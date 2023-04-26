@@ -9,8 +9,8 @@ Memory share an app that stores images and PDFs
 /raybags/v1/user/login
 
 {
-    "email":"raybags@admin.net",
-    "password":"HjkdlfaejLh2afq6j4d"
+    "email":"email address",
+    "password":<password>
 }
 ```
 
