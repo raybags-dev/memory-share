@@ -1,6 +1,7 @@
 import { PaginateData } from '../lifters/works.js'
-import { API_CLIENT, runSpinner, Notify } from '../lifters/works.js'
+import { API_CLIENT, runSpinner, Notify, fetchData } from '../lifters/works.js'
 import { DisplayeBigImage } from '../components/card.js'
+import { CARD } from '../components/card.js'
 
 export async function MAIN_PAGE () {
   let pageContent = `
@@ -21,7 +22,7 @@ export async function MAIN_PAGE () {
             </label>
           </form>
         </div>
-        <div id="off__Container" class="row row-cols-1 row-cols-md-3 g-2">
+        <div id="off__Container" class="row row-cols-1 row-cols-md-3 g-2" style="transition:.5s !important;">
         </div>
       </main>
     `
@@ -32,7 +33,6 @@ export async function MAIN_PAGE () {
   // generate card carucel
   await genCardCarucel()
 }
-
 export async function genCardCarucel () {
   const cardContainer = document.querySelector('#off__Container')
   cardContainer.addEventListener('click', async e => {
@@ -68,10 +68,10 @@ export async function genCardCarucel () {
       )
     }
   })
+
   // ********* IMPLIMENT DOC DELETE **********//
   // ********* IMPLIMENT DOC DELETE **********//
 }
-
 export async function uploadFiles () {
   runSpinner(false, 'Uploading...')
   try {
@@ -82,7 +82,6 @@ export async function uploadFiles () {
     if (!files || files.length === 0) {
       return Notify('Please select files to upload')
     }
-
     const formData = new FormData()
     for (let i = 0; i < files.length; i++) {
       formData.append('images', files[i])
@@ -96,10 +95,24 @@ export async function uploadFiles () {
     })
     if (response.statusText == 'OK') {
       runSpinner(true)
-      console.log(response.data)
-    }
+      Notify('Success: File(s) uploaded!')
 
-    // do something with the response, like show a success message
+      let newData = await fetchData(1)
+      let container = document.querySelector('#off__Container')
+      let existingData = Array.from(container.children).map(
+        child => child.dataset.id
+      )
+
+      newData.forEach(async obj => {
+        try {
+          if (!existingData.includes(obj._id)) {
+            await CARD(obj, true)
+          }
+        } catch (e) {
+          console.log(e.message)
+        }
+      })
+    }
   } catch (error) {
     console.log(error)
     if (error.response.data.duplicates) {
@@ -108,6 +121,5 @@ export async function uploadFiles () {
       )
       runSpinner(true)
     }
-    // handle the error, like show an error message
   }
 }

@@ -114,9 +114,11 @@ export async function loginUser (user) {
     }
   } catch (error) {
     runSpinner(false, 'Failed!')
-    // const errorMessage = error.response.data.error || 'An error occurred.'
-    // Notify(`Credentials: ${errorMessage}.`)
-    // setTimeout(() => runSpinner(true), 2000)
+    const errorMessage = error.response.data.error || 'An error occurred.'
+    Notify(`Session: ${errorMessage}.`)
+    setTimeout(() => runSpinner(true), 2000)
     console.log(error)
+  } finally {
+    runSpinner(true)
   }
 }

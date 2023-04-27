@@ -1,5 +1,5 @@
 import { formatDate, formatEmail, runSpinner } from '../lifters/works.js'
-export async function CARD (data) {
+export async function CARD (data, isNew = false) {
   const {
     url,
     signature,
@@ -16,15 +16,13 @@ export async function CARD (data) {
   const { email } = JSON.parse(sessionStorage.getItem('token'))
   let fall_back = 'images/fallback.jpeg'
   let cardContent = `
-    <div class="col bg-transparent" data-id="${data._id}">
+    <div class="col bg-transparent" data-id="${_id}">
       <div class="card  bg-transparent h-100 rounded" style="object-fit:cover !important;">
         <div class="skeleton"><span class="image_loader"></span></div>
-        <div class="img-container" style="width:100% !importnat;min-height:50vh;object-fit:cover !important;">
+        <div class="img-container" style="width:100% !importnat;min-height:50vh;object-fit:cover !important; object-position: top;">
             <img src="${
               `${url}/${signature}` || fall_back
-            }" class="card-img-top border-dark h-100 img-fluid hide_2 img_card ${
-    data._id
-  }"  alt="..." onload="this.classList.remove('hide_2')" min-height-50%>
+            }" class="card-img-top border-dark h-100 img-fluid hide_2 img_card ${_id}"  alt="..." onload="this.classList.remove('hide_2')" min-height-50%>
       </div>
         <div class="card-body text-white">
           <ul class="list-group rounded">
@@ -47,7 +45,11 @@ export async function CARD (data) {
   `
 
   const offContainer = document.querySelector('#off__Container')
-  offContainer?.insertAdjacentHTML('beforeend', cardContent)
+  if (isNew) {
+    offContainer?.insertAdjacentHTML('afterbegin', cardContent)
+  } else {
+    offContainer?.insertAdjacentHTML('beforeend', cardContent)
+  }
   // remove skeleton after image is loaded
   runSkeleto(document.querySelector('.card .img-container img') !== null)
 }
@@ -136,7 +138,7 @@ export async function DisplayeBigImage (
       if (!container) return
       container?.removeChild(document.getElementById('carocel_big'))
     } catch (error) {
-      console.log('_')
+      console.log('An error occured: ' + error.message)
     }
   })
   // ******* Updated logic
@@ -146,10 +148,7 @@ export async function DisplayeBigImage (
       removeElementFromDOM(IMGCONT)
     }
   })
-
-  // ******* Updated logic
 }
-
 function removeElementFromDOM (elementAnchor) {
   if (document.contains(elementAnchor)) {
     elementAnchor.remove()

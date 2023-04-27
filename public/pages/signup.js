@@ -77,7 +77,7 @@ export async function SIGNUP_HTML () {
         const storedUser = { name, email, isUser: true }
         localStorage.setItem('user', JSON.stringify(storedUser))
 
-        Notify(`Hi ${storedUser.name}, your account is ready. Login please.`)
+        Notify(`Account for '${storedUser.name}', has been created.`)
         setTimeout(() => {
           history.pushState(null, null, '/')
           runSpinner(true)
