@@ -198,6 +198,8 @@ export async function PaginateData () {
                   target = container.children[container.children.length - 2]
                   observer.observe(target)
                 }
+              } else {
+                Notify(`Technical issue occured., I'll get right to it asap`)
               }
             }
           },

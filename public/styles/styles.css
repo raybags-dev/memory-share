@@ -155,6 +155,8 @@ a {
     backdrop-filter: blur(200px);
 }
 
+
+
 .label:hover {
     background: transparent;
     color: var(--green);
@@ -257,7 +259,7 @@ a {
 .card {
     min-width: 100%;
     min-height: 100%;
-    border: 5px solid rgba(255, 254, 254, 0.2);
+    border: 5px solid #9d04c333;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
@@ -266,9 +268,76 @@ a {
 .heading {
     position: relative;
     font-size: 23px;
+    text-transform: uppercase;
+    opacity: .8;
     text-shadow: 2px 3px 1px rgba(252, 248, 248, 0.4) !important;
 }
 
+@media screen and (max-width: 400px) {
+    .label {
+        width: 30px;
+        height: 30px;
+    }
+
+    .label span {
+        font-size: 23px;
+    }
+
+    .heading {
+        font-size: 20px;
+    }
+
+}
+
+#search____input {
+    background-color: transparent;
+    border-color: #04adc333 #04adc333 #04adc333 #04adc333;
+    box-shadow: none;
+    color: white;
+    width: 20%;
+    z-index: 1;
+    cursor: pointer;
+    transition: .5s;
+}
+
+#search____input:focus,
+.search_db_form i:focus {
+    width: 100%;
+    border-color: #04adc3 #04adc3 #04adc3 #04adc3;
+
+}
+
+.search_db_form {
+    position: relative;
+}
+
+.search_db_form i {
+    position: absolute;
+    left: 10%;
+    top: 60%;
+    z-index: -0.9999;
+    color: #04adc3;
+    transition: .3s;
+    transform: translate(-50%, -50%)
+}
+
+.search_db_form input:focus+i {
+    opacity: 0;
+    transition: .3s;
+}
+
+@media screen and (max-width: 482px) {
+    #search____input {
+        min-width: 94vw;
+        background-color: transparent;
+        color: white;
+    }
+
+    .search_db_form i {
+        left: 3.5%;
+    }
+
+}
 
 
 .img-container {
@@ -292,7 +361,7 @@ a {
 }
 
 .card:hover .img-container img {
-    transform: scale(1.189);
+    transform: scale(1.0999);
     transition: .3s;
 }
 
@@ -308,8 +377,7 @@ a {
     overflow-y: auto !important;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
-    background-color: rgba(0, 0, 0, 0.7);
-    background-image: linear-gradient(to bottom, rgb(23, 14, 28, .05) 0%, rgb(38, 24, 95, .1) 100%);
+    background-color: #04adc333;
 }
 
 .card.card-body ul {

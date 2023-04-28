@@ -9,12 +9,13 @@ export async function MAIN_PAGE () {
         <div class="container">
           <h2 class="text-light sticky-top heading">Memories</h2>
           <form class="d-flex search_db_form pt-2" role="search">
-            <input id="search____input" autocomplete="off" class="form-control me-2" type="search" placeholder="Search..." aria-label="Search">
+            <input id="search____input" autocomplete="off" class="form-control me-2" type="search" placeholder="" aria-label="Search">
+            <i class="fa-solid fa-magnifying-glass"></i>
           </form>
         </div>
       </nav>
       <main id="main__wrapper" class="container my-10 position-relative">
-        <div class="container pb-3 sticky-top off__Container">
+        <div class="container pb-3 sticky-top mt-1 off__Container">
           <form class="select-img-form text-danger">
             <label class="label">
               <input class="select-image-input" type="file" ref="inputRef">
