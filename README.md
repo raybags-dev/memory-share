@@ -1,4 +1,4 @@
-# MY-WIZARD API
+# DOCUMENT UPLOADER
 
 Memory share an app that stores images and PDFs
 
