@@ -72,6 +72,8 @@ export async function LOGIN_HTML () {
         sessionStorage.setItem('token', JSON.stringify({ token, email }))
         // Redirect to main page
         sessionStorage.setItem('redirected', true)
+        //   show logout button
+        document.querySelector('#log___out')?.classList.remove('hide')
         Notify(`Login successfull`)
         setTimeout(() => {
           runSpinner(true)
@@ -79,7 +81,7 @@ export async function LOGIN_HTML () {
           //   ***********************
           MAIN_PAGE()
           //   ***********************
-        }, 3000)
+        }, 800)
       }
     } catch (error) {
       runSpinner(false, 'Failed!')
@@ -89,7 +91,6 @@ export async function LOGIN_HTML () {
     }
   })
 }
-
 export async function loginUser (user) {
   runSpinner(false, 'Processing')
   const email = user.email
@@ -105,6 +106,8 @@ export async function loginUser (user) {
       // Redirect to main page
       sessionStorage.setItem('redirected', true)
       Notify(`Login successfull`)
+      //   show logout button
+      document.querySelector('#log___out')?.classList.remove('hide')
       setTimeout(() => {
         runSpinner(true)
         //   ***********************
@@ -120,5 +123,21 @@ export async function loginUser (user) {
     console.log(error)
   } finally {
     runSpinner(true)
+  }
+}
+
+export async function logOutUser (isLogout) {
+  if (isLogout) {
+    const sessionToken = sessionStorage.getItem('token')
+    if (sessionToken) {
+      Notify(`Logout successful!`)
+      document.querySelector('#log___out')?.classList.add('hide')
+      setTimeout(() => {
+        sessionStorage.removeItem('token')
+        sessionStorage.removeItem('redirected')
+      }, 500)
+    }
+    // navigate to the login page
+    await LOGIN_HTML()
   }
 }
