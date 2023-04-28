@@ -2,6 +2,7 @@ import { PaginateData } from '../lifters/works.js'
 import { API_CLIENT, runSpinner, Notify, fetchData } from '../lifters/works.js'
 import { DisplayeBigImage } from '../components/card.js'
 import { CARD } from '../components/card.js'
+import { logOutUser } from '../pages/login.js'
 
 export async function MAIN_PAGE () {
   let pageContent = `
@@ -33,6 +34,9 @@ export async function MAIN_PAGE () {
   selectImgForm?.addEventListener('change', uploadFiles)
   // generate card carucel
   await genCardCarucel()
+
+  //   show logout button
+  document.querySelector('#log___out')?.classList.remove('hide')
 }
 export async function genCardCarucel () {
   const cardContainer = document.querySelector('#off__Container')
@@ -124,3 +128,6 @@ export async function uploadFiles () {
     }
   }
 }
+// logout user
+const logoutLink = document.querySelector('#logoutuser_link')
+logoutLink?.addEventListener('click', async () => logOutUser(true))
