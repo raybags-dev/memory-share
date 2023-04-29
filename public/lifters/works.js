@@ -1,4 +1,4 @@
-import { LOGIN_HTML } from '../pages/login.js'
+import { LOGIN_HTML, LogoutBtnIsVisible } from '../pages/login.js'
 import { SIGNUP_HTML } from '../pages/signup.js'
 import { CARD } from '../components/card.js'
 
@@ -137,12 +137,13 @@ export async function fetchData (page = 1) {
       return Notify('You dont have any saved documents.')
     }
     if (error?.response.status == 401) {
-      Notify('Session expired, please login.')
-      LOGIN_HTML()
-      return
+      Notify('Session expired. Please login!')
+      //   hide logout button
+      LogoutBtnIsVisible(false)
+      return LOGIN_HTML()
     }
     if (error?.response.status == 404) {
-      showNotification('Account not found. Please sign up.')
+      showNotification('Account not found. Please sign up!')
       SIGNUP_HTML()
       return
     }
@@ -212,9 +213,6 @@ export async function PaginateData () {
           observer.observe(target)
         }
       }, 1000)
-    } else {
-      Notify('No documents available in your database')
-      setTimeout(() => runSpinner(true), 1500)
     }
   } catch (error) {
     console.warn(error.message)

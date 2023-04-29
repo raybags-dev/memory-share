@@ -1,7 +1,5 @@
 import { LOGIN_HTML } from '../pages/login.js'
-import { SIGNUP_HTML } from '../pages/signup.js'
 import { MAIN_PAGE } from '../pages/main_container.js'
-import { runSpinner } from '../lifters/works.js'
 
 //Initializer
 export async function INITIALIZE_APP () {
