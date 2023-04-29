@@ -14,7 +14,6 @@ const {
   AWS_REGION
 } = process.env
 import { DOCUMENT } from '../src/models/documentModel.js'
-import { GenToken } from '../middleware//generateToken.js'
 
 // S3 client
 const s3 = new S3Client({
@@ -49,9 +48,10 @@ export const dbFileUploader = async (files, req, res) => {
       }
     }
 
+    console.log(duplicateFiles)
     if (duplicateFiles.length > 0) {
       return res.status(400).json({
-        message: `The following file(s) already exist`,
+        message: `Duplicates detected!`,
         duplicates: duplicateFiles
       })
     } else {
@@ -95,7 +95,6 @@ export const createBucket = async () => {
       console.log(`Bucket ${err.BucketName} already exists.`)
       return err.BucketName
     }
-    console.log(err.message) // re-throw any other errors
   }
 }
 //saves to aws-bucket
@@ -135,7 +134,10 @@ export async function saveImagesToS3 (files) {
     }
 
     return urls
-  } catch (e) {
-    throw new Error(e.message)
+  } catch (err) {
+    console.log(err.message)
+    if (err.code === 'NoSuchBucket') {
+      console.error('This bucket does not exist')
+    }
   }
 }

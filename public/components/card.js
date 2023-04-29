@@ -1,4 +1,9 @@
-import { formatDate, formatEmail, runSpinner } from '../lifters/works.js'
+import {
+  formatEmail,
+  runSpinner,
+  API_CLIENT,
+  Notify
+} from '../lifters/works.js'
 export async function CARD (data, isNew = false) {
   const {
     url,
@@ -21,8 +26,8 @@ export async function CARD (data, isNew = false) {
         <div class="skeleton"><span class="image_loader"></span></div>
         <div class="img-container" style="width:100% !importnat;min-height:50vh;object-fit:cover !important; object-position: top;">
             <img src="${
-              `${url}/${signature}` || fall_back
-            }" class="card-img-top border-dark h-100 img-fluid hide_2 img_card ${_id}"  alt="..." onload="this.classList.remove('hide_2')" min-height-50%>
+              `${url}/${signature}` || ''
+            }"  class="card-img-top border-dark h-100 img-fluid hide_2 img_card ${_id}"  alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
       </div>
         <div class="card-body text-white">
           <ul class="list-group rounded">
@@ -87,22 +92,22 @@ export async function DisplayeBigImage (
   _id
 ) {
   runSpinner(false, 'Fetching...')
-  let fallbaskIMG = '../images/profile_pic.webp'
+  let fallback_img = 'images/fallback.jpeg'
   const innerBodyBig = `
     <div id="carocel_big" class="container rounded" data-carucel="${
       _id && _id
     }" style="z-index:100">
       <span class="lead">X</span>
       <div class="container __bigOne__">
-      <div class="main-del-cont" style="cursor:pointer !important;">
-      <i class="fa-regular fa-trash-can"></i>
+      <div class="main-del-cont" style="cursor:pointer !important;z-index:230000 !important;">
+      <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
       </div>
         <div class="card bg-transparent" data-user="${
           userId && userId
         }"  style="width:50%;height:70% !important">
-          <img src="${
-            (imgurl && imgurl) || fallbaskIMG
-          }" class="card-img-top img-fluid" alt="...">
+          <img  src="${
+            imgurl || ''
+          }" class="card-img-top img-fluid" alt="..."  onerror="this.onerror=null;this.src='${fallback_img}'">
           <div id="description" class="card-body" style="z-index: 100;">
             <h5 class="card-title">${email && email}</h5>
             <hr>
@@ -129,18 +134,10 @@ export async function DisplayeBigImage (
   setTimeout(() => runSpinner(true), 100)
 
   const closeButton = document.querySelector('#carocel_big .lead')
-  const closeOnIconClick = document.querySelector('.off__Container')
   closeButton?.addEventListener('click', function () {
     container?.removeChild(document.getElementById('carocel_big'))
   })
-  closeOnIconClick?.addEventListener('click', async function () {
-    try {
-      if (!container) return
-      container?.removeChild(document.getElementById('carocel_big'))
-    } catch (error) {
-      console.log('An error occured: ' + error.message)
-    }
-  })
+
   // ******* Updated logic
   let IMGCONT = document.querySelector('#carocel_big')
   IMGCONT.addEventListener('click', function (event) {
@@ -148,9 +145,52 @@ export async function DisplayeBigImage (
       removeElementFromDOM(IMGCONT)
     }
   })
+
+  // delete document
+  // let btn = document.querySelector('.main-del-cont')
+  // btn?.addEventListener('click', async () => {
+  //   console.log('skdljasldasdas')
+  //   await deleteDocument('644033f32d5934941de7719e')
+  // })
 }
+//
 function removeElementFromDOM (elementAnchor) {
   if (document.contains(elementAnchor)) {
     elementAnchor.remove()
   }
 }
+
+//****** Delete document
+
+// export async function deleteDocument (documentId) {
+//   runSpinner(false, 'Deleting...')
+
+//   const { token } = JSON.parse(sessionStorage.getItem('token'))
+//   if (!token) {
+//     return Notify('Session terminated. Login required!')
+//   }
+
+//   try {
+//     document.querySelectorAll('.col').forEach(card => {
+//       card.addEventListener('click', async e => {
+//         console.log(e.target.parent)
+//       })
+//     })
+//     let url = `delete-doc/${documentId}`
+//     const response = await API_CLIENT.delete(url, {
+//       headers: { Authorization: `Bearer ${token}` }
+//     })
+//     if (response.status === 200) {
+//       runSpinner(true)
+//       Notify('Success: Document deleted!')
+//     } else {
+//       throw new Error(`Error deleting document: ${response.status}`)
+//     }
+//   } catch (error) {
+//     console.error(error)
+//     Notify(`Error deleting document: ${error.message}`)
+//   } finally {
+//     runSpinner(true)
+//   }
+// }
+//****** Delete document

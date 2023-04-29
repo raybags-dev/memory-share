@@ -163,7 +163,7 @@ export async function PaginateData () {
 
   try {
     const data = await fetchData(page)
-    if (data.length) {
+    if (data && data.length) {
       data.forEach(async obj => {
         try {
           await CARD(obj)
@@ -182,7 +182,7 @@ export async function PaginateData () {
             if (lastEntry.isIntersecting && !loading) {
               loading = true
               const data = await fetchData(++page)
-              if (data.length) {
+              if (data && data.length) {
                 data.forEach(async obj => {
                   await CARD(obj)
                 })
@@ -207,7 +207,7 @@ export async function PaginateData () {
         )
 
         const responses = document.querySelectorAll('.card')
-        if (responses.length >= 10) {
+        if (responses && responses.length >= 10) {
           // Only start observing when there are at least 10 items on the first page
           observer.observe(target)
         }

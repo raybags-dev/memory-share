@@ -386,7 +386,7 @@ a {
 }
 
 .card:hover .card-body {
-    height: 50%;
+    height: 30% !important;
     opacity: 1;
     transition: .3s;
 }

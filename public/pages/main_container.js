@@ -40,7 +40,7 @@ export async function MAIN_PAGE () {
 }
 export async function genCardCarucel () {
   const cardContainer = document.querySelector('#off__Container')
-  cardContainer.addEventListener('click', async e => {
+  cardContainer?.addEventListener('click', async e => {
     const card = e.target.closest('.card')
     if (card) {
       const imgSrc = card.querySelector('img')?.getAttribute('src')
@@ -84,6 +84,9 @@ export async function uploadFiles () {
     const inputRef = document.querySelector('.select-image-input')
     const files = inputRef?.files
 
+    if (!token) {
+      return Notify('Session terminated. Login required!')
+    }
     if (!files || files.length === 0) {
       return Notify('Please select files to upload')
     }
@@ -119,13 +122,15 @@ export async function uploadFiles () {
       })
     }
   } catch (error) {
-    console.log(error)
-    if (error.response.data.duplicates) {
+    if (error?.response?.data?.duplicates) {
       Notify(
-        `Something isn't right! One of more selected files have already been uploaded. Please try again`
+        `Duplicates detected. One or more selected files have already been uploaded`
       )
       runSpinner(true)
     }
+    console.log(error)
+  } finally {
+    runSpinner(true)
   }
 }
 // logout user

@@ -34,7 +34,9 @@ export const loginUser = async (req, res, next) => {
     // Check if user with email exists in database
     const user = await USER_MODEL.findOne({ email })
     if (!user) {
-      return res.status(401).json({ error: 'You are not registered!' })
+      return res
+        .status(401)
+        .json({ error: 'You are not authorized to use this service.' })
     }
     // Check if password matches user's password in database
     const isMatch = await user.comparePassword(password)
