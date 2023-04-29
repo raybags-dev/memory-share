@@ -1,5 +1,5 @@
 import { INITIALIZE_APP } from '../runners/handlers.js'
 
-//MAIN_PAGE()
-//CARD()
+// **Initialize app
 INITIALIZE_APP()
+// **Initialize app

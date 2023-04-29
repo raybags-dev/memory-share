@@ -2,7 +2,7 @@ import { PaginateData } from '../lifters/works.js'
 import { API_CLIENT, runSpinner, Notify, fetchData } from '../lifters/works.js'
 import { DisplayeBigImage } from '../components/card.js'
 import { CARD } from '../components/card.js'
-import { logOutUser } from '../pages/login.js'
+import { logOutUser, LogoutBtnIsVisible, LOGIN_HTML } from '../pages/login.js'
 
 export async function MAIN_PAGE () {
   let pageContent = `
@@ -34,9 +34,8 @@ export async function MAIN_PAGE () {
   selectImgForm?.addEventListener('change', uploadFiles)
   // generate card carucel
   await genCardCarucel()
-
   //   show logout button
-  document.querySelector('#log___out')?.classList.remove('hide')
+  await LogoutBtnIsVisible(true)
 }
 export async function genCardCarucel () {
   const cardContainer = document.querySelector('#off__Container')
@@ -84,7 +83,7 @@ export async function uploadFiles () {
     const inputRef = document.querySelector('.select-image-input')
     const files = inputRef?.files
 
-    if (!token) {
+    if (!token || token === undefined) {
       return Notify('Session terminated. Login required!')
     }
     if (!files || files.length === 0) {
@@ -122,13 +121,21 @@ export async function uploadFiles () {
       })
     }
   } catch (error) {
-    if (error?.response?.data?.duplicates) {
+    let err = error?.response?.data
+    if (err?.duplicates) {
       Notify(
         `Duplicates detected. One or more selected files have already been uploaded`
       )
       runSpinner(true)
+      return
     }
-    console.log(error)
+    if (error instanceof TypeError && error.message.includes('token')) {
+      console.warn('Authentication required. Please login!')
+      Notify('Authentication required: Please login!')
+      LogoutBtnIsVisible(false)
+      await LOGIN_HTML()
+    }
+    console.log('Something went wrong: ' + error.message)
   } finally {
     runSpinner(true)
   }

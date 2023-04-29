@@ -73,7 +73,7 @@ export async function LOGIN_HTML () {
         // Redirect to main page
         sessionStorage.setItem('redirected', true)
         //   show logout button
-        document.querySelector('#log___out')?.classList.remove('hide')
+        LogoutBtnIsVisible(false)
         Notify(`Login successfull`)
         setTimeout(() => {
           runSpinner(true)
@@ -107,19 +107,17 @@ export async function loginUser (user) {
       sessionStorage.setItem('redirected', true)
       Notify(`Login successfull`)
       //   show logout button
-      document.querySelector('#log___out')?.classList.remove('hide')
+      LogoutBtnIsVisible(true)
       setTimeout(() => {
         runSpinner(true)
-        //   ***********************
         MAIN_PAGE()
-        //   ***********************
-      }, 2000)
+      }, 100)
     }
   } catch (error) {
     runSpinner(false, 'Failed!')
     const errorMessage = error.response.data.error || 'An error occurred.'
     Notify(`Session: ${errorMessage}.`)
-    setTimeout(() => runSpinner(true), 1500)
+    setTimeout(() => runSpinner(true), 800)
     console.log(error)
   } finally {
     runSpinner(true)
@@ -130,7 +128,8 @@ export async function logOutUser (isLogout) {
     const sessionToken = sessionStorage.getItem('token')
     if (sessionToken) {
       Notify(`Logout successful!`)
-      document.querySelector('#log___out')?.classList.add('hide')
+      //   hide logout btn
+      LogoutBtnIsVisible(false)
       setTimeout(() => {
         sessionStorage.removeItem('token')
         sessionStorage.removeItem('redirected')
@@ -138,5 +137,16 @@ export async function logOutUser (isLogout) {
     }
     // navigate to the login page
     await LOGIN_HTML()
+  }
+}
+export async function LogoutBtnIsVisible (isHidden) {
+  try {
+    setTimeout(() => {
+      let btn = document.getElementById('log___out')
+      if (btn && !isHidden) return btn?.classList.add('hide')
+      btn?.classList.remove('hide')
+    }, 5)
+  } catch (e) {
+    console.log(e.message)
   }
 }
