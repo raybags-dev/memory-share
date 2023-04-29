@@ -77,20 +77,22 @@ export async function SIGNUP_HTML () {
         const storedUser = { name, email, isUser: true }
         localStorage.setItem('user', JSON.stringify(storedUser))
 
-        Notify(`Account for '${storedUser.name}', has been created.`)
+        Notify(`Success: ${storedUser.name} account created.`)
         setTimeout(() => {
           history.pushState(null, null, '/')
           runSpinner(true)
           //   ======
           loginUser(user)
           //   =======
-        }, 5000)
+        }, 1000)
         return
       }
       Notify('Something went wrong, try again later.')
       setTimeout(() => runSpinner(true), 3000)
     } catch (error) {
-      console.log(error)
+      console.log(error.message)
+    } finally {
+      runSpinner(true)
     }
   })
 }

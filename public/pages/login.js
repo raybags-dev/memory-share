@@ -86,8 +86,8 @@ export async function LOGIN_HTML () {
     } catch (error) {
       runSpinner(false, 'Failed!')
       const errorMessage = error.response.data.error || 'An error occurred.'
-      Notify(`Credentials: ${errorMessage}.`)
-      setTimeout(() => runSpinner(true), 3000)
+      Notify(`${errorMessage}.`)
+      setTimeout(() => runSpinner(true), 100)
     }
   })
 }
@@ -119,13 +119,12 @@ export async function loginUser (user) {
     runSpinner(false, 'Failed!')
     const errorMessage = error.response.data.error || 'An error occurred.'
     Notify(`Session: ${errorMessage}.`)
-    setTimeout(() => runSpinner(true), 2000)
+    setTimeout(() => runSpinner(true), 1500)
     console.log(error)
   } finally {
     runSpinner(true)
   }
 }
-
 export async function logOutUser (isLogout) {
   if (isLogout) {
     const sessionToken = sessionStorage.getItem('token')
