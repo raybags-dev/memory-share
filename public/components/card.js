@@ -1,5 +1,6 @@
 import {
   formatEmail,
+  formatDate,
   runSpinner,
   API_CLIENT,
   Notify
@@ -29,11 +30,12 @@ export async function CARD (data, isNew = false) {
           `${url}/${signature}` || ''
         }"  class="card-img-top border-dark h-100 img-fluid hide_2 img_card ${_id}"  alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
   </div>
+  <div class="card-footer bg-transparent card-img-overlay text-danger m-1 rounded" style="backdrop-filter:blur(20px); width:fit-content;height:fit-content;padding:.2rem; font-style:italic">${formatDate(
+    createdAt
+  )}</div>
     <div class="card-body text-white">
       <ul class="list-group rounded">
-        <li class="list-group-item bg-transparent text-white">${formatEmail(
-          email
-        )}</li>
+        <li class="list-group-item bg-transparent">${formatEmail(email)}</li>
         <li class="list-group-item bg-transparent text-white">${user}</li>
         <li class="list-group-item bg-transparent text-white">${originalname}</li>
         <li class="list-group-item bg-transparent text-white">${filename}</li>
