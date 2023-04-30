@@ -5,14 +5,13 @@ import { v4 as uuidv4 } from 'uuid'
 
 const app = express()
 import apicache from 'apicache'
-import path from 'path'
 import { ObjectId } from 'mongodb'
 
 import { config } from 'dotenv'
 config()
 
 import { asyncMiddleware } from '../../middleware/asyncErros.js'
-import { dbFileUploader, saveImagesToS3 } from '../../middleware/bd_worker.js'
+import { dbFileUploader, deleteFromS3 } from '../../middleware/bd_worker.js'
 import { GenToken } from '../../middleware/generateToken.js'
 // cache
 let cache = apicache.middleware
@@ -302,17 +301,32 @@ function DeleteOneDoc (app) {
       if (!item) return res.status(404).json('Document could not be found')
       // If the user is an admin, they can delete any document
       if (item && req.user.isAdmin) {
+        //delete from aws and mongodb
+        await deleteFromS3(item.filename)
         await item.delete()
+
         return res.status(200).json({
-          state: 'admin previllages',
           message: 'Document deleted',
-          item
+          deletedDocument: {
+            filename: item.filename,
+            _id: item._id,
+            deletedAt: new Date().toISOString()
+          }
         })
       }
       // If the user created the document, they can delete it
       if (item.user.toString() === userId.toString()) {
+        //delete from aws and mongodb
+        await deleteFromS3(item.filename)
         await item.delete()
-        return res.status(200).json({ message: 'Document deleted', item })
+        return res.status(200).json({
+          message: 'Document deleted',
+          deletedDocument: {
+            filename: item.filename,
+            _id: item._id,
+            deletedAt: new Date().toISOString()
+          }
+        })
       }
       // Otherwise, the user cannot delete the document
       return res

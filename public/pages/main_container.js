@@ -72,9 +72,6 @@ export async function genCardCarucel () {
       )
     }
   })
-
-  // ********* IMPLIMENT DOC DELETE **********//
-  // ********* IMPLIMENT DOC DELETE **********//
 }
 export async function uploadFiles () {
   runSpinner(false, 'Uploading...')
@@ -121,8 +118,7 @@ export async function uploadFiles () {
       })
     }
   } catch (error) {
-    let err = error?.response?.data
-    if (err?.duplicates) {
+    if (error.response.status === 409) {
       Notify(
         `Duplicates detected. One or more selected files have already been uploaded`
       )
@@ -135,7 +131,7 @@ export async function uploadFiles () {
       LogoutBtnIsVisible(false)
       await LOGIN_HTML()
     }
-    console.log('Something went wrong: ' + error.message)
+    console.log('Something went wrong: ' + error)
   } finally {
     runSpinner(true)
   }

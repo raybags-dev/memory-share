@@ -1,9 +1,8 @@
 import AWS from 'aws-sdk'
-import { v4 as uuid } from 'uuid'
 import {
   S3Client,
-  PutObjectCommand,
-  CreateBucketCommand
+  CreateBucketCommand,
+  DeleteObjectCommand
 } from '@aws-sdk/client-s3'
 import { config } from 'dotenv'
 config()
@@ -23,43 +22,26 @@ const s3 = new S3Client({
     secretAccessKey: AWS_SECRET_ACCESS_KEY
   }
 })
-
 // save to mongodb
 export const dbFileUploader = async (files, req, res) => {
   try {
-    const savedFiles = []
-    const duplicateFiles = []
-    const urls = await saveImagesToS3(files)
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      const existingFile = await DOCUMENT.findOne({
-        originalname: file.originalname
-      })
+    const savedFiles = await saveImagesToS3(files)
+    const duplicateFiles = savedFiles.filter(file => file.error)
 
-      if (existingFile) {
-        duplicateFiles.push(file.originalname)
-      } else {
-        const savedFile = await DOCUMENT.create({
-          ...file,
-          url: urls[i].url,
-          signature: urls[i].signature
-        })
-        savedFiles.push(savedFile)
-      }
-    }
-
-    console.log(duplicateFiles)
     if (duplicateFiles.length > 0) {
-      return res.status(400).json({
-        message: `Duplicates detected!`,
-        duplicates: duplicateFiles
-      })
-    } else {
-      return res.status(200).json({
-        message: 'Files uploaded successfully',
-        files: savedFiles
+      return res.status(409).json({
+        status: 'Conflict',
+        message: 'One or more files already exist on the server.',
+        files: duplicateFiles
       })
     }
+    const validFiles = savedFiles.filter(
+      file => file.message === 'File uploaded successfully'
+    )
+    return res.status(200).json({
+      message: 'Files uploaded successfully',
+      files: validFiles
+    })
   } catch (error) {
     console.log(error)
     return res.status(500).json({
@@ -69,7 +51,6 @@ export const dbFileUploader = async (files, req, res) => {
     })
   }
 }
-
 //*******aws s3 bucket ******
 export const createBucket = async () => {
   try {
@@ -97,8 +78,8 @@ export const createBucket = async () => {
     }
   }
 }
-//saves to aws-bucket
 
+//saves to aws-bucket
 export async function saveImagesToS3 (files) {
   try {
     const urls = []
@@ -106,31 +87,60 @@ export async function saveImagesToS3 (files) {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      const uploadParams = {
-        Bucket: AWS_BUCKET_NAME,
-        Body: file.data,
-        Key: file.filename,
-        ContentType: file.contentType
+
+      // Check if the file exists in MongoDB
+      const existingDocument = await DOCUMENT.findOne({
+        originalname: file.originalname
+      })
+
+      if (existingDocument) {
+        // File already exists, return the URL and signature from the database
+        urls.push({
+          url: existingDocument.url,
+          signature: existingDocument.signature,
+          error: 'Duplication detected'
+        })
+      } else {
+        // File does not exist, upload to S3 and save to MongoDB
+        const uploadParams = {
+          Bucket: AWS_BUCKET_NAME,
+          Body: file.data,
+          Key: file.filename,
+          ContentType: file.contentType
+        }
+        const signedUrlParams = {
+          Bucket: AWS_BUCKET_NAME,
+          Key: file.filename,
+          Expires: 604800
+        }
+
+        const result = await s3.upload(uploadParams).promise()
+        const signedUrls = await s3.getSignedUrlPromise(
+          'getObject',
+          signedUrlParams
+        )
+
+        const urlParts = result.Location.split('amazonaws.com/')
+        const url = urlParts[0] + 'amazonaws.com'
+        const signature = urlParts[1] + '?' + signedUrls.split('?')[1]
+
+        // Create a new document for the uploaded file
+        const newDocument = new DOCUMENT({
+          ...file,
+          url: url,
+          signature: signature,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // set the expiration date to one week from now
+        })
+
+        // Save the new document to the database
+        await newDocument.save()
+
+        urls.push({
+          url: newDocument.url,
+          signature: newDocument.signature,
+          message: 'File uploaded successfully'
+        })
       }
-      const signedUrlParams = {
-        Bucket: AWS_BUCKET_NAME,
-        Key: file.filename,
-        Expires: 604800
-      }
-
-      // **********************
-      // ******* TO DO generate presign urls *********
-      //* aws s3 presign s3://ray-doc-files/09c8e2a9-b7a3-459f-8f75-95e9a7ce4260.jpeg --expires-in 604800
-      // **********************
-
-      const result = await s3.upload(uploadParams).promise()
-      const signedUrls = await s3.getSignedUrl('getObject', signedUrlParams)
-
-      const urlParts = result.Location.split('amazonaws.com/')
-      const url = urlParts[0] + 'amazonaws.com'
-      const signature = urlParts[1] + '?' + signedUrls.split('?')[1]
-
-      urls.push({ url, signature })
     }
 
     return urls
@@ -139,5 +149,20 @@ export async function saveImagesToS3 (files) {
     if (err.code === 'NoSuchBucket') {
       console.error('This bucket does not exist')
     }
+  }
+}
+
+export async function deleteFromS3 (filename) {
+  const command = new DeleteObjectCommand({
+    Bucket: AWS_BUCKET_NAME,
+    Key: filename
+  })
+
+  try {
+    const response = await s3.send(command)
+    if (response.$metadata.httpStatusCode === 204)
+      return console.log(`File ${filename} deleted successfully from S3`)
+  } catch (err) {
+    console.error(`Error deleting file ${filename} from S3: ${err.message}`)
   }
 }
