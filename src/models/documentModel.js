@@ -31,6 +31,20 @@ const DocumentModel = {
     type: String,
     require: true
   },
+  expiresAt: {
+    type: Date,
+    required: true,
+    default: function () {
+      return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    }
+  },
+  /**
+     expiresAt: {
+    type: Date,
+    required: true,
+    default: moment().add(7, 'days').utc().toDate()
+  },
+   */
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

@@ -19,34 +19,34 @@ export async function CARD (data, isNew = false) {
     originalname
   } = await data
   const { email } = JSON.parse(sessionStorage.getItem('token'))
-  let fall_back = 'images/fallback.jpeg'
+  let fall_back = 'images/404_img.jpeg'
   let cardContent = `
-    <div class="col bg-transparent" data-id="${_id}">
-      <div class="card  bg-transparent h-100 rounded" style="object-fit:cover !important;">
-        <div class="skeleton"><span class="image_loader"></span></div>
-        <div class="img-container" style="width:100% !importnat;min-height:50vh;object-fit:cover !important; object-position: top;">
-            <img src="${
-              `${url}/${signature}` || ''
-            }"  class="card-img-top border-dark h-100 img-fluid hide_2 img_card ${_id}"  alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
-      </div>
-        <div class="card-body text-white">
-          <ul class="list-group rounded">
-            <li class="list-group-item bg-transparent text-white">${formatEmail(
-              email
-            )}</li>
-            <li class="list-group-item bg-transparent text-white">${user}</li>
-            <li class="list-group-item bg-transparent text-white">${originalname}</li>
-            <li class="list-group-item bg-transparent text-white">${filename}</li>
-            <li class="list-group-item bg-transparent text-white">${size}</li>
-            <li class="list-group-item bg-transparent text-white">${encoding}</li>
-            <li class="list-group-item bg-transparent text-white">${createdAt}</li>
-            <li class="list-group-item bg-transparent text-white">${updatedAt}</li>
-            <li class="list-group-item bg-transparent text-white">${contentType}</li>
-            <li class="list-group-item bg-transparent text-white">${_id}</li>
-          </ul>
-        </div>
-      </div>
+  <div class="col bg-transparent" data-id="${_id}">
+  <div class="card  bg-transparent h-100 rounded" style="object-fit:cover !important;">
+    <div class="skeleton"><span class="image_loader"></span></div>
+    <div class="img-container" style="width:100% !importnat;min-height:50vh;object-fit:cover !important; object-position: top;">
+        <img src="${
+          `${url}/${signature}` || ''
+        }"  class="card-img-top border-dark h-100 img-fluid hide_2 img_card ${_id}"  alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
+  </div>
+    <div class="card-body text-white">
+      <ul class="list-group rounded">
+        <li class="list-group-item bg-transparent text-white">${formatEmail(
+          email
+        )}</li>
+        <li class="list-group-item bg-transparent text-white">${user}</li>
+        <li class="list-group-item bg-transparent text-white">${originalname}</li>
+        <li class="list-group-item bg-transparent text-white">${filename}</li>
+        <li class="list-group-item bg-transparent text-white">${size}</li>
+        <li class="list-group-item bg-transparent text-white">${encoding}</li>
+        <li class="list-group-item bg-transparent text-white">${createdAt}</li>
+        <li class="list-group-item bg-transparent text-white">${updatedAt}</li>
+        <li class="list-group-item bg-transparent text-white">${contentType}</li>
+        <li class="list-group-item bg-transparent text-white">${_id}</li>
+      </ul>
     </div>
+  </div>
+</div>
   `
 
   const offContainer = document.querySelector('#off__Container')
@@ -58,7 +58,6 @@ export async function CARD (data, isNew = false) {
   // remove skeleton after image is loaded
   runSkeleto(document.querySelector('.card .img-container img') !== null)
 }
-
 export async function runSkeleto (isDone) {
   if (isDone) {
     let cards = document.querySelectorAll('.col')
@@ -92,7 +91,7 @@ export async function DisplayeBigImage (
   _id
 ) {
   runSpinner(false, 'Fetching...')
-  let fallback_img = 'images/fallback.jpeg'
+  let fallback_img = '../images/404_img.jpeg'
   const innerBodyBig = `
     <div id="carocel_big" class="container rounded" data-carucel="${
       _id && _id
@@ -138,7 +137,6 @@ export async function DisplayeBigImage (
     container?.removeChild(document.getElementById('carocel_big'))
   })
 
-  // ******* Updated logic
   let IMGCONT = document.querySelector('#carocel_big')
   IMGCONT.addEventListener('click', function (event) {
     if (!IMGCONT.contains(event.target)) {
@@ -147,50 +145,52 @@ export async function DisplayeBigImage (
   })
 
   // delete document
-  // let btn = document.querySelector('.main-del-cont')
-  // btn?.addEventListener('click', async () => {
-  //   console.log('skdljasldasdas')
-  //   await deleteDocument('644033f32d5934941de7719e')
-  // })
+  let btn = document.querySelector('.main-del-cont')
+  btn?.addEventListener('click', async () => {
+    runSpinner(false)
+    await deleteDocument(_id)
+  })
 }
-//
 function removeElementFromDOM (elementAnchor) {
   if (document.contains(elementAnchor)) {
     elementAnchor.remove()
   }
 }
+export async function deleteDocument (documentId = '') {
+  const { token } = JSON.parse(sessionStorage.getItem('token'))
+  if (!token) {
+    return Notify('Session terminated. Login required!')
+  }
 
-//****** Delete document
+  try {
+    let colElem = [...document.querySelectorAll('.col')].find(
+      card => card.dataset.id === documentId
+    )
+    let docId = colElem?.dataset.id
 
-// export async function deleteDocument (documentId) {
-//   runSpinner(false, 'Deleting...')
+    // remove big carocel
+    let carocelll = document.querySelector('#carocel_big')
+    removeElementFromDOM(carocelll)
 
-//   const { token } = JSON.parse(sessionStorage.getItem('token'))
-//   if (!token) {
-//     return Notify('Session terminated. Login required!')
-//   }
-
-//   try {
-//     document.querySelectorAll('.col').forEach(card => {
-//       card.addEventListener('click', async e => {
-//         console.log(e.target.parent)
-//       })
-//     })
-//     let url = `delete-doc/${documentId}`
-//     const response = await API_CLIENT.delete(url, {
-//       headers: { Authorization: `Bearer ${token}` }
-//     })
-//     if (response.status === 200) {
-//       runSpinner(true)
-//       Notify('Success: Document deleted!')
-//     } else {
-//       throw new Error(`Error deleting document: ${response.status}`)
-//     }
-//   } catch (error) {
-//     console.error(error)
-//     Notify(`Error deleting document: ${error.message}`)
-//   } finally {
-//     runSpinner(true)
-//   }
-// }
-//****** Delete document
+    setTimeout(async () => {
+      let url = `delete-doc/${docId}`
+      const response = await API_CLIENT.delete(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.status === 200) {
+        colElem.classList.add('del_effect')
+        // remove the card from the DOM
+        setTimeout(() => colElem.remove(), 500)
+        // runSpinner(true)
+        Notify('Success: Document deleted!')
+      } else {
+        throw new Error(`Error deleting document: ${response.status}`)
+      }
+    }, 500)
+  } catch (error) {
+    console.error(error)
+    Notify(`Error deleting document: ${error.message}`)
+  } finally {
+    runSpinner(true)
+  }
+}

@@ -28,6 +28,20 @@
             margin: unset !important;
         }
 
+        .del_effect {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            transition: .3s;
+            opacity: 1;
+            animation: dele-item 1 ease-in forwards .3s;
+        }
+
+        @keyframes dele-item {
+            to {
+                clip-path: polygon(49% 48%, 49% 48%, 49% 48%, 49% 48%);
+                opacity: 0;
+            }
+        }
+
         #carocel_big {
             position: fixed;
             min-width: 100vw;

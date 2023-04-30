@@ -133,7 +133,6 @@ export async function fetchData (page = 1) {
       error?.response.status == 404
     ) {
       runSpinner(true)
-      console.warn(error.message)
       return Notify('You dont have any saved documents.')
     }
     if (error?.response.status == 401) {
