@@ -126,11 +126,16 @@ export async function uploadFiles () {
       return
     }
     if (error instanceof TypeError && error.message.includes('token')) {
-      console.warn('Authentication required. Please login!')
-      Notify('Authentication required: Please login!')
+      Notify('Your session has expired. Please login!')
       LogoutBtnIsVisible(false)
       await LOGIN_HTML()
     }
+    if (error?.response.status == 401) {
+      Notify('Session expired. Please login!')
+      document.getElementById('log___out').style.display = 'none'
+      return LOGIN_HTML()
+    }
+
     console.log('Something went wrong: ' + error)
   } finally {
     runSpinner(true)
