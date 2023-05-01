@@ -11,14 +11,14 @@ export async function SIGNUP_HTML () {
           </a>
           <ul class="navbar-nav ">
               <li class="nav-item">
-                  <a id="to_login_p" class="nav-link active text-white" aria-current="page" href="#">Login</a>
+                  <a id="to_login_p" class="nav-link active text-white" aria-current="page" href="#">LOGIN</a>
               </li>
           </ul>
       </div>
   </nav>
   <main id="main__wrapper" class="container container-fluid my-10 position-relative">
       <div class="container sign___up container-fluid">
-          <h3 class="text-center p-3 text-white">Signup</h3>
+          <h3 class="text-center p-3 text-white">SIGNUP</h3>
           <form class="shadow-lg p-3 rounded pt-2 text-white" id="signup_form">
               <div class="mb-3">
                   <label for="exampleInputName" class="form-label">Name</label>
@@ -40,7 +40,7 @@ export async function SIGNUP_HTML () {
               </div>
               <div class="d-grid gap-2">
                   <button id="signup_bt" style="box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(255, 255, 255, .4),
-                  0.3em 0.3em 1em rgba(0, 0, 0, 0.3);" type="submit" class="btn btn-transparent text-white" type="button">Submit</button>
+                  0.3em 0.3em 1em rgba(0, 0, 0, 0.3);" type="submit" class="btn btn-transparent text-white" type="button">SUBMIT</button>
               </div>
           </form>
       </div>

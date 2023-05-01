@@ -104,9 +104,32 @@ a {
 
 #login___form,
 #signup_form {
+    transition: all ease-in .4s !important;
     -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(10px);
-    background-image: linear-gradient(-225deg, #ff3cac4d 0%, #562b7c4d 52%, #2b86c54d 100%);
+    backdrop-filter: blur(15px);
+    border-radius: .4rem !important;
+}
+
+.form-control {
+    border: none;
+    padding: 1rem .6rem 1rem .6rem;
+    color: white;
+    opacity: .6;
+    background-image: linear-gradient(to top, rgba(26, 62, 103, 0.8) 0%, #e7f0fd 100%);
+}
+
+.mb-3>.form-control:not(#search____input):focus {
+    border: none;
+    outline: none;
+    box-shadow: none;
+    opacity: 0.9;
+}
+
+#search____input {
+    padding: .5rem;
+    background-image: unset;
+    background-image: linear-gradient(to top, rgba(255, 0, 0, 0.1) 0%, rgb(231, 240, 253, .1) 100%);
+
 }
 
 
@@ -318,7 +341,6 @@ a {
 .search_db_form i:focus {
     width: 100%;
     border-color: #04adc3 #04adc3 #04adc3 #04adc3;
-
 }
 
 .search_db_form {
@@ -402,9 +424,8 @@ a {
     z-index: 2;
     width: 100%;
     height: 100%;
-    -webkit-backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(10px) grayscale(100%);
-    background-image: linear-gradient(to top, rgb(2, 80, 197, .3) 0%, rgb(212, 63, 141, .3) 100%);
 }
 
 .skeleton {
