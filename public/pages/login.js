@@ -7,20 +7,20 @@ export async function LOGIN_HTML () {
     <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
         <a class="navbar-brand p-2 mb-1" href="#">
-            <img src="https://github.com/raybags-web-dev/image_base/blob/master/images/logo/logo9_5_21251.jpeg?raw=true" alt="" width=40" height="40" style="border-radius: 50%;"
+            <img src="https://github.com/raybags-web-dev/image_base/blob/master/images/logo/logo9_5_21251.jpeg?raw=true" alt="" width=40" height="40" style="border-radius: 50%;filter: gray(100%)"
                 class="d-inline-block align-text-top">
         </a>
   
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a id="to_sigup_p" class="nav-link active text-white" aria-current="page" href="#">Signup</a>
+                <a id="to_sigup_p" class="nav-link active text-white" aria-current="page" href="#">SIGNUP</a>
             </li>
         </ul>
     </div>
   </nav>
   <main id="main__wrapper" class="container container-fluid my-10 position-relative">
     <div class="container log___in container-fluid">
-        <h3 class="text-center p-3 text-white">Login</h3>
+        <h3 class="text-center p-3 text-white">LOGIN</h3>
         <form id="login___form" class="shadow-lg p-3 rounded pt-2 text-white">
                 <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Email address</label>
@@ -36,7 +36,7 @@ export async function LOGIN_HTML () {
               </div>
             <div class="d-grid gap-2">
                 <button type="submit" style="box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(255, 255, 255, .4),
-                0.3em 0.3em 1em rgba(0, 0, 0, 0.3);" class="btn btn-transparent login_btn text-white">Submit</button>
+                0.3em 0.3em 1em rgba(0, 0, 0, 0.3);" class="btn btn-transparent login_btn text-white">SUBMIT</button>
             </div>
         </form>
     </div>
