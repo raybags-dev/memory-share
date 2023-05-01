@@ -137,8 +137,7 @@ export async function fetchData (page = 1) {
     }
     if (error?.response.status == 401) {
       Notify('Session expired. Please login!')
-      //   hide logout button
-      LogoutBtnIsVisible(false)
+      document.getElementById('log___out').style.display = 'none'
       return LOGIN_HTML()
     }
     if (error?.response.status == 404) {
