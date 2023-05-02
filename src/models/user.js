@@ -80,8 +80,6 @@ userSchema.pre('save', function (next) {
   this.version = this.version + 1
   next()
 })
-
 const USER_MODEL = mongoose.model('User', userSchema)
 const USER_ID_MODEL = mongoose.model('UserId', userIdSchema)
-
 export { USER_MODEL, USER_ID_MODEL }

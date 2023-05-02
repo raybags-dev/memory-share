@@ -5,6 +5,7 @@ import {
   API_CLIENT,
   Notify
 } from '../lifters/works.js'
+import { LogoutBtnIsVisible, LOGIN_HTML } from '../pages/login.js'
 export async function CARD (data, isNew = false) {
   const {
     url,
@@ -77,7 +78,6 @@ export async function runSkeleto (isDone) {
     })
   }
 }
-// ******** Implimenting Caiucel **********
 // big Carucel
 export async function DisplayeBigImage (
   imgurl,
@@ -95,21 +95,25 @@ export async function DisplayeBigImage (
   runSpinner(false, 'Fetching...')
   let fallback_img = '../images/404_img.jpeg'
   const innerBodyBig = `
-    <div id="carocel_big" class="container rounded" data-carucel="${
+    <div id="carocel_big" class="container control_big_cont rounded" data-carucel="${
       _id && _id
     }" style="z-index:100">
-      <span class="lead">X</span>
-      <div class="container __bigOne__">
+    <div class="container __bigOne__">
+    <div class="del_btn_cont">
+    <span class="lead">X</span>
+    </div>
       <div class="main-del-cont" style="cursor:pointer !important;z-index:230000 !important;">
       <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
       </div>
-        <div class="card bg-transparent" data-user="${
+        <div class="card big_box bg-transparent" data-user="${
           userId && userId
         }"  style="width:50%;height:70% !important">
+        <div class="details_btn"><span>&#9737;</span></div>
+
           <img  src="${
             imgurl || ''
           }" class="card-img-top img-fluid" alt="..."  onerror="this.onerror=null;this.src='${fallback_img}'">
-          <div id="description" class="card-body" style="z-index: 100;">
+          <div id="description" class="card-body hide" style="z-index: 100;">
             <h5 class="card-title">${email && email}</h5>
             <hr>
             <p class="">User: ${userId && userId}</p>
@@ -152,6 +156,18 @@ export async function DisplayeBigImage (
     runSpinner(false)
     await deleteDocument(_id)
   })
+
+  document.querySelector('.details_btn')?.addEventListener('click', () => {
+    document.querySelector('#description')?.classList.toggle('hide')
+  })
+  // remove big carucel
+  document.addEventListener('click', event => {
+    const carocelBig = document.getElementById('carocel_big')
+    const clickIsOutside = event.target.classList.contains('control_big_cont')
+    if (carocelBig && clickIsOutside) {
+      carocelBig?.remove()
+    }
+  })
 }
 function removeElementFromDOM (elementAnchor) {
   if (document.contains(elementAnchor)) {
@@ -159,12 +175,11 @@ function removeElementFromDOM (elementAnchor) {
   }
 }
 export async function deleteDocument (documentId = '') {
-  const { token } = JSON.parse(sessionStorage.getItem('token'))
-  if (!token) {
-    return Notify('Session terminated. Login required!')
-  }
-
   try {
+    const { token } = JSON.parse(sessionStorage.getItem('token'))
+    if (!token) {
+      return Notify('Session terminated. Login required!')
+    }
     let colElem = [...document.querySelectorAll('.col')].find(
       card => card.dataset.id === documentId
     )
@@ -184,14 +199,15 @@ export async function deleteDocument (documentId = '') {
         // remove the card from the DOM
         setTimeout(() => colElem.remove(), 500)
         // runSpinner(true)
-        Notify('Success: Document deleted!')
-      } else {
-        throw new Error(`Error deleting document: ${response.status}`)
+        return Notify('Success: Document deleted!')
       }
     }, 500)
   } catch (error) {
-    console.error(error)
-    Notify(`Error deleting document: ${error.message}`)
+    if (error instanceof TypeError) {
+      Notify('Sorry, an error occurred while processing your request.')
+      LogoutBtnIsVisible(false)
+      return await LOGIN_HTML()
+    }
   } finally {
     runSpinner(true)
   }

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1, user-scalable=no"">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Memories</title>
     <!-- favicon -->
     <link rel=" icon" type="image/png" style="border-radius: 50px; filter: grayscale(100%) !important;" sizes="32x32"
@@ -84,20 +84,16 @@
             height: 40%;
             width: 40%;
             color: white;
+            opacity: 1;
             transition: all ease-in .2s;
             overflow-y: auto !important;
-            opacity: 0;
             border-bottom-right-radius: .4rem !important;
             border-top-right-radius: .4rem !important;
             border-top-right-radius: .3rem;
             border-bottom-right-radius: .3rem;
             backdrop-filter: blur(15px) !important;
-        }
-
-        #carocel_big .container:hover #description {
-            opacity: .7;
-            backdrop-filter: blur(7px) !important;
             background-color: #04adc333;
+            backdrop-filter: blur(7px) !important;
         }
 
         #carocel_big .container:hover img {
@@ -105,23 +101,25 @@
             transition: .2s;
         }
 
-        #carocel_big .lead {
+        .del_btn_cont {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            display: block;
+            top: 1%;
+            right: 1%;
             width: 40px;
             height: 40px;
-            line-height: 40px;
-            text-align: center;
-            border-radius: 50%;
+            padding: .1.2rem;
+            border-radius: .3rem;
+            z-index: 3000;
+            display: grid;
+            color: #f95454;
             cursor: pointer;
-            color: white;
-            transition: 0.1s ease-in-out;
+            place-content: center;
         }
 
-        #carocel_big .lead:hover {
-            color: rgb(247, 36, 36);
+        .del_btn_cont span {
+            font-weight: 500;
+            z-index: 5000;
+            cursor: pointer;
         }
 
         /*delete icon*/
@@ -170,14 +168,14 @@
             border-radius: .3rem;
             height: 40px;
             z-index: 100;
-            color: black;
-            background-color: hsla(0, 0%, 57%, 0.5);
+            background-color: hsla(0, 0%, 42%, 0.2);
             backdrop-filter: blur(10px);
         }
 
         #log___out a {
-            color: #ffff;
-            font-style: italic;
+            color: rgba(255, 254, 254, 0.5);
+            text-transform: uppercase;
+            font-size: 1rem;
         }
 
         #log___out a:active {
@@ -185,16 +183,11 @@
         }
 
         #log___out:hover {
-            background-color: hsla(0, 3%, 31%, 0.5);
-
+            background-color: hsla(0, 0%, 42%, 0.5);
         }
 
-        @media screen and (max-width:502px) {
-            #log___out {
-                font-size: 15px !important;
-                left: 0%;
-                bottom: 0%;
-            }
+        #log___out:hover a {
+            color: rgba(255, 254, 254, 0.8);
         }
 
         /*delete icon*/
@@ -216,12 +209,26 @@
                 opacity: 1;
                 color: red;
             }
+
+            .nav-item a,
+            .login_btn,
+            .signup_btn {
+                font-size: 1rem;
+            }
         }
 
         @media screen and (max-width: 557px) {
             #carocel_big .container {
                 width: 100 !important;
                 height: 90%;
+            }
+        }
+
+        @media screen and (max-width:502px) {
+            #log___out {
+                font-size: 15px !important;
+                left: 0%;
+                bottom: 0%;
             }
         }
 
@@ -245,6 +252,30 @@
                 color: #f53939;
                 font-style: italic;
             }
+        }
+
+        .details_btn {
+            position: absolute;
+            left: 4%;
+            top: 97%;
+            padding: .3rem;
+            border-radius: .3rem;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            z-index: 1000;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            color: white;
+        }
+
+        .details_btn span {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
         }
     </style>
     <link rel="stylesheet" href="./styles/styles.css">

@@ -13,7 +13,6 @@ const {
   AWS_REGION
 } = process.env
 import { DOCUMENT } from '../src/models/documentModel.js'
-
 // S3 client
 const s3 = new S3Client({
   region: AWS_REGION,
@@ -78,7 +77,6 @@ export const createBucket = async () => {
     }
   }
 }
-
 //saves to aws-bucket
 export async function saveImagesToS3 (files) {
   try {
@@ -151,13 +149,11 @@ export async function saveImagesToS3 (files) {
     }
   }
 }
-
 export async function deleteFromS3 (filename) {
   const command = new DeleteObjectCommand({
     Bucket: AWS_BUCKET_NAME,
     Key: filename
   })
-
   try {
     const response = await s3.send(command)
     if (response.$metadata.httpStatusCode === 204)

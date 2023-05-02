@@ -41,8 +41,8 @@ body {
     scroll-behavior: smooth;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px) !important;
-    background: linear-gradient(rgba(2, 43, 124, 0.7),
-            rgba(255, 255, 255, 0.1)),
+    background: linear-gradient(rgba(1, 44, 82, 0.7),
+            rgb(37, 40, 54)),
         url("https://github.com/raybags-web-dev/image_base/blob/master/images/faniture3.jpeg?raw=true") center/cover no-repeat fixed;
 }
 
@@ -115,7 +115,6 @@ a {
     padding: 1rem .6rem 1rem .6rem;
     color: white;
     opacity: .6;
-    background-image: linear-gradient(to top, rgba(26, 62, 103, 0.8) 0%, #e7f0fd 100%);
 }
 
 .mb-3>.form-control:not(#search____input):focus {
@@ -296,7 +295,7 @@ a {
 .card {
     min-width: 100%;
     min-height: 100%;
-    border: 5px solid #9d04c333;
+    border: 5px solid #7e7e7e1a;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
