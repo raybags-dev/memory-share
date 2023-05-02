@@ -41,16 +41,20 @@
         "multer": "^1.4.5-lts.1",
         "node-fetch": "^3.3.0",
         "openai": "^3.1.0",
-        "request": "^2.88.2",
-        "request-promise": "^4.2.6",
+        "request": "0.0.1",
+        "request-promise": "^0.0.1",
         "sharp": "^0.32.0",
         "uuid": "^9.0.0",
         "whatwg-fetch": "^3.6.2"
     },
     "devDependencies": {
+        "@babel/core": "^7.21.8",
+        "@babel/preset-env": "^7.21.5",
+        "@babel/preset-typescript": "^7.21.5",
+        "babel-jest": "^29.5.0",
         "find-free-port": "^2.0.0",
         "husky": "^8.0.3",
-        "jest": "^29.3.1",
+        "jest": "^29.5.0",
         "nodemon": "^2.0.20",
         "supertest": "^6.3.3"
     }

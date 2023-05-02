@@ -1,5 +1,11 @@
 import { PaginateData } from '../lifters/works.js'
-import { API_CLIENT, runSpinner, Notify, fetchData } from '../lifters/works.js'
+import {
+  API_CLIENT,
+  runSpinner,
+  Notify,
+  fetchData,
+  searchDatabase
+} from '../lifters/works.js'
 import { DisplayeBigImage } from '../components/card.js'
 import { CARD } from '../components/card.js'
 import { logOutUser, LogoutBtnIsVisible, LOGIN_HTML } from '../pages/login.js'
@@ -36,6 +42,31 @@ export async function MAIN_PAGE () {
   await genCardCarucel()
   //   show logout button
   await LogoutBtnIsVisible(true)
+  // handle db search
+  let mySearchTimeout = null
+  let searchInput = document.querySelector('#search____input')
+
+  function debounceSearchDatabase (e) {
+    if (e && e.preventDefault) e.preventDefault()
+    clearTimeout(mySearchTimeout)
+
+    mySearchTimeout = setTimeout(async () => {
+      const inputValue = searchInput?.value.trim().toLowerCase()
+
+      if (inputValue === '') {
+        await PaginateData()
+      } else {
+        await searchDatabase()
+      }
+    }, 1000)
+  }
+  async function clearSearchInput () {
+    searchInput.value = ''
+    searchDatabase()
+  }
+
+  searchInput?.addEventListener('input', debounceSearchDatabase)
+  searchInput?.addEventListener('blur', clearSearchInput)
 }
 export async function genCardCarucel () {
   const cardContainer = document.querySelector('#off__Container')
@@ -118,6 +149,11 @@ export async function uploadFiles () {
       })
     }
   } catch (error) {
+    if (error instanceof TypeError) {
+      Notify('Sorry, an error occurred while processing your request.')
+      LogoutBtnIsVisible(false)
+      return await LOGIN_HTML()
+    }
     if (error.response.status === 409) {
       Notify(
         `Duplicates detected. One or more selected files have already been uploaded`

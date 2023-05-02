@@ -1,12 +1,11 @@
+const app = express()
 import express from 'express'
 import multer from 'multer'
 import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
 
-const app = express()
 import apicache from 'apicache'
 import { ObjectId } from 'mongodb'
-
 import { config } from 'dotenv'
 config()
 
@@ -17,26 +16,23 @@ import { GenToken } from '../../middleware/generateToken.js'
 let cache = apicache.middleware
 
 import { USER_MODEL, USER_ID_MODEL } from '../models/user.js'
-
 import { DOCUMENT } from '../models/documentModel.js'
-
 import {
   loginUser,
   authMiddleware,
   extractTokenMiddleware,
   checkDocumentAccess,
   isAdmin,
-  checkUserExists
+  checkUserExists,
+  validateDocumentOwnership
 } from '../../middleware/auth.js'
-
 //fallback page path
 const fallbackPagePath = new URL(
   '../../errorPage/noConnection.html',
   import.meta.url
 ).pathname
-
 // create user
-async function CreateUser (app) {
+export async function CreateUser (app) {
   app.post('/raybags/v1/uploader/create-user', async (req, res) => {
     try {
       const { name, email, password, isAdmin } = req.body
@@ -62,7 +58,7 @@ async function CreateUser (app) {
   })
 }
 //login handler
-async function Login (app) {
+export async function Login (app) {
   app.post('/raybags/v1/user/login', loginUser, async (req, res) => {
     try {
       // Find the user based on the email in the request body
@@ -79,7 +75,7 @@ async function Login (app) {
     }
   })
 }
-async function DocsUploader (app) {
+export async function DocsUploader (app) {
   const multerMiddleware = multer({ storage: multer.memoryStorage() }).array(
     'images'
   )
@@ -180,11 +176,11 @@ async function DocsUploader (app) {
   )
 }
 
-function AllUserDocs (app) {
+export function AllUserDocs (app) {
   app.post(
     '/raybags/v1/uploader/user-docs',
     authMiddleware,
-    checkDocumentAccess,
+    validateDocumentOwnership,
     asyncMiddleware(async (req, res) => {
       const isAdmin = req.user.isAdmin
       let query
@@ -205,7 +201,7 @@ function AllUserDocs (app) {
     })
   )
 }
-function FindOneItem (app) {
+export function FindOneItem (app) {
   app.post(
     '/raybags/v1/wizard/uploader/:id',
     authMiddleware,
@@ -230,10 +226,11 @@ function FindOneItem (app) {
     })
   )
 }
-function GetPaginatedDocs (app) {
+export function GetPaginatedDocs (app) {
   app.post(
     '/raybags/v1/uploader/paginated-user-documents',
     authMiddleware,
+    validateDocumentOwnership,
     asyncMiddleware(async (req, res) => {
       const userId = req.user.data._id
       const query = DOCUMENT.find({ user: userId }, { token: 0 }).sort({
@@ -261,7 +258,7 @@ function GetPaginatedDocs (app) {
     })
   )
 }
-function deleteUserAndOwnDocs (app) {
+export function deleteUserAndOwnDocs (app) {
   app.delete(
     '/raybags/v1/delete-user-and-docs/:userId',
     authMiddleware,
@@ -290,10 +287,11 @@ function deleteUserAndOwnDocs (app) {
     })
   )
 }
-function DeleteOneDoc (app) {
+export function DeleteOneDoc (app) {
   app.delete(
     '/raybags/v1/delete-doc/:id',
     authMiddleware,
+    checkDocumentAccess,
     asyncMiddleware(async (req, res) => {
       const itemId = req.params.id
       const userId = req.user.data._id
@@ -335,7 +333,7 @@ function DeleteOneDoc (app) {
     })
   )
 }
-function GetAllUsers (app) {
+export function GetAllUsers (app) {
   app.post(
     '/raybags/v1/uploader/get-users',
     authMiddleware,
@@ -365,19 +363,6 @@ function GetAllUsers (app) {
     })
   )
 }
-
-function NotSupported (req, res, next) {
+export function NotSupported (req, res, next) {
   res.status(502).sendFile(fallbackPagePath)
-}
-export {
-  CreateUser,
-  Login,
-  DocsUploader,
-  NotSupported,
-  AllUserDocs,
-  FindOneItem,
-  GetPaginatedDocs,
-  deleteUserAndOwnDocs,
-  DeleteOneDoc,
-  GetAllUsers
 }

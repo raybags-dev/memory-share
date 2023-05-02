@@ -40,7 +40,7 @@ export async function SIGNUP_HTML () {
               </div>
               <div class="d-grid gap-2">
                   <button id="signup_bt" style="box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(255, 255, 255, .4),
-                  0.3em 0.3em 1em rgba(0, 0, 0, 0.3);" type="submit" class="btn btn-transparent text-white" type="button">SUBMIT</button>
+                  0.3em 0.3em 1em rgba(0, 0, 0, 0.3);" type="submit" class="btn btn-transparent signup_btn text-white" type="button">SUBMIT</button>
               </div>
           </form>
       </div>
@@ -52,9 +52,8 @@ export async function SIGNUP_HTML () {
   navbarBrand?.addEventListener('click', async () => {
     LOGIN_HTML()
   })
-  // =========================================================
-  const signupForm = document.querySelector('#signup_form')
 
+  const signupForm = document.querySelector('#signup_form')
   signupForm?.addEventListener('submit', async event => {
     event.preventDefault()
     const formData = new FormData(signupForm)

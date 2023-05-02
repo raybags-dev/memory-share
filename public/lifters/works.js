@@ -21,7 +21,6 @@ API_CLIENT.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-
 // Notifications
 export async function Notify (message = '...') {
   // Check if a notification already exists and remove it
@@ -96,12 +95,8 @@ export function formatEmail (email) {
   }
   return ''
 }
-// ******** Fetch Data ********
 export async function fetchData (page = 1) {
   runSpinner(false, 'loading...')
-  const sessionToken = sessionStorage.getItem('token')
-  if (!sessionToken) return
-
   try {
     const { token } = JSON.parse(sessionStorage.getItem('token'))
 
@@ -123,11 +118,19 @@ export async function fetchData (page = 1) {
         Notify(`Last page: ${page}`)
         return data
       } else {
+        if (page == 1) Notify(``)
         Notify(`Page ${page} loaded`)
         return data
       }
     }
   } catch (error) {
+    if (error instanceof TypeError) {
+      Notify('An error occurred while processing your request. Please login!')
+      setTimeout(async () => {
+        LogoutBtnIsVisible(false)
+        return await LOGIN_HTML()
+      }, 2000)
+    }
     if (
       error?.response.data == 'Sorry I have nothing for you!' ||
       error?.response.status == 404
@@ -150,7 +153,6 @@ export async function fetchData (page = 1) {
     runSpinner(true)
   }
 }
-// ***********Fetch Paginated data on scroll ***************
 export async function PaginateData () {
   runSpinner(false)
   let page = 1
@@ -197,8 +199,6 @@ export async function PaginateData () {
                   target = container.children[container.children.length - 2]
                   observer.observe(target)
                 }
-              } else {
-                Notify(`Technical issue occured., I'll get right to it asap`)
               }
             }
           },
@@ -213,7 +213,67 @@ export async function PaginateData () {
       }, 1000)
     }
   } catch (error) {
+    if (error instanceof TypeError) {
+      Notify('Sorry, an error occurred while processing your request.')
+      LogoutBtnIsVisible(false)
+      return await LOGIN_HTML()
+    }
     console.warn(error.message)
+  } finally {
+    runSpinner(true)
+  }
+}
+// search db
+export async function searchDatabase () {
+  const searchingInput = document.querySelector('#search____input')
+  let inputValue = searchingInput?.value.trim().toLowerCase()
+
+  try {
+    runSpinner(false, 'Searching...')
+    const { token } = JSON.parse(sessionStorage.getItem('token'))
+    let url = '/uploader/user-docs'
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+    const res = await API_CLIENT.post(url, {}, { headers })
+
+    if (res.statusText === 'OK') {
+      runSpinner(true)
+      const { documents: response } = await res.data
+      let hasResults = false
+      let matchingDocs = [] // array to store the matching search results
+
+      response.forEach((obj, index) => {
+        const { originalname, filename, createdAt } = obj
+        const document_name = originalname.toLowerCase()
+
+        if (inputValue === '' || document_name.includes(inputValue)) {
+          if (originalname && filename && createdAt) {
+            matchingDocs.push(obj) // add the matching result to the array
+            hasResults = true
+          } else {
+            console.warn(
+              `Document with ID ${obj._id} is missing one or more required properties.`
+            )
+          }
+        } else {
+          const card = document.querySelector(`[data-id="${obj._id}"]`)
+          if (card) {
+            card.classList.add('hide') // hide cards that don't match the search query
+          }
+        }
+      })
+
+      if (!inputValue) {
+        // Make all the cards visible again if inputValue is empty
+        const cards = document.querySelectorAll('.card.hide')
+        cards.forEach(card => card.classList.remove('hide'))
+      }
+    }
+  } catch (error) {
+    console.log(error)
   } finally {
     runSpinner(true)
   }

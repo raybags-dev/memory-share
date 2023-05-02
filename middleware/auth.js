@@ -64,7 +64,6 @@ export const loginUser = async (req, res, next) => {
     res.status(500).json({ error: 'Server error', message: error.message })
   }
 }
-
 //   extract token
 export const extractTokenMiddleware = (req, res, next) => {
   const authHeader = req.headers['authorization']
@@ -117,7 +116,6 @@ export const authMiddleware = async (req, res, next) => {
       .json({ error: 'Invalid token', message: error.message })
   }
 }
-
 export const checkDocumentAccess = async (req, res, next) => {
   try {
     const { user } = req.locals // retrieve user object from req.locals
@@ -160,5 +158,27 @@ export const checkUserExists = async (req, res, next) => {
   } catch (error) {
     console.error(error.message)
     res.status(500).json({ error: 'Server error', message: 'Try again later' })
+  }
+}
+export const validateDocumentOwnership = async (req, res, next) => {
+  try {
+    const user_id = req.user.data._id
+    // Find all documents that were created by the user
+    const documents = await DOCUMENT.find({ user: user_id }, { data: 0 }).exec()
+
+    if (documents.length === 0) {
+      return res.status(404).json({ error: 'Documents not found' })
+    }
+    // Check if the requested document is in the list of documents created by the user
+    const userdocuments = documents.find(doc => doc.user.toString() === user_id)
+    if (!userdocuments) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+    // Attach document object to req.locals for use in subsequent middleware or routes
+    req.locals = { userdocuments }
+    next()
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ error: 'Server error' })
   }
 }
