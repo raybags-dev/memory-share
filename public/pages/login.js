@@ -75,12 +75,10 @@ export async function LOGIN_HTML () {
         //   show logout button
         LogoutBtnIsVisible(false)
         Notify(`Login successfull`)
-        setTimeout(() => {
+        setTimeout(async () => {
           runSpinner(true)
           history.pushState(null, null, '/')
-          //   ***********************
-          MAIN_PAGE()
-          //   ***********************
+          await MAIN_PAGE()
         }, 800)
       }
     } catch (error) {

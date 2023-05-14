@@ -5,6 +5,7 @@ import {
   API_CLIENT,
   Notify
 } from '../lifters/works.js'
+import { hideUploadForm } from '../pages/main_container.js'
 import { LogoutBtnIsVisible, LOGIN_HTML } from '../pages/login.js'
 export async function CARD (data, isNew = false) {
   const {
@@ -21,17 +22,17 @@ export async function CARD (data, isNew = false) {
     originalname
   } = await data
   const { email } = JSON.parse(sessionStorage.getItem('token'))
-  let fall_back = 'images/404_img.jpeg'
+  let fall_back = '../images/_404_.webp'
   let cardContent = `
-  <div class="col bg-transparent" data-id="${_id}">
-  <div class="card  bg-transparent h-100 rounded" style="object-fit:cover !important;">
+  <div class="col bg-transparent" style="padding:.2rem;" data-id="${_id}">
+  <div class="card  bg-transparent rounded" style="object-fit:contain !important;">
     <div class="skeleton"><span class="image_loader"></span></div>
-    <div class="img-container" style="width:100% !importnat;min-height:50vh;object-fit:cover !important; object-position: top;">
+    <div class="img-container" style="width:100% !important;object-fit:cover !important;">
         <img src="${
-          `${url}/${signature}` || ''
-        }"  class="card-img-top border-dark h-100 img-fluid hide_2 img_card ${_id}"  alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
+          `${url}?${signature}` || ''
+        }"  class="card-img-top border-dark img-fluid hide_2 img_card ${_id}"  alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
   </div>
-  <div class="card-footer bg-transparent card-img-overlay text-danger m-1 rounded" style="backdrop-filter:blur(20px); width:fit-content;height:fit-content;padding:.2rem; font-style:italic">${formatDate(
+  <div class="card-footer bg-transparent card-img-overlay text-danger m-1 rounded" style="width:fit-content;height:fit-content;padding:.3rem; font-style:italic">${formatDate(
     createdAt
   )}</div>
     <div class="card-body text-white">
@@ -93,9 +94,9 @@ export async function DisplayeBigImage (
   _id
 ) {
   runSpinner(false, 'Fetching...')
-  let fallback_img = '../images/404_img.jpeg'
+  let fallback_img = '../images/_404_.webp'
   const innerBodyBig = `
-    <div id="carocel_big" class="container control_big_cont rounded" data-carucel="${
+    <div id="carocel_big" class="container control_big_cont" data-carucel="${
       _id && _id
     }" style="z-index:100">
     <div class="container __bigOne__">
@@ -107,12 +108,12 @@ export async function DisplayeBigImage (
       </div>
         <div class="card big_box bg-transparent" data-user="${
           userId && userId
-        }"  style="width:50%;height:70% !important">
+        }"  style="width:60%;height:70% !important">
         <div class="details_btn"><span>&#9737;</span></div>
 
           <img  src="${
             imgurl || ''
-          }" class="card-img-top img-fluid" alt="..."  onerror="this.onerror=null;this.src='${fallback_img}'">
+          }" class="card-img-top img-fluid" alt="..." style="border-radius:.2rem;"  onerror="this.onerror=null;this.src='${fallback_img}'">
           <div id="description" class="card-body hide" style="z-index: 100;">
             <h5 class="card-title">${email && email}</h5>
             <hr>
@@ -122,10 +123,10 @@ export async function DisplayeBigImage (
             <p class=""> File size: ${size && size}</p>
             <p class="">Encoding type: ${encoding && encoding}</p>
             <p class="">Content type: ${contenttype && contenttype}</p>
-            <p class="card-text"><small class="text-muted">Created: ${
+            <p class="card-text"><small>Created: ${
               createdAt && createdAt
             }</small></p>
-            <p class="card-text"><small class="text-muted">Updated: ${
+            <p class="card-text"><small>Updated: ${
               updaedAt && updaedAt
             }</small></p>
           </div>
@@ -139,8 +140,9 @@ export async function DisplayeBigImage (
   setTimeout(() => runSpinner(true), 100)
 
   const closeButton = document.querySelector('#carocel_big .lead')
-  closeButton?.addEventListener('click', function () {
+  closeButton?.addEventListener('click', async () => {
     container?.removeChild(document.getElementById('carocel_big'))
+    await hideUploadForm(true)
   })
 
   let IMGCONT = document.querySelector('#carocel_big')
@@ -155,17 +157,19 @@ export async function DisplayeBigImage (
   btn?.addEventListener('click', async () => {
     runSpinner(false)
     await deleteDocument(_id)
+    await hideUploadForm(true)
   })
 
   document.querySelector('.details_btn')?.addEventListener('click', () => {
     document.querySelector('#description')?.classList.toggle('hide')
   })
   // remove big carucel
-  document.addEventListener('click', event => {
+  document.addEventListener('click', async event => {
     const carocelBig = document.getElementById('carocel_big')
     const clickIsOutside = event.target.classList.contains('control_big_cont')
     if (carocelBig && clickIsOutside) {
       carocelBig?.remove()
+      await hideUploadForm(true)
     }
   })
 }

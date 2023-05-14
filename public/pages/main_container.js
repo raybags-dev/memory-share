@@ -15,7 +15,7 @@ export async function MAIN_PAGE () {
       <nav class="navbar navbar-expand-lg">
         <div class="container">
           <h2 class="text-light sticky-top heading">Memories</h2>
-          <form class="d-flex search_db_form pt-2" role="search">
+          <form class="d-flex search_db_form pt-2 hide" role="search">
             <input id="search____input" autocomplete="off" class="form-control me-2" type="search" placeholder="" aria-label="Search">
             <i class="fa-solid fa-magnifying-glass"></i>
           </form>
@@ -23,9 +23,9 @@ export async function MAIN_PAGE () {
       </nav>
       <main id="main__wrapper" class="container my-10 position-relative">
         <div class="container pb-3 sticky-top mt-1 off__Container">
-          <form class="select-img-form text-danger">
+          <form id="upload_formm" class="select-img-form text-danger sticky-top hide">
             <label class="label">
-              <input class="select-image-input" type="file" ref="inputRef">
+              <input class="select-image-input" type="file" ref="inputRef" multiple>
               <span>+</span>
             </label>
           </form>
@@ -64,9 +64,8 @@ export async function MAIN_PAGE () {
     searchInput.value = ''
     searchDatabase()
   }
-
   searchInput?.addEventListener('input', debounceSearchDatabase)
-  searchInput?.addEventListener('blur', clearSearchInput)
+  hideUploadForm(true)
 }
 export async function genCardCarucel () {
   const cardContainer = document.querySelector('#off__Container')
@@ -101,6 +100,7 @@ export async function genCardCarucel () {
         contentType,
         _id
       )
+      hideUploadForm(false)
     }
   })
 }
@@ -130,7 +130,7 @@ export async function uploadFiles () {
     })
     if (response.statusText == 'OK') {
       runSpinner(true)
-      Notify('Success: File(s) uploaded!')
+      Notify('Uploaded successful')
 
       let newData = await fetchData(1)
       let container = document.querySelector('#off__Container')
@@ -180,3 +180,10 @@ export async function uploadFiles () {
 // logout user
 const logoutLink = document.querySelector('#logoutuser_link')
 logoutLink?.addEventListener('click', async () => logOutUser(true))
+// hide/show upload btn
+export async function hideUploadForm (isVisible) {
+  let form = document.getElementById('upload_formm')
+  if (!isVisible) return form?.classList.add('hide')
+
+  form?.classList.remove('hide')
+}

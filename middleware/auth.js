@@ -36,7 +36,7 @@ export const loginUser = async (req, res, next) => {
     if (!user) {
       return res
         .status(401)
-        .json({ error: 'You are not authorized to use this service.' })
+        .json({ error: 'Unauthorized. Signup to use this service.' })
     }
     // Check if password matches user's password in database
     const isMatch = await user.comparePassword(password)
