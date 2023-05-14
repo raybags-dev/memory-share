@@ -1,4 +1,5 @@
 import AWS from 'aws-sdk'
+import { promisify } from 'util'
 import {
   S3Client,
   CreateBucketCommand,
@@ -10,7 +11,8 @@ const {
   AWS_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY,
   AWS_BUCKET_NAME,
-  AWS_REGION
+  AWS_REGION,
+  TZ
 } = process.env
 import { DOCUMENT } from '../src/models/documentModel.js'
 // S3 client
@@ -20,6 +22,11 @@ const s3 = new S3Client({
     accessKeyId: AWS_ACCESS_KEY_ID,
     secretAccessKey: AWS_SECRET_ACCESS_KEY
   }
+})
+const S_3 = new AWS.S3({
+  accessKeyId: AWS_ACCESS_KEY_ID,
+  secretAccessKey: AWS_SECRET_ACCESS_KEY,
+  region: AWS_REGION
 })
 // save to mongodb
 export const dbFileUploader = async (files, req, res) => {
@@ -50,7 +57,6 @@ export const dbFileUploader = async (files, req, res) => {
     })
   }
 }
-//*******aws s3 bucket ******
 export const createBucket = async () => {
   try {
     const command = new CreateBucketCommand({ Bucket: `${AWS_BUCKET_NAME}` })
@@ -109,27 +115,27 @@ export async function saveImagesToS3 (files) {
         const signedUrlParams = {
           Bucket: AWS_BUCKET_NAME,
           Key: file.filename,
-          Expires: 604800
+          Expires: 60
         }
 
-        const result = await s3.upload(uploadParams).promise()
+        await s3.upload(uploadParams).promise()
         const signedUrls = await s3.getSignedUrlPromise(
           'getObject',
           signedUrlParams
         )
 
-        const urlParts = result.Location.split('amazonaws.com/')
-        const url = urlParts[0] + 'amazonaws.com'
-        const signature = urlParts[1] + '?' + signedUrls.split('?')[1]
+        const urlParts = signedUrls.split('?')
+        const url = urlParts[0]
+        const signature = urlParts[1]
+        console.log(signedUrls)
 
         // Create a new document for the uploaded file
         const newDocument = new DOCUMENT({
           ...file,
           url: url,
           signature: signature,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // set the expiration date to one week from now
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         })
-
         // Save the new document to the database
         await newDocument.save()
 
@@ -140,7 +146,6 @@ export async function saveImagesToS3 (files) {
         })
       }
     }
-
     return urls
   } catch (err) {
     console.log(err.message)
@@ -161,4 +166,52 @@ export async function deleteFromS3 (filename) {
   } catch (err) {
     console.error(`Error deleting file ${filename} from S3: ${err.message}`)
   }
+}
+export async function checkAndUpdateDocumentUrls (files) {
+  const updatedDocs = []
+  const notExpiredDocs = []
+
+  for (const file of files) {
+    try {
+      const isExpired = await checkExpiryDate(file.expiresAt)
+
+      if (!isExpired) {
+        const getObjectParams = {
+          Bucket: AWS_BUCKET_NAME,
+          Key: file.filename,
+          Expires: 604800
+        }
+
+        const newUrl = await promisify(S_3.getSignedUrl.bind(S_3))(
+          'getObject',
+          getObjectParams
+        )
+        const urlParts = newUrl.split('?')
+        const url = urlParts[0]
+        const signature = urlParts[1]
+        // Update the file's URL, signature, and expiresAt fields in the database
+        const updatedDoc = await DOCUMENT.findByIdAndUpdate(
+          file._id,
+          {
+            url: url,
+            signature: signature,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+          },
+          { new: true }
+        )
+        updatedDocs.push(updatedDoc)
+      } else {
+        notExpiredDocs.push(file)
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  return [...notExpiredDocs, ...updatedDocs]
+}
+export async function checkExpiryDate (timestamp) {
+  const dbTimestamp = new Date(Date.parse(timestamp))
+  const currentDate = new Date()
+  return dbTimestamp.getTime() < currentDate.getTime()
 }

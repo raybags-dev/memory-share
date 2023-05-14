@@ -39,8 +39,8 @@ export async function Notify (message = '...') {
   // Create the message element and add it to the notification
   const messageElement = document.createElement('p')
   messageElement.style.color = 'white'
-  messageElement.innerText = message || 'Nothing to see...'
-  notification.appendChild(messageElement)
+  messageElement.innerText = message || ''
+  notification.appendChild(messageElement && messageElement)
   // Append the notification to the body
   document.body.appendChild(notification)
   // Wait 5 seconds and remove the showNotification class
@@ -51,6 +51,11 @@ export async function Notify (message = '...') {
       notification.remove()
     }, 500)
   }, 5000)
+}
+export async function showSearchBar (isData) {
+  let searchBar = document.querySelector('.search_db_form')
+  if (!isData) return searchBar?.classList.add('hide')
+  searchBar?.classList.remove('hide')
 }
 // Main page loader
 export async function runSpinner (isDone, message = 'Processing...') {
@@ -115,17 +120,22 @@ export async function fetchData (page = 1) {
       setTimeout(() => runSpinner(true), 500)
       const data = res.data.data || []
       if (data.length < perPage) {
-        Notify(`Last page: ${page}`)
+        if (page > 1) {
+          Notify(`Last page: ${page}`)
+        }
         return data
       } else {
-        if (page == 1) Notify(``)
-        Notify(`Page ${page} loaded`)
+        if (page > 1) {
+          Notify(`Page: ${page}`)
+        }
+        showSearchBar(true)
         return data
       }
     }
   } catch (error) {
     if (error instanceof TypeError) {
       Notify('An error occurred while processing your request. Please login!')
+      showSearchBar(false)
       setTimeout(async () => {
         LogoutBtnIsVisible(false)
         return await LOGIN_HTML()
@@ -136,7 +146,8 @@ export async function fetchData (page = 1) {
       error?.response.status == 404
     ) {
       runSpinner(true)
-      return Notify('You dont have any saved documents.')
+      showSearchBar(false)
+      return
     }
     if (error?.response.status == 401) {
       Notify('Session expired. Please login!')
@@ -215,6 +226,7 @@ export async function PaginateData () {
   } catch (error) {
     if (error instanceof TypeError) {
       Notify('Sorry, an error occurred while processing your request.')
+      showSearchBar(false)
       LogoutBtnIsVisible(false)
       return await LOGIN_HTML()
     }

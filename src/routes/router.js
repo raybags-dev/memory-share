@@ -10,10 +10,20 @@ import { config } from 'dotenv'
 config()
 
 import { asyncMiddleware } from '../../middleware/asyncErros.js'
-import { dbFileUploader, deleteFromS3 } from '../../middleware/bd_worker.js'
+import {
+  dbFileUploader,
+  deleteFromS3,
+  checkAndUpdateDocumentUrls
+} from '../../middleware/bd_worker.js'
 import { GenToken } from '../../middleware/generateToken.js'
 // cache
-let cache = apicache.middleware
+function cache (duration) {
+  if (duration === null) {
+    throw new Error('Cache duration cannot be null')
+  }
+  const durationString = `${String(duration)} minutes`
+  return apicache.middleware(durationString)
+}
 
 import { USER_MODEL, USER_ID_MODEL } from '../models/user.js'
 import { DOCUMENT } from '../models/documentModel.js'
@@ -143,7 +153,6 @@ export async function DocsUploader (app) {
           }
 
           await dbFileUploader(files, req, res)
-          // await saveImagesToS3(files)
         })
       } catch (error) {
         if (error.name === 'ValidationError') {
@@ -175,12 +184,12 @@ export async function DocsUploader (app) {
     })
   )
 }
-
 export function AllUserDocs (app) {
   app.post(
     '/raybags/v1/uploader/user-docs',
     authMiddleware,
     validateDocumentOwnership,
+    cache(5),
     asyncMiddleware(async (req, res) => {
       const isAdmin = req.user.isAdmin
       let query
@@ -197,7 +206,8 @@ export function AllUserDocs (app) {
       const response = await query
       if (response.length === 0) return res.status(404).json('Nothing found!')
 
-      res.status(200).json({ count: count, documents: response })
+      const updatedDoc = await checkAndUpdateDocumentUrls(response)
+      res.status(200).json({ count: count, documents: updatedDoc })
     })
   )
 }
@@ -212,13 +222,13 @@ export function FindOneItem (app) {
         const userId = req.user.data._id
 
         const document = await DOCUMENT.findOne({ _id: new ObjectId(itemId) })
-
-        // If the user created the document, they can delete it
         if (document.user.toString() === userId.toString()) {
-          return res.status(200).json({ message: 'Success', document })
+          const updatedDoc = await checkAndUpdateDocumentUrls([document])
+          return res.status(200).json({ message: 'Success', ...updatedDoc })
         }
 
-        res.status(200).json(document)
+        const updatedDoc = await checkAndUpdateDocumentUrls([document])
+        res.status(200).json(...updatedDoc)
       } catch (error) {
         console.error(error)
         res.status(500).json({ error: 'Server error' })
@@ -250,10 +260,12 @@ export function GetPaginatedDocs (app) {
           data: response
         })
 
+      const updatedDocs = await checkAndUpdateDocumentUrls(response)
+
       res.status(200).json({
         totalPages: totalPages,
         totalCount: count,
-        data: response
+        data: updatedDocs
       })
     })
   )
@@ -338,6 +350,7 @@ export function GetAllUsers (app) {
     '/raybags/v1/uploader/get-users',
     authMiddleware,
     isAdmin,
+    cache(2),
     asyncMiddleware(async (req, res) => {
       const users = await USER_MODEL.find(
         {},
