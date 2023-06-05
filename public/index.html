@@ -30,9 +30,9 @@
 
         .del_effect {
             clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-            transition: .3s;
+            transition: .1s;
             opacity: 1;
-            animation: dele-item 1 ease-in forwards .3s;
+            animation: dele-item 1 ease-in forwards .1s;
         }
 
         @keyframes dele-item {
@@ -53,11 +53,6 @@
             align-items: center;
         }
 
-        /* .col {
-            min-height: auto !important;
-            border: 10px solid red;
-        }*/
-
         #carocel_big .container {
             position: relative;
             width: 100%;
@@ -68,17 +63,9 @@
             max-height: 90%;
             margin: 0 auto;
             object-fit: contain;
-            overflow: hidden !important;
             transition: clip-path ease-in .2s;
             box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
-            clip-path: inset(50% 0 50% 0);
             animation: big-img-caru 1 ease-in forwards .2s;
-        }
-
-        @keyframes big-img-caru {
-            to {
-                clip-path: inset(0 0 0 0);
-            }
         }
 
         #carocel_big .container img {
@@ -111,11 +98,6 @@
             backdrop-filter: blur(15px) !important;
             background-color: #04adc333;
             backdrop-filter: blur(7px) !important;
-        }
-
-        #carocel_big .container:hover img {
-            transform: scale(1.00999);
-            transition: .2s;
         }
 
         .del_btn_cont {

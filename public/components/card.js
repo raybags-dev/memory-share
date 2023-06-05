@@ -24,7 +24,7 @@ export async function CARD (data, isNew = false) {
   const { email } = JSON.parse(sessionStorage.getItem('token'))
   let fall_back = '../images/_404_.webp'
   let cardContent = `
-  <div class="col bg-transparent" style="padding:.2rem;" data-id="${_id}">
+  <div class="col sm-card bg-transparent" style="padding:.2rem;" data-id="${_id}">
   <div class="card  bg-transparent rounded" style="object-fit:contain !important;">
     <div class="skeleton"><span class="image_loader"></span></div>
     <div class="img-container" style="width:100% !important;object-fit:cover !important;">
@@ -155,7 +155,7 @@ export async function DisplayeBigImage (
   // delete document
   let btn = document.querySelector('.main-del-cont')
   btn?.addEventListener('click', async () => {
-    runSpinner(false)
+    Notify('Deleting document...')
     await deleteDocument(_id)
     await hideUploadForm(true)
   })
@@ -202,7 +202,6 @@ export async function deleteDocument (documentId = '') {
         colElem.classList.add('del_effect')
         // remove the card from the DOM
         setTimeout(() => colElem.remove(), 500)
-        // runSpinner(true)
         return Notify('Success: Document deleted!')
       }
     }, 500)

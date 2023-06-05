@@ -304,9 +304,21 @@ a {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
 }
 
+.col.sm-card {
+    max-height: 50%;
+    min-height: 50%;
+}
+
+.col.sm-card .card {
+    display: grid;
+    place-content: center;
+    align-items: center;
+}
+
 .big_box {
     min-width: 100%;
     min-height: 100%;
+    border: 0 transparent !important;
 }
 
 .heading {
