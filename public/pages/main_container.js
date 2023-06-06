@@ -155,10 +155,8 @@ export async function uploadFiles () {
       return await LOGIN_HTML()
     }
     if (error.response.status === 409) {
-      Notify(
-        `Duplicates detected. One or more selected files have already been uploaded`
-      )
-      runSpinner(true)
+      Notify(`Duplicates detected.`)
+      setTimeout(() => location.reload(), 1500)
       return
     }
     if (error instanceof TypeError && error.message.includes('token')) {

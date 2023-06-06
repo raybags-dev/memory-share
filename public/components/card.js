@@ -117,7 +117,7 @@ export async function DisplayeBigImage (
           <div id="description" class="card-body hide" style="z-index: 100;">
             <h5 class="card-title">${email && email}</h5>
             <hr>
-            <p class="">User: ${userId && userId}</p>
+            <p class="">Id: ${userId && userId}</p>
             <p class="">Original file: ${originalname && originalname}</p>
             <p class="">New file: ${filename && filename}</p>
             <p class=""> File size: ${size && size}</p>
