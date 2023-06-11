@@ -22,7 +22,7 @@ export async function CARD (data, isNew = false) {
     originalname
   } = await data
   const { email } = JSON.parse(sessionStorage.getItem('token'))
-  let fall_back = '../images/_404_.webp'
+  let fall_back = '../images/_404_.jpeg'
   let cardContent = `
   <div class="col sm-card bg-transparent" style="padding:.2rem;" data-id="${_id}">
   <div class="card  bg-transparent rounded" style="object-fit:contain !important;">
@@ -30,7 +30,7 @@ export async function CARD (data, isNew = false) {
     <div class="img-container" style="width:100% !important;object-fit:cover !important;">
         <img src="${
           `${url}?${signature}` || ''
-        }"  class="card-img-top border-dark img-fluid hide_2 img_card ${_id}"  alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
+        }" class="card-img-top border-dark img-fluid hide_2 img_card ${_id}" loading="lazy" alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
   </div>
   <div class="card-footer bg-transparent card-img-overlay text-danger m-1 rounded" style="width:fit-content;height:fit-content;padding:.3rem; font-style:italic">${formatDate(
     createdAt
@@ -94,18 +94,26 @@ export async function DisplayeBigImage (
   _id
 ) {
   runSpinner(false, 'Fetching...')
-  let fallback_img = '../images/_404_.webp'
+  let fallback_img = '../images/_404_.jpeg'
   const innerBodyBig = `
     <div id="carocel_big" class="container control_big_cont" data-carucel="${
       _id && _id
-    }" style="z-index:100">
+    }" style="z-index:200">
     <div class="container __bigOne__">
     <div class="del_btn_cont">
-    <span class="lead">X</span>
+    <span class="lead">&#10006;</span>
     </div>
-      <div class="main-del-cont" style="cursor:pointer !important;z-index:230000 !important;">
-      <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
-      </div>
+
+    <div class="prev__btn">
+    <span class="lead">&#10094;</span>
+    </div>
+
+      <div class="main-del-cont" style="cursor:pointer !important;z-index:1000 !important;">
+        <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
+        </div>
+        <div class="big_spinnerr hide_2">
+          <span class="big_caro_loader"></span>
+        </div>
         <div class="card big_box bg-transparent" data-user="${
           userId && userId
         }"  style="width:60%;height:70% !important">
@@ -113,7 +121,7 @@ export async function DisplayeBigImage (
 
           <img  src="${
             imgurl || ''
-          }" class="card-img-top img-fluid" alt="..." style="border-radius:.2rem;"  onerror="this.onerror=null;this.src='${fallback_img}'">
+          }" class="card-img-top img-fluid" loading="lazy" alt="..." style="border-radius:.2rem;"  onerror="this.onerror=null;this.src='${fallback_img}'">
           <div id="description" class="card-body hide" style="z-index: 100;">
             <h5 class="card-title">${email && email}</h5>
             <hr>
@@ -130,6 +138,9 @@ export async function DisplayeBigImage (
               updaedAt && updaedAt
             }</small></p>
           </div>
+        </div>
+        <div class="next__btn">
+        <span class="lead">&#10095;</span>
         </div>
       </div>
     </div>`
@@ -172,7 +183,84 @@ export async function DisplayeBigImage (
       await hideUploadForm(true)
     }
   })
+
+  function handle_bigCau_container (isReady) {
+    let element = document.querySelector('.big_spinnerr')
+    return isReady && !element.classList.contains('hide_2')
+      ? element.classList.add('hide_2')
+      : element.classList.remove('hide_2')
+  }
+  let currentIndex = 0 // Track the current image index
+  let images = [] // Array to store the image URLs
+
+  // Helper function to update the image source
+  function updateImage () {
+    handle_bigCau_container(false)
+    const imgElement = document.querySelector('#carocel_big .card-img-top')
+
+    if (images.length > 0) {
+      const imageUrl = images[currentIndex]
+      imgElement.src = imageUrl
+    } else {
+      imgElement.src = fallback_img
+    }
+
+    // Hide or show prev/next buttons based on currentIndex
+    if (currentIndex === 1) {
+      prevBTN.style.display = 'none' // Hide prev button
+    } else {
+      prevBTN.style.display = 'block' // Show prev button
+    }
+
+    if (currentIndex === images.length - 1) {
+      nextBTN.style.display = 'none' // Hide next button
+    } else {
+      nextBTN.style.display = 'block' // Show next button
+    }
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          handle_bigCau_container(true)
+        }
+      })
+    })
+
+    observer.observe(imgElement)
+  }
+
+  // Helper function to add image URLs to the images array
+  function addImage (url) {
+    images.push(url)
+  }
+
+  // Retrieve image URLs from all images in the DOM
+  const imageElements = document.querySelectorAll('.card-img-top')
+  imageElements.forEach(imgElement => {
+    addImage(imgElement.src)
+  })
+
+  // Find the index of the current image in the images array
+  currentIndex = images.findIndex(imageUrl => imageUrl === imgurl)
+
+  // Add logic to cycle through images when prev or next button is clicked
+  const prevBTN = document.querySelector('.prev__btn')
+  const nextBTN = document.querySelector('.next__btn')
+
+  prevBTN?.addEventListener('click', () => {
+    if (currentIndex > 0) {
+      currentIndex--
+      updateImage()
+    }
+  })
+
+  nextBTN?.addEventListener('click', () => {
+    if (currentIndex < images.length - 1) {
+      currentIndex++
+    }
+    updateImage()
+  })
 }
+
 function removeElementFromDOM (elementAnchor) {
   if (document.contains(elementAnchor)) {
     elementAnchor.remove()
@@ -182,7 +270,7 @@ export async function deleteDocument (documentId = '') {
   try {
     const { token } = JSON.parse(sessionStorage.getItem('token'))
     if (!token) {
-      return Notify('Session terminated. Login required!')
+      return Notify('Session expired! Login required!')
     }
     let colElem = [...document.querySelectorAll('.col')].find(
       card => card.dataset.id === documentId

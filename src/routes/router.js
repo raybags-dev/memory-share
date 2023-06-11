@@ -3,8 +3,7 @@ import express from 'express'
 import multer from 'multer'
 import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
-
-import apicache from 'apicache'
+import { cacheResponse, getCachedData } from '../../middleware/redis.js'
 import { ObjectId } from 'mongodb'
 import { config } from 'dotenv'
 config()
@@ -16,14 +15,6 @@ import {
   checkAndUpdateDocumentUrls
 } from '../../middleware/bd_worker.js'
 import { GenToken } from '../../middleware/generateToken.js'
-// cache
-function cache (duration) {
-  if (duration === null) {
-    throw new Error('Cache duration cannot be null')
-  }
-  const durationString = `${String(duration)} minutes`
-  return apicache.middleware(durationString)
-}
 
 import { USER_MODEL, USER_ID_MODEL } from '../models/user.js'
 import { DOCUMENT } from '../models/documentModel.js'
@@ -41,6 +32,7 @@ const fallbackPagePath = new URL(
   '../../errorPage/noConnection.html',
   import.meta.url
 ).pathname
+
 // create user
 export async function CreateUser (app) {
   app.post('/raybags/v1/uploader/create-user', async (req, res) => {
@@ -151,7 +143,6 @@ export async function DocsUploader (app) {
               size: file.size
             })
           }
-
           await dbFileUploader(files, req, res)
         })
       } catch (error) {
@@ -189,7 +180,6 @@ export function AllUserDocs (app) {
     '/raybags/v1/uploader/user-docs',
     authMiddleware,
     validateDocumentOwnership,
-    cache(5),
     asyncMiddleware(async (req, res) => {
       const isAdmin = req.user.isAdmin
       let query
@@ -236,6 +226,7 @@ export function FindOneItem (app) {
     })
   )
 }
+
 export function GetPaginatedDocs (app) {
   app.post(
     '/raybags/v1/uploader/paginated-user-documents',
@@ -350,7 +341,6 @@ export function GetAllUsers (app) {
     '/raybags/v1/uploader/get-users',
     authMiddleware,
     isAdmin,
-    cache(2),
     asyncMiddleware(async (req, res) => {
       const users = await USER_MODEL.find(
         {},

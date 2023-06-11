@@ -63,8 +63,7 @@
             max-height: 90%;
             margin: 0 auto;
             object-fit: contain;
-            transition: clip-path ease-in .2s;
-            box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
+            transition: clip-path ease-in .1s;
             animation: big-img-caru 1 ease-in forwards .2s;
         }
 
@@ -75,6 +74,8 @@
             max-width: 100%;
             max-height: 100%;
             transition: .3s;
+            cursor: default !important;
+
         }
 
         #carocel_big .container .card {
@@ -199,6 +200,11 @@
                 padding-right: unset;
             }
 
+            .prev__btn span,
+            .next__btn span {
+                font-size: 3rem !important;
+            }
+
             #description {
                 width: 100% !important;
             }
@@ -247,6 +253,11 @@
             #log___out a:hover {
                 color: #f53939;
                 font-style: italic;
+            }
+
+            .prev__btn span,
+            .next__btn span {
+                font-size: 2rem !important;
             }
         }
 
