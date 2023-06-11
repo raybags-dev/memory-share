@@ -23,7 +23,7 @@
     "author": "ray bags",
     "license": "ISC",
     "dependencies": {
-        "@aws-sdk/client-s3": "^3.317.0",
+        "@aws-sdk/client-s3": "^3.350.0",
         "aws-sdk": "^2.1363.0",
         "axios": "^1.2.2",
         "bcryptjs": "^2.4.3",
