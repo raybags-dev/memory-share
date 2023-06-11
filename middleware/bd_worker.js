@@ -11,8 +11,7 @@ const {
   AWS_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY,
   AWS_BUCKET_NAME,
-  AWS_REGION,
-  TZ
+  AWS_REGION
 } = process.env
 import { DOCUMENT } from '../src/models/documentModel.js'
 // S3 client
@@ -28,11 +27,11 @@ const S_3 = new AWS.S3({
   secretAccessKey: AWS_SECRET_ACCESS_KEY,
   region: AWS_REGION
 })
-// save to mongodb
+
 export const dbFileUploader = async (files, req, res) => {
   try {
     const savedFiles = await saveImagesToS3(files)
-    const duplicateFiles = savedFiles.filter(file => file.error)
+    const duplicateFiles = savedFiles?.filter(file => file.error)
 
     if (duplicateFiles.length > 0) {
       return res.status(409).json({
@@ -115,7 +114,7 @@ export async function saveImagesToS3 (files) {
         const signedUrlParams = {
           Bucket: AWS_BUCKET_NAME,
           Key: file.filename,
-          Expires: 60
+          Expires: 604800
         }
 
         await s3.upload(uploadParams).promise()
@@ -127,7 +126,6 @@ export async function saveImagesToS3 (files) {
         const urlParts = signedUrls.split('?')
         const url = urlParts[0]
         const signature = urlParts[1]
-        console.log(signedUrls)
 
         // Create a new document for the uploaded file
         const newDocument = new DOCUMENT({
@@ -148,7 +146,7 @@ export async function saveImagesToS3 (files) {
     }
     return urls
   } catch (err) {
-    console.log(err.message)
+    console.log(err)
     if (err.code === 'NoSuchBucket') {
       console.error('This bucket does not exist')
     }
@@ -167,6 +165,11 @@ export async function deleteFromS3 (filename) {
     console.error(`Error deleting file ${filename} from S3: ${err.message}`)
   }
 }
+
+/*
+ * update access
+ * to s3 resources
+ */
 export async function checkAndUpdateDocumentUrls (files) {
   const updatedDocs = []
   const notExpiredDocs = []
@@ -175,7 +178,7 @@ export async function checkAndUpdateDocumentUrls (files) {
     try {
       const isExpired = await checkExpiryDate(file.expiresAt)
 
-      if (!isExpired) {
+      if (isExpired) {
         const getObjectParams = {
           Bucket: AWS_BUCKET_NAME,
           Key: file.filename,
