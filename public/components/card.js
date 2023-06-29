@@ -26,7 +26,7 @@ export async function CARD (data, isNew = false) {
   let cardContent = `
   <div class="col sm-card bg-transparent" style="padding:.2rem;" data-id="${_id}">
   <div class="card  bg-transparent rounded" style="object-fit:contain !important;">
-    <div class="skeleton"><span class="image_loader"></span></div>
+    <div class="skeleton"></div>
     <div class="img-container" style="width:100% !important;object-fit:cover !important;">
         <img src="${
           `${url}?${signature}` || ''
@@ -69,11 +69,11 @@ export async function runSkeleto (isDone) {
       let image = card.querySelector('img')
       if (image.complete) {
         let skeleton = card.querySelector('.skeleton')
-        setTimeout(() => skeleton.classList.add('hide'), 1500)
+        setTimeout(() => skeleton.classList.add('hide'), 800)
       } else {
         image.addEventListener('load', () => {
           let skeleton = card.querySelector('.skeleton')
-          setTimeout(() => skeleton.classList.add('hide_2'), 1500)
+          setTimeout(() => skeleton.classList.add('hide_2'), 800)
         })
       }
     })
