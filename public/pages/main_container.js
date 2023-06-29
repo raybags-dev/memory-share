@@ -14,7 +14,7 @@ export async function MAIN_PAGE () {
   let pageContent = `
       <nav class="navbar navbar-expand-lg">
         <div class="container">
-          <h2 class="text-light sticky-top heading">Memories</h2>
+          <h2 class="text-light sticky-top heading">Share Memories</h2>
           <form class="d-flex search_db_form pt-2 hide" role="search">
             <input id="search____input" autocomplete="off" class="form-control me-2" type="search" placeholder="" aria-label="Search">
             <i class="fa-solid fa-magnifying-glass"></i>
