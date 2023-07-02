@@ -73,7 +73,6 @@ export async function LOGIN_HTML () {
         // Redirect to main page
         sessionStorage.setItem('redirected', true)
         //   show logout button
-        LogoutBtnIsVisible(false)
         Notify(`Login successfull`)
         setTimeout(async () => {
           runSpinner(true)
@@ -105,7 +104,6 @@ export async function loginUser (user) {
       sessionStorage.setItem('redirected', true)
       Notify(`Login successfull`)
       //   show logout button
-      LogoutBtnIsVisible(true)
       setTimeout(() => {
         runSpinner(true)
         MAIN_PAGE()
@@ -127,7 +125,6 @@ export async function logOutUser (isLogout) {
     if (sessionToken) {
       Notify(`Logout successful!`)
       //   hide logout btn
-      LogoutBtnIsVisible(false)
       setTimeout(() => {
         sessionStorage.removeItem('token')
         sessionStorage.removeItem('redirected')
@@ -135,16 +132,5 @@ export async function logOutUser (isLogout) {
     }
     // navigate to the login page
     await LOGIN_HTML()
-  }
-}
-export async function LogoutBtnIsVisible (isHidden) {
-  try {
-    setTimeout(() => {
-      let btn = document.getElementById('log___out')
-      if (btn && !isHidden) return btn?.classList.add('hide')
-      btn?.classList.remove('hide')
-    }, 5)
-  } catch (e) {
-    console.log(e.message)
   }
 }

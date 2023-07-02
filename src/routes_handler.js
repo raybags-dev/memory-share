@@ -7,8 +7,10 @@ import {
   FindOneItem,
   GetPaginatedDocs,
   deleteUserAndOwnDocs,
+  deleteUserDocs,
   DeleteOneDoc,
-  GetAllUsers
+  GetAllUsers,
+  GetUser
 } from './routes/router.js'
 
 export default async app => {
@@ -19,7 +21,9 @@ export default async app => {
   FindOneItem(app)
   GetPaginatedDocs(app)
   deleteUserAndOwnDocs(app)
+  deleteUserDocs(app)
   DeleteOneDoc(app)
   GetAllUsers(app)
+  GetUser(app)
   app.use(NotSupported)
 }
