@@ -1,6 +1,6 @@
-import { LOGIN_HTML, LogoutBtnIsVisible } from '../pages/login.js'
+import { LOGIN_HTML } from '../pages/login.js'
 import { SIGNUP_HTML } from '../pages/signup.js'
-import { CARD } from '../components/card.js'
+import { CARD, userGuideModel } from '../components/card.js'
 
 // api client
 export const API_CLIENT = axios.create({
@@ -58,7 +58,7 @@ export async function showSearchBar (isData) {
   searchBar?.classList.remove('hide')
 }
 // Main page loader
-export async function runSpinner (isDone, message = 'Processing...') {
+export async function runSpinner (isDone, message = '') {
   const loader = document.querySelector('#main-page-loader')
   if (!isDone) {
     if (!loader) {
@@ -66,9 +66,9 @@ export async function runSpinner (isDone, message = 'Processing...') {
           <div id="main-page-loader" class="d-flex align-items-center text-white justify-content-center"
             style="position:fixed; top:0; left:0; right:0; bottom:0;z-index:3000">
             <div class="d-flex">
-              <h3 class="fs-4" id="my_text" style="position:absolute;top:50%;opacity:.7;left:50%;transform:translate(-50%, -50%);">
+              <p class="fs-4" id="my_text" style="position:absolute;top:50%;opacity:.7;left:50%;transform:translate(-50%, -50%);">
                 ${message}
-              </h3>
+              </p>
               <span class="loader text-white" style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);"></span>
             </div>
           </div>
@@ -82,6 +82,16 @@ export async function runSpinner (isDone, message = 'Processing...') {
     }
   }
 }
+export async function emptyMainContainer () {
+  const offContainer = document.querySelectorAll('.col')
+  const contBTN = document.querySelector('.del_btn_cont .lead')
+
+  offContainer.forEach(card => {
+    card.parentNode.removeChild(card)
+  })
+  contBTN.click()
+}
+
 export function formatDate (timestamp) {
   const date = new Date(timestamp)
   const year = date.getUTCFullYear()
@@ -133,22 +143,22 @@ export async function fetchData (page = 1) {
       }
     }
   } catch (error) {
+    let off_cards = document.querySelectorAll('.col')
+
     if (error instanceof TypeError) {
       Notify('An error occurred while processing your request. Please login!')
       showSearchBar(false)
       setTimeout(async () => {
-        LogoutBtnIsVisible(false)
         return await LOGIN_HTML()
       }, 2000)
     }
-    if (
-      error?.response.data == 'Sorry I have nothing for you!' ||
-      error?.response.status == 404
-    ) {
+    if (error?.response.status == 404 && !off_cards?.length) {
       runSpinner(true)
       showSearchBar(false)
+      userGuideModel()
       return
     }
+
     if (error?.response.status == 401) {
       Notify('Session expired. Please login!')
       document.getElementById('log___out').style.display = 'none'
@@ -227,7 +237,6 @@ export async function PaginateData () {
     if (error instanceof TypeError) {
       Notify('Sorry, an error occurred while processing your request.')
       showSearchBar(false)
-      LogoutBtnIsVisible(false)
       return await LOGIN_HTML()
     }
     console.warn(error.message)
@@ -285,7 +294,140 @@ export async function searchDatabase () {
       }
     }
   } catch (error) {
-    console.log(error)
+    if (error.response.data.error == 'Documents not found') {
+      Notify('No maches were found!')
+      console.log(error.message)
+    }
+  } finally {
+    runSpinner(true)
+  }
+}
+// get user profiles
+export async function fetchUserProfile () {
+  runSpinner(false)
+  try {
+    const { token, email } = JSON.parse(sessionStorage.getItem('token'))
+
+    const baseUrl = '/uploader/get-user'
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+
+    const url = `${baseUrl}?email=${email}`
+    const res = await API_CLIENT.post(url, {}, { headers })
+    if (res.statusText == 'OK') {
+      setTimeout(() => runSpinner(true), 500)
+      const data = res.data || {}
+      if (data) return data
+      showSearchBar(true)
+      return data
+    }
+  } catch (error) {
+    if (error instanceof TypeError) {
+      Notify('An error occurred while processing your request.')
+      showSearchBar(false)
+      setTimeout(async () => {
+        return await LOGIN_HTML()
+      }, 2000)
+    }
+    if (
+      error?.response.data == 'User not found!' ||
+      error?.response.status == 404
+    ) {
+      runSpinner(true)
+      showSearchBar(false)
+      return
+    }
+    if (error?.response.status == 401) {
+      Notify('Session expired. Please login!')
+      return LOGIN_HTML()
+    }
+    if (error?.response.status == 404) {
+      showNotification('Account not found. Please sign up!')
+      SIGNUP_HTML()
+      return
+    }
+    console.log(error.message)
+  } finally {
+    runSpinner(true)
+  }
+}
+// delete user documents
+export async function deleteUserDocuments () {
+  runSpinner(false, 'deleting...')
+  try {
+    const { token } = JSON.parse(sessionStorage.getItem('token'))
+    const userID = document.querySelector('[data-pro-id]')
+    const idValue = userID?.dataset.proId
+
+    const baseUrl = '/delete-user-docs'
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+    const url = `${baseUrl}/${idValue}`
+    const res = await API_CLIENT.delete(url, { headers })
+
+    if (res.statusText == 'OK') {
+      await emptyMainContainer()
+      runSpinner(true)
+      Notify('All documents have been deleted')
+    }
+  } catch (error) {
+    if (error instanceof TypeError) {
+      Notify('An error occurred while processing your request.')
+      showSearchBar(false)
+      setTimeout(async () => {
+        return await LOGIN_HTML()
+      }, 2000)
+    }
+    if (error?.response.status == 401) {
+      Notify('Session expired. Please login!')
+      return LOGIN_HTML()
+    }
+    console.log(error.message)
+    Notify('Request could not be processed, try again later!')
+  } finally {
+    runSpinner(true)
+  }
+}
+// delete user profile
+export async function deleteUserProf () {
+  runSpinner(false, 'Deleting...')
+  try {
+    const { token } = JSON.parse(sessionStorage.getItem('token'))
+    const userID = document.querySelector('[data-pro-id]')
+    const idValue = userID?.dataset.proId
+
+    const baseUrl = '/delete-user-and-docs'
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+    const url = `${baseUrl}/${idValue}`
+    const res = await API_CLIENT.delete(url, { headers })
+
+    if (res.statusText == 'OK') {
+      localStorage.clear()
+      sessionStorage.clear()
+      await SIGNUP_HTML()
+      Notify('Account deleted!')
+    }
+  } catch (error) {
+    if (error instanceof TypeError) {
+      Notify('An error occurred while processing your request.')
+      showSearchBar(false)
+      setTimeout(async () => {
+        return await LOGIN_HTML()
+      }, 2000)
+    }
+    if (error?.response.status == 401) {
+      Notify('Session expired. Please login!')
+      return LOGIN_HTML()
+    }
+    console.log(error.message)
+    Notify('Request could not be processed, try again later!')
   } finally {
     runSpinner(true)
   }

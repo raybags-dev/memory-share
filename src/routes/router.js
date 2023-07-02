@@ -290,6 +290,42 @@ export function deleteUserAndOwnDocs (app) {
     })
   )
 }
+export function deleteUserDocs (app) {
+  app.delete(
+    '/raybags/v1/delete-user-docs/:userId',
+    authMiddleware,
+    asyncMiddleware(async (req, res) => {
+      const userId = req.params.userId
+      // Check if the user exists
+      const user = await USER_MODEL.findById(
+        { _id: userId },
+        { isAdmin: 0, password: 0, _id: 0, userId: 0 }
+      )
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' })
+      }
+      // Find all documents associated with the user
+      const documents = await DOCUMENT.find({ user: userId })
+      if (documents.length === 0) {
+        return res
+          .status(200)
+          .json({ message: 'User has no documents to delete' })
+      }
+      // Loop through each document and delete from AWS S3 and MongoDB
+      for (const document of documents) {
+        // Delete from AWS S3
+        await deleteFromS3(document.filename)
+        // Delete from MongoDB
+        await document.delete()
+      }
+      const { name, email, createdAt } = user
+      res.status(200).json({
+        message: 'User documents deleted',
+        user_profile: { username: name, user_email: email, createdAt }
+      })
+    })
+  )
+}
 export function DeleteOneDoc (app) {
   app.delete(
     '/raybags/v1/delete-doc/:id',
@@ -363,6 +399,29 @@ export function GetAllUsers (app) {
         profile_count: `${updatedUsers.length} profiles`,
         user_profiles: updatedUsers
       })
+    })
+  )
+}
+export function GetUser (app) {
+  app.post(
+    '/raybags/v1/uploader/get-user',
+    authMiddleware,
+    asyncMiddleware(async (req, res) => {
+      const email = req.query.email
+
+      const user = await USER_MODEL.findOne(
+        { email },
+        { token: 0, password: 0, isAdmin: 0, version: 0, __v: 0 }
+      )
+      if (!user) return res.status(404).json('User not found!')
+
+      const count = await DOCUMENT.countDocuments({ user: user._id })
+      const updatedUser = {
+        ...user.toObject(),
+        DocumentCount: count
+      }
+
+      res.status(200).json(updatedUser)
     })
   )
 }

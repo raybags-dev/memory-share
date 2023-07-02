@@ -1,4 +1,4 @@
-import { LOGIN_HTML, LogoutBtnIsVisible } from '../pages/login.js'
+import { LOGIN_HTML } from '../pages/login.js'
 import { MAIN_PAGE } from '../pages/main_container.js'
 
 //Initializer

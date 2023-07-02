@@ -13,7 +13,7 @@
     --white: rgb(72, 72, 72);
     --black: black;
     --scrollbarBG: #10464d33;
-    --thumb-bg: rgb(128, 80, 80)
+    --thumb-bg: #3a556b80;
 }
 
 *,
@@ -30,6 +30,7 @@ html {
 }
 
 body {
+    zoom: reset;
     font-family: 'Roboto', sans-serif;
     overflow: hidden;
     color: var(--secondary);
@@ -109,15 +110,7 @@ a {
 
 .form-control {
     border: none;
-    padding: 1rem .6rem 1rem .6rem;
     opacity: .6;
-}
-
-.mb-3>.form-control:not(#search____input):focus {
-    border: none;
-    outline: none;
-    box-shadow: none;
-    opacity: 0.9;
 }
 
 #search____input {
@@ -227,7 +220,7 @@ a {
     padding-bottom: 0% !important;
     padding-top: .5rem !important;
     transition: all .2s;
-    border-bottom-color: red !important;
+    border-bottom-color: transparent !important;
 }
 
 .showNotification {
@@ -416,45 +409,6 @@ a {
     transition: .5s;
 }
 
-#search____input:focus {
-    border-color: #f1f1f180 #f1f1f180 #f1f1f180 #f1f1f180;
-    background-image: linear-gradient(to top, hsla(0, 50%, 20%, 0.1) 0%, hsla(215, 100%, 85%, 0.1) 100%);
-
-}
-
-.search_db_form {
-    position: relative;
-}
-
-.search_db_form i {
-    position: absolute;
-    left: 10%;
-    top: 60%;
-    z-index: -0.9999;
-    color: #04adc3;
-    transition: .3s;
-    transform: translate(-50%, -50%)
-}
-
-.search_db_form input:focus+i {
-    opacity: 0;
-    transition: .3s;
-}
-
-@media screen and (max-width: 482px) {
-    #search____input {
-        min-width: 94vw;
-        background-color: transparent;
-        color: white;
-    }
-
-    .search_db_form i {
-        left: 3.5%;
-    }
-
-}
-
-
 .img-container {
     border: 3px solid transparent;
     width: 100%;
@@ -498,6 +452,43 @@ a {
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     background-color: transparent;
+}
+
+.modaal_cont {
+    opacity: 0 !important;
+}
+
+#prof_body {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 80%;
+    padding: unset;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    opacity: 1;
+}
+
+.prof-bad {
+    width: -webkit-max-content;
+    width: -moz-max-content;
+    width: max-content;
+    min-height: -webkit-max-content;
+    min-height: -moz-max-content;
+    min-height: max-content;
+    max-height: -webkit-max-content;
+    max-height: -moz-max-content;
+    max-height: max-content;
+
+    border: unset;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: unset;
+
 }
 
 .backdrop {

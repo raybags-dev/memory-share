@@ -6,26 +6,44 @@ import {
   fetchData,
   searchDatabase
 } from '../lifters/works.js'
-import { DisplayeBigImage } from '../components/card.js'
+import { DisplayeBigImage, DisplayUserProfileHTML } from '../components/card.js'
 import { CARD } from '../components/card.js'
-import { logOutUser, LogoutBtnIsVisible, LOGIN_HTML } from '../pages/login.js'
+import { logOutUser, LOGIN_HTML } from '../pages/login.js'
 
 export async function MAIN_PAGE () {
   let pageContent = `
-      <nav class="navbar navbar-expand-lg">
-        <div class="container">
-          <h2 class="text-light sticky-top heading">Share Memories</h2>
-          <form class="d-flex search_db_form pt-2 hide" role="search">
-            <input id="search____input" autocomplete="off" class="form-control me-2" type="search" placeholder="" aria-label="Search">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </form>
+      <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #293c4c80;">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="https://raybags.herokuapp.com" target="_blank">
+          <img src="https://github.com/raybags-web-dev/image_base/blob/master/images/logo/logo9_5_21257.jpeg?raw=true" alt="" width="40" height="40" style="border-radius:50%;">
+          </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse bg-transparent" id="navbarScroll">
+              <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll bg-transparent" style="--bs-scroll-height: 100px;">
+                <li class="nav-item dropdown text-dark">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      ACTIONS
+                    </a>
+                    <ul class="dropdown-menu mt-3 dropdown-menu-dark" aria-labelledby="navbarScrollingDropdown" style="background-color: #293c4c80;z-index:1000">
+                      <li><a class="dropdown-item dropdown-item-dark text-light" style="z-index:1000" href="#">Videos</a></li>
+                      <li><a class="dropdown-item dropdown-item-dark user_profile_link text-light" style="z-index:1000" href="#">Account</a></li>
+                      <li><a class="dropdown-item dropdown-item-dark text-light logoutuser_link" style="z-index:1000" href="#">Logout</a></li>
+                    </ul>
+                </li>
+              </ul>
+            <form class="d-flex" style="max-height:inherit !important">
+              <input id="search____input" class="form-control me-2" autocomplete="off" type="search" placeholder="Search" aria-label="Search">
+            </form>
+          </div>
         </div>
       </nav>
       <main id="main__wrapper" class="container my-10 position-relative">
         <div class="container pb-3 sticky-top mt-1 off__Container">
           <form id="upload_formm" class="select-img-form text-danger sticky-top hide">
             <label class="label">
-              <input class="select-image-input" type="file" ref="inputRef" multiple>
+              <input  class="select-image-input" type="file" ref="inputRef" multiple>
               <span>+</span>
             </label>
           </form>
@@ -40,8 +58,7 @@ export async function MAIN_PAGE () {
   selectImgForm?.addEventListener('change', uploadFiles)
   // generate card carucel
   await genCardCarucel()
-  //   show logout button
-  await LogoutBtnIsVisible(true)
+
   // handle db search
   let mySearchTimeout = null
   let searchInput = document.querySelector('#search____input')
@@ -66,6 +83,18 @@ export async function MAIN_PAGE () {
   }
   searchInput?.addEventListener('input', debounceSearchDatabase)
   hideUploadForm(true)
+
+  // logout user
+  const logoutLink = document.querySelector('.logoutuser_link')
+  logoutLink?.addEventListener('click', async () => {
+    logOutUser(true)
+  })
+  // display user profile big carucel
+  const userProfileLink = document.querySelector('.user_profile_link')
+  userProfileLink?.addEventListener('click', async () => {
+    await hideUploadForm(false)
+    await DisplayUserProfileHTML()
+  })
 }
 export async function genCardCarucel () {
   const cardContainer = document.querySelector('#off__Container')
@@ -151,7 +180,6 @@ export async function uploadFiles () {
   } catch (error) {
     if (error instanceof TypeError) {
       Notify('Sorry, an error occurred while processing your request.')
-      LogoutBtnIsVisible(false)
       return await LOGIN_HTML()
     }
     if (error.response.status === 409) {
@@ -161,7 +189,6 @@ export async function uploadFiles () {
     }
     if (error instanceof TypeError && error.message.includes('token')) {
       Notify('Your session has expired. Please login!')
-      LogoutBtnIsVisible(false)
       await LOGIN_HTML()
     }
     if (error?.response.status == 401) {
@@ -175,9 +202,6 @@ export async function uploadFiles () {
     runSpinner(true)
   }
 }
-// logout user
-const logoutLink = document.querySelector('#logoutuser_link')
-logoutLink?.addEventListener('click', async () => logOutUser(true))
 // hide/show upload btn
 export async function hideUploadForm (isVisible) {
   let form = document.getElementById('upload_formm')

@@ -3,10 +3,13 @@ import {
   formatDate,
   runSpinner,
   API_CLIENT,
-  Notify
+  Notify,
+  fetchUserProfile,
+  deleteUserDocuments,
+  deleteUserProf
 } from '../lifters/works.js'
 import { hideUploadForm } from '../pages/main_container.js'
-import { LogoutBtnIsVisible, LOGIN_HTML } from '../pages/login.js'
+import { LOGIN_HTML } from '../pages/login.js'
 export async function CARD (data, isNew = false) {
   const {
     url,
@@ -260,7 +263,6 @@ export async function DisplayeBigImage (
     updateImage()
   })
 }
-
 function removeElementFromDOM (elementAnchor) {
   if (document.contains(elementAnchor)) {
     elementAnchor.remove()
@@ -296,10 +298,138 @@ export async function deleteDocument (documentId = '') {
   } catch (error) {
     if (error instanceof TypeError) {
       Notify('Sorry, an error occurred while processing your request.')
-      LogoutBtnIsVisible(false)
       return await LOGIN_HTML()
     }
   } finally {
     runSpinner(true)
   }
+}
+export async function DisplayUserProfileHTML () {
+  let profile_object = await fetchUserProfile()
+  if (profile_object === null || profile_object === undefined) {
+    runSpinner(false, 'Failed!')
+    Notify('There seems to be an issue with your profile account')
+    await hideUploadForm(true)
+    setTimeout(() => runSpinner(true), 5000)
+    return
+  }
+
+  const {
+    _id: id,
+    name,
+    email,
+    createdAt,
+    updatedAt,
+    DocumentCount: count
+  } = profile_object
+  runSpinner(false, 'Fetching...')
+  const innerBodyBig = `
+      <div id="carocel_big" class="container control_big_cont" style="z-index: 200;">
+      <div class="container">
+        <div class="del_btn_cont">
+          <span class="lead">&#10006;</span>
+        </div>
+        
+        <div class="card bg-transparent prof-bad">
+            <div id="prof_body" class="container card-body text-light" style="z-index: 100000;">
+            <p class="card-text">Name: ${
+              (email && formatEmail(email)) || 'value'
+            }</p>
+                <p class="card-text" data-pro-id="${id}">ID: ${id || 'id'}</p>
+                <p class="card-text">Email: ${(email && email) || 'value'}</p>
+                <p class="card-text">Created: ${
+                  (createdAt && createdAt) || 'value'
+                }</p>
+                <p class="card-text">Updated: ${
+                  (updatedAt && updatedAt) || 'value'
+                }</p>
+                <p class="card-text">Document count: ${
+                  (count && count) || 0
+                }</p>
+                <div class="card-footer text-white border-transparent gap-2">
+                  <a href="#" class="btn del_all_docs btn-lg bg-transparent btn-danger text-white">Delete all documents</a>
+                  <a href="#" class="btn del_profile btn-lg bg-transparent btn-danger text-white">Delete your profile</a>
+                </div>
+            </div>
+      </div>
+      </div>
+    </div>`
+
+  const container = document.getElementById('innerBody')
+  container?.insertAdjacentHTML('afterbegin', innerBodyBig)
+  // finished appending remove spinner
+  setTimeout(() => runSpinner(true), 100)
+
+  const closeButton = document.querySelector('#carocel_big .lead')
+  closeButton?.addEventListener('click', async () => {
+    container?.removeChild(document.getElementById('carocel_big'))
+    await hideUploadForm(true)
+  })
+
+  let IMGCONT = document.querySelector('#carocel_big')
+  IMGCONT.addEventListener('click', function (event) {
+    if (!IMGCONT.contains(event.target)) {
+      removeElementFromDOM(IMGCONT)
+    }
+  })
+
+  //delete all user docs
+  let deleteUserProfile = document.querySelector('.del_profile')
+  deleteUserProfile?.addEventListener('click', async () => {
+    await deleteUserProf()
+  })
+  //delete all user docs
+  let deleleteAllDocs = document.querySelector('.del_all_docs')
+  deleleteAllDocs?.addEventListener('click', async () => {
+    await deleteUserDocuments()
+  })
+
+  // remove big carucel
+  document.addEventListener('click', async event => {
+    const carocelBig = document.getElementById('carocel_big')
+    const clickIsOutside = event.target.classList.contains('control_big_cont')
+    if (carocelBig && clickIsOutside) {
+      carocelBig?.remove()
+      await hideUploadForm(true)
+    }
+  })
+}
+export async function userGuideModel () {
+  const userGuideServiceModal = `
+      <button type="button" class="btn btn-sm modaal_cont position-absolute"  data-bs-toggle="modal" data-bs-target="#exampleModal">
+      </button>
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content bg-transparent text-light" style="backdrop-filter:blur(20px);border:2px solid #13283b80;">
+            <div class="modal-header text-white" style="background: #13283b80;">
+              <h5 class="modal-title" id="exampleModalLabel">How it works</h5>
+              <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-light" style="background-color: #13283b80;">
+              <ul style="opacity:0.5;">
+                <li>Sign up: Start by creating an account with your email address and password. This will grant you access to all the features of our application.</li>
+                <li>Upload Documents: Once you're logged in, you can easily upload your documents. Simply click on the 'Upload' button and select the files you want to upload. Our application supports various file formats, including PDF, Word documents, images, and more.</li>
+               <li>Manage Documents: After uploading your documents, you can manage them efficiently. You can view a list of all your uploaded documents, search for specific documents, and even organize them into folders or categories.</li>
+                <li>Edit and Share: Our application allows you to make edits to your documents directly within the platform. You can highlight text, add comments, and make annotations. You can also share your documents with others by generating shareable links or inviting collaborators.</li>
+                <li>Document Security: We prioritize the security and privacy of your documents. All documents are stored securely using encryption techniques, and access to your documents is protected with user authentication and authorization.</li>
+               <li>Collaboration: Collaboration is made easy with our application. You can invite others to collaborate on your documents, allowing them to view, edit, or comment on specific sections. Real-time collaboration ensures seamless teamwork and efficient document collaboration.</li>
+               <li>Document History and Version Control: Our application keeps track of document changes, maintaining a comprehensive history of revisions. You can easily revert to previous versions or compare different versions of the same document.</li>
+               <li>Document Organization: To keep your documents organized, you can create folders, tags, or categories. This helps you categorize and locate your documents quickly and easily.</li>
+               <li>Mobile Accessibility: Access your documents on the go! Our application is fully responsive and accessible on mobile devices, allowing you to manage your documents from anywhere, anytime.</li>
+               <li>Account Management: You have full control over your account settings. You can update your profile information, change your password, and manage notification preferences.</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="border:2px solid #13283b80;background-color: #13283b80;">
+              <button type="button" class="btn text-success  bg-transparent btn-lg" style="border: 2px solid #13283b80;" data-bs-dismiss="modal">Close Modal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  const container = document.getElementById('innerBody')
+  container?.insertAdjacentHTML('afterbegin', userGuideServiceModal)
+  setTimeout(async () => {
+    const modal_btn = document.querySelector('.modaal_cont')
+    modal_btn?.click()
+  }, 2000)
 }
