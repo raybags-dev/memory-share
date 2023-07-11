@@ -107,9 +107,40 @@ export async function DocsUploader (app) {
             })
           }
 
+          let maxLimit = 6
+          let docCount = await DOCUMENT.countDocuments({
+            user: req.user.data._id
+          })
+
+          if (!req.user.data.isAdmin) {
+            const totalDocuments = req.files.length + docCount
+
+            if (totalDocuments > maxLimit) {
+              return res.status(428).json({
+                message:
+                  'With a demo account, this number of document uploads is not allowed!'
+              })
+            }
+
+            if (docCount >= maxLimit) {
+              return res.status(429).json({
+                count: docCount,
+                message: 'Demo upload limit reached.'
+              })
+            }
+          }
+
           const files = []
           for (const file of req.files) {
-            const acceptedTypes = ['jpeg', 'jpg', 'png', 'gif', 'pdf', 'webp']
+            const acceptedTypes = [
+              'jpeg',
+              'jpg',
+              'png',
+              'gif',
+              'pdf',
+              'webp',
+              'avif'
+            ]
             const fileType = file.originalname.split('.').pop().toLowerCase()
 
             if (!acceptedTypes.includes(fileType)) {
@@ -182,8 +213,7 @@ export function AllUserDocs (app) {
     validateDocumentOwnership,
     asyncMiddleware(async (req, res) => {
       const isAdmin = req.user.isAdmin
-      let query
-      let count
+      let query, count
       if (isAdmin) {
         query = DOCUMENT.find({}, { token: 0 }).sort({ createdAt: -1 })
         count = await DOCUMENT.countDocuments({})
@@ -226,7 +256,6 @@ export function FindOneItem (app) {
     })
   )
 }
-
 export function GetPaginatedDocs (app) {
   app.post(
     '/raybags/v1/uploader/paginated-user-documents',

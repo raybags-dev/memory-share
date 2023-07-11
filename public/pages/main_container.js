@@ -178,10 +178,15 @@ export async function uploadFiles () {
       })
     }
   } catch (error) {
-    if (error instanceof TypeError) {
-      Notify('Sorry, an error occurred while processing your request.')
-      return await LOGIN_HTML()
-    }
+    if (error.response && error.response.status == 429)
+      return Notify('Max limit upload for demo account reached!')
+
+    if (error.response && error.response.status == 428)
+      return Notify('Document selection not allowed for a demo account!')
+
+    if (error instanceof TypeError)
+      return Notify('Sorry, an error occurred while processing your request.')
+
     if (error.response.status === 409) {
       Notify(`Duplicates detected.`)
       setTimeout(() => location.reload(), 1500)
@@ -191,11 +196,8 @@ export async function uploadFiles () {
       Notify('Your session has expired. Please login!')
       await LOGIN_HTML()
     }
-    if (error?.response.status == 401) {
-      Notify('Session expired. Please login!')
-      document.getElementById('log___out').style.display = 'none'
-      return LOGIN_HTML()
-    }
+    if (error?.response.status == 401)
+      return Notify('Session expired. Please login!')
 
     console.log('Something went wrong: ' + error)
   } finally {
