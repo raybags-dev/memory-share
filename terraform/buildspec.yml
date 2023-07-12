@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+    commands:
+      - echo "Installing dependencies"
+      - echo "Running pre-installation steps"
+  pre_build:
+    commands:
+      - echo "Executing pre-build steps"
+      - echo "Validating configuration"
+  build:
+    commands:
+      - echo "Building project"
+      - echo "Running tests"
+  post_build:
+    commands:
+      - echo "Executing post-build steps"
+      - echo "Deploying artifacts"
+
+artifacts:
+  files:
+    - "**/*"
+  name: MyArtifact
+
+cache:
+  paths:
+    - "/root/.cache"
+    - "/root/.m2/repository"
