@@ -329,29 +329,30 @@ export async function DisplayUserProfileHTML () {
         <div class="del_btn_cont">
           <span class="lead">&#10006;</span>
         </div>
-        
-        <div class="card bg-transparent prof-bad">
-            <div id="prof_body" class="container card-body text-light" style="z-index: 100000;">
-            <p class="card-text">Name: ${
-              (email && formatEmail(email)) || 'value'
-            }</p>
-                <p class="card-text" data-pro-id="${id}">ID: ${id || 'id'}</p>
-                <p class="card-text">Email: ${(email && email) || 'value'}</p>
-                <p class="card-text">Created: ${
+            <ul class="list-group prof-bad text-white" style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);width:100%;height:auto;">
+                <li class="list-group-item bg-transparent text-light">Name: ${
+                  (email && formatEmail(email)) || 'value'
+                }</li>
+                <li class="list-group-item bg-transparent text-light" data-pro-id="${id}">ID: ${
+    id || 'id'
+  }</li>
+                <li class="list-group-item bg-transparent text-light">Email: ${
+                  (email && email) || 'value'
+                }</li>
+                <li class="list-group-item bg-transparent text-light">Created: ${
                   (createdAt && createdAt) || 'value'
-                }</p>
-                <p class="card-text">Updated: ${
+                }</li>
+                <li class="list-group-item bg-transparent text-light">Updated: ${
                   (updatedAt && updatedAt) || 'value'
-                }</p>
-                <p class="card-text">Document count: ${
+                }</li>
+                <li class="list-group-item bg-transparent text-light">Document total: ${
                   (count && count) || 0
-                }</p>
-                <div class="card-footer text-white border-transparent gap-2">
+                }</li>
+                <div class="text-white border-transparent d-flex mt-3 gap-2">
                   <a href="#" class="btn del_all_docs btn-lg bg-transparent btn-danger text-white">Delete all documents</a>
                   <a href="#" class="btn del_profile btn-lg bg-transparent btn-danger text-white">Delete your profile</a>
                 </div>
-            </div>
-      </div>
+            </ul>
       </div>
     </div>`
 
@@ -365,7 +366,6 @@ export async function DisplayUserProfileHTML () {
     container?.removeChild(document.getElementById('carocel_big'))
     await hideUploadForm(true)
   })
-
   let IMGCONT = document.querySelector('#carocel_big')
   IMGCONT.addEventListener('click', function (event) {
     if (!IMGCONT.contains(event.target)) {

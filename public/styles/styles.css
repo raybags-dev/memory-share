@@ -483,10 +483,10 @@ a {
     max-height: -webkit-max-content;
     max-height: -moz-max-content;
     max-height: max-content;
-
     border: unset;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
+    background-color: transparent !important;
     box-shadow: unset;
 
 }

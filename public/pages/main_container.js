@@ -22,15 +22,11 @@ export async function MAIN_PAGE () {
           </button>
           <div class="collapse navbar-collapse bg-transparent" id="navbarScroll">
               <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll bg-transparent" style="--bs-scroll-height: 100px;">
-                <li class="nav-item dropdown text-dark">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      ACTIONS
-                    </a>
-                    <ul class="dropdown-menu mt-3 dropdown-menu-dark" aria-labelledby="navbarScrollingDropdown" style="background-color: #293c4c80;z-index:1000">
-                      <li><a class="dropdown-item dropdown-item-dark text-light" style="z-index:1000" href="#">Videos</a></li>
-                      <li><a class="dropdown-item dropdown-item-dark user_profile_link text-light" style="z-index:1000" href="#">Account</a></li>
-                      <li><a class="dropdown-item dropdown-item-dark text-light logoutuser_link" style="z-index:1000" href="#">Logout</a></li>
-                    </ul>
+                <li class="nav-item dropdown">
+                  <a class="dropdown-item dropdown-item-dark text-white bg-transparent user_profile_link"href="#">Account</a>
+                </li>
+                <li class="nav-item dropdown">
+                  <a class="dropdown-item dropdown-item-dark text-white bg-transparent logoutuser_link" href="#">Logout</a>
                 </li>
               </ul>
             <form class="d-flex" style="max-height:inherit !important">
