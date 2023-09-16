@@ -7,8 +7,11 @@ import { cacheResponse, getCachedData } from '../../middleware/redis.js'
 import { ObjectId } from 'mongodb'
 import { config } from 'dotenv'
 config()
+const { RECIPIENT_EMAIL, AWS_BUCKET_NAME, AWS_REGION } = process.env
 
 import { asyncMiddleware } from '../../middleware/asyncErros.js'
+import { sendEmail, emailerhandler } from '../../middleware/emailer.js'
+
 import {
   dbFileUploader,
   deleteFromS3,
@@ -24,7 +27,6 @@ import {
   extractTokenMiddleware,
   checkDocumentAccess,
   isAdmin,
-  checkUserExists,
   validateDocumentOwnership
 } from '../../middleware/auth.js'
 //fallback page path
@@ -51,6 +53,12 @@ export async function CreateUser (app) {
       await user.save()
       // Generate a JWT for the user and send back the newly created user and JWT as a response
       const token = user.generateAuthToken()
+      // notify incase of successful user creation
+      const createUserEmailData = {
+        title: 'User  successful created in your s3 bucket',
+        body: `A user:\n${user}\n has succesfully been created in your S3 bucket: "${AWS_BUCKET_NAME}" in: ${AWS_REGION}.`
+      }
+      await sendEmail(createUserEmailData, RECIPIENT_EMAIL, emailerhandler)
       res
         .status(201)
         .send({ user: { name, email, isAdmin: user.isAdmin }, token })
@@ -294,6 +302,7 @@ export function deleteUserAndOwnDocs (app) {
   app.delete(
     '/raybags/v1/delete-user-and-docs/:userId',
     authMiddleware,
+    isAdmin,
     asyncMiddleware(async (req, res) => {
       const userId = req.params.userId
       // Check if the user exists
@@ -319,10 +328,11 @@ export function deleteUserAndOwnDocs (app) {
     })
   )
 }
-export function deleteUserDocs (app) {
+export async function deleteUserDocs (app) {
   app.delete(
     '/raybags/v1/delete-user-docs/:userId',
     authMiddleware,
+    isAdmin,
     asyncMiddleware(async (req, res) => {
       const userId = req.params.userId
       // Check if the user exists
@@ -347,6 +357,13 @@ export function deleteUserDocs (app) {
         // Delete from MongoDB
         await document.delete()
       }
+      // notify incase of successful deleted
+      const deleteUserDocsEmailData = {
+        title: 'User documents deleted!',
+        body: `All user documents '${documents.length}', have been deleted from your S3 bucket: "${AWS_BUCKET_NAME}" in: ${AWS_REGION}.`
+      }
+      await sendEmail(deleteUserDocsEmailData, RECIPIENT_EMAIL, emailerhandler)
+
       const { name, email, createdAt } = user
       res.status(200).json({
         message: 'User documents deleted',
