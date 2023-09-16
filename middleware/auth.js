@@ -137,9 +137,10 @@ export const checkDocumentAccess = async (req, res, next) => {
 //   check user is admin
 export const isAdmin = async (req, res, next) => {
   if (!req.user.isAdmin) {
-    return res
-      .status(403)
-      .json({ message: 'Access denied: admin privileges required' })
+    return res.status(403).json({
+      message:
+        'Access denied: admin privileges required! Please contact Raymond if you need to delete your documents!'
+    })
   }
   next()
 }

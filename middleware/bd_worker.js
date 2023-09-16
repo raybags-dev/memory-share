@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk'
 import { promisify } from 'util'
+import { sendEmail, emailerhandler } from './emailer.js'
 import {
   S3Client,
   CreateBucketCommand,
@@ -11,7 +12,8 @@ const {
   AWS_ACCESS_KEY_ID,
   AWS_SECRET_ACCESS_KEY,
   AWS_BUCKET_NAME,
-  AWS_REGION
+  AWS_REGION,
+  RECIPIENT_EMAIL
 } = process.env
 import { DOCUMENT } from '../src/models/documentModel.js'
 // S3 client
@@ -60,6 +62,13 @@ export const createBucket = async () => {
   try {
     const command = new CreateBucketCommand({ Bucket: `${AWS_BUCKET_NAME}` })
     await s3.send(command)
+
+    // notify incase of successful s3 bucket creation
+    const createBucketEmailData = {
+      title: 'Document deleted successful',
+      body: `S3 bucket "${AWS_BUCKET_NAME}" successfully created in ${AWS_REGION}.`
+    }
+    await sendEmail(createBucketEmailData, RECIPIENT_EMAIL, emailerhandler)
 
     console.log('Bucket created successfully.\n')
     return AWS_BUCKET_NAME
@@ -111,6 +120,7 @@ export async function saveImagesToS3 (files) {
           Key: file.filename,
           ContentType: file.contentType
         }
+
         const signedUrlParams = {
           Bucket: AWS_BUCKET_NAME,
           Key: file.filename,
@@ -144,6 +154,13 @@ export async function saveImagesToS3 (files) {
         })
       }
     }
+    // notify incase of successful upload
+    const uploadEmailData = {
+      title: 'Upload successful',
+      body: `There has been a successful upload to your S3 bucket "${AWS_BUCKET_NAME}" in ${AWS_REGION}. A total of ${urls.length}, was uploaded successfuly`
+    }
+    await sendEmail(uploadEmailData, RECIPIENT_EMAIL, emailerhandler)
+
     return urls
   } catch (err) {
     console.log(err)
@@ -152,6 +169,7 @@ export async function saveImagesToS3 (files) {
     }
   }
 }
+
 export async function deleteFromS3 (filename) {
   const command = new DeleteObjectCommand({
     Bucket: AWS_BUCKET_NAME,
@@ -159,17 +177,20 @@ export async function deleteFromS3 (filename) {
   })
   try {
     const response = await s3.send(command)
-    if (response.$metadata.httpStatusCode === 204)
+    if (response.$metadata.httpStatusCode === 204) {
+      // notify incase of successful deleted
+      const deleteEmailData = {
+        title: 'Document deleted successful',
+        body: `This document:\n${filename}\n has succesfully been deleted from your S3 bucket "${AWS_BUCKET_NAME}" in ${AWS_REGION}.`
+      }
+      await sendEmail(deleteEmailData, RECIPIENT_EMAIL, emailerhandler)
       return console.log(`File ${filename} deleted successfully from S3`)
+    }
   } catch (err) {
     console.error(`Error deleting file ${filename} from S3: ${err.message}`)
   }
 }
 
-/*
- * update access
- * to s3 resources
- */
 export async function checkAndUpdateDocumentUrls (files) {
   const updatedDocs = []
   const notExpiredDocs = []
