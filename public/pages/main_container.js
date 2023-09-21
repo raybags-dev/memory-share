@@ -4,7 +4,8 @@ import {
   runSpinner,
   Notify,
   fetchData,
-  searchDatabase
+  searchDatabase,
+  downloadImageById
 } from '../lifters/works.js'
 import { DisplayeBigImage, DisplayUserProfileHTML } from '../components/card.js'
 import { CARD } from '../components/card.js'
@@ -93,41 +94,56 @@ export async function MAIN_PAGE () {
   })
 }
 export async function genCardCarucel () {
-  const cardContainer = document.querySelector('#off__Container')
-  cardContainer?.addEventListener('click', async e => {
-    const card = e.target.closest('.card')
-    if (card) {
-      const imgSrc = card.querySelector('img')?.getAttribute('src')
-      const un_ordered_list = card.querySelector('.card-body ul')
+  try {
+    const cardContainer = document.querySelector('#off__Container')
+    cardContainer?.addEventListener('click', async e => {
+      //Handle file download
+      const isDownloadBtnClicked = e.target.classList.contains('download-btn')
+      if (isDownloadBtnClicked) {
+        let imageId = e.target.id
 
-      const liElements = un_ordered_list.querySelectorAll('li')
-      const email = liElements[0]?.textContent
-      const userId = liElements[1]?.textContent
-      const originalName = liElements[2]?.textContent
-      const fileName = liElements[3]?.textContent
-      const size = liElements[4]?.textContent
-      const encoding = liElements[5]?.textContent
-      const createdAt = liElements[6]?.textContent
-      const updatedAt = liElements[7]?.textContent
-      const contentType = liElements[8]?.textContent
-      const _id = liElements[9]?.textContent
+        return imageId
+          ? await downloadImageById(imageId)
+          : Notify(
+              'Something went wrong. Image could not be downloaded, please try again later!'
+            )
+      }
+      const card = e.target.closest('.card')
+      if (card) {
+        const imgSrc = card.querySelector('img')?.getAttribute('src')
+        const un_ordered_list = card.querySelector('.card-body ul')
 
-      DisplayeBigImage(
-        imgSrc,
-        email,
-        userId,
-        originalName,
-        fileName,
-        size,
-        encoding,
-        createdAt,
-        updatedAt,
-        contentType,
-        _id
-      )
-      hideUploadForm(false)
-    }
-  })
+        const liElements = un_ordered_list.querySelectorAll('li')
+        const email = liElements[0]?.textContent
+        const userId = liElements[1]?.textContent
+        const originalName = liElements[2]?.textContent
+        const fileName = liElements[3]?.textContent
+        const size = liElements[4]?.textContent
+        const encoding = liElements[5]?.textContent
+        const createdAt = liElements[6]?.textContent
+        const updatedAt = liElements[7]?.textContent
+        const contentType = liElements[8]?.textContent
+        const _id = liElements[9]?.textContent
+
+        DisplayeBigImage(
+          imgSrc,
+          email,
+          userId,
+          originalName,
+          fileName,
+          size,
+          encoding,
+          createdAt,
+          updatedAt,
+          contentType,
+          _id
+        )
+        hideUploadForm(false)
+      }
+    })
+  } catch (e) {
+    console.log('Error from genCardCarucel: ' + e.message)
+  }
 }
 export async function uploadFiles () {
   runSpinner(false, 'Uploading...')

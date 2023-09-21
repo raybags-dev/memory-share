@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk'
 import { promisify } from 'util'
+import { Readable } from 'stream'
 import { sendEmail, emailerhandler } from './emailer.js'
 import {
   S3Client,
@@ -29,7 +30,6 @@ const S_3 = new AWS.S3({
   secretAccessKey: AWS_SECRET_ACCESS_KEY,
   region: AWS_REGION
 })
-
 export const dbFileUploader = async (files, req, res) => {
   try {
     const savedFiles = await saveImagesToS3(files)
@@ -210,6 +210,7 @@ export async function checkAndUpdateDocumentUrls (files) {
           'getObject',
           getObjectParams
         )
+        console.log(newUrl)
         const urlParts = newUrl.split('?')
         const url = urlParts[0]
         const signature = urlParts[1]
@@ -238,4 +239,21 @@ export async function checkExpiryDate (timestamp) {
   const dbTimestamp = new Date(Date.parse(timestamp))
   const currentDate = new Date()
   return dbTimestamp.getTime() < currentDate.getTime()
+}
+
+export async function createFileReadStream (imageData) {
+  try {
+    if (Buffer.isBuffer(imageData)) {
+      // If 'imageData' is already a Buffer, use it directly
+      const fileStream = new Readable()
+      fileStream.push(imageData)
+      fileStream.push(null) // Signal the end of the stream
+      return fileStream
+    } else {
+      throw new Error('Invalid image data')
+    }
+  } catch (error) {
+    console.log(error.message)
+    throw error
+  }
 }

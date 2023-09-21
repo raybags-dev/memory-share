@@ -29,11 +29,12 @@ export async function CARD (data, isNew = false) {
   let cardContent = `
   <div class="col sm-card bg-transparent" style="padding:.2rem;" data-id="${_id}">
   <div class="card  bg-transparent rounded" style="object-fit:contain !important;">
-    <div class="skeleton"></div>
-    <div class="img-container" style="width:100% !important;object-fit:cover !important;">
+  <div class="skeleton"></div>
+  <div class="img-container" style="width:100% !important;object-fit:cover !important;">
+  <i id="${_id}" class="fa-solid fa-download download-btn ${_id}"></i>
         <img src="${
           `${url}?${signature}` || ''
-        }" class="card-img-top border-dark img-fluid hide_2 img_card ${_id}" loading="lazy" alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
+        }" class="card-img-top  border-dark img-fluid hide_2 img_card ${_id}" loading="lazy" alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
   </div>
   <div class="card-footer bg-transparent card-img-overlay text-danger m-1 rounded" style="width:fit-content;height:fit-content;padding:.3rem; font-style:italic">${formatDate(
     createdAt
@@ -55,7 +56,6 @@ export async function CARD (data, isNew = false) {
   </div>
 </div>
   `
-
   const offContainer = document.querySelector('#off__Container')
   if (isNew) {
     offContainer?.insertAdjacentHTML('afterbegin', cardContent)
@@ -106,20 +106,20 @@ export async function DisplayeBigImage (
     <div class="del_btn_cont">
     <span class="lead">&#10006;</span>
     </div>
-
+    
     <div class="prev__btn">
     <span class="lead">&#10094;</span>
     </div>
-
-      <div class="main-del-cont" style="cursor:pointer !important;z-index:1000 !important;">
-        <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
-        </div>
-        <div class="big_spinnerr hide_2">
-          <span class="big_caro_loader"></span>
-        </div>
-        <div class="card big_box bg-transparent" data-user="${
-          userId && userId
-        }"  style="width:60%;height:70% !important">
+    
+    <div class="main-del-cont" style="cursor:pointer !important;z-index:1000 !important;">
+    <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
+    </div>
+    <div class="big_spinnerr hide_2">
+    <span class="big_caro_loader"></span>
+    </div>
+    <div class="card big_box bg-transparent" data-user="${
+      userId && userId
+    }"  style="width:60%;height:70% !important">
         <div class="details_btn"><span>&#9737;</span></div>
 
           <img  src="${
@@ -407,16 +407,11 @@ export async function userGuideModel () {
             </div>
             <div class="modal-body text-light" style="background-color: #13283b80;">
               <ul style="opacity:0.5;">
-                <li>Sign up: Start by creating an account with your email address and password. This will grant you access to all the features of our application.</li>
-                <li>Upload Documents: Once you're logged in, you can easily upload your documents. Simply click on the 'Upload' button and select the files you want to upload. Our application supports various file formats, including PDF, Word documents, images, and more.</li>
-               <li>Manage Documents: After uploading your documents, you can manage them efficiently. You can view a list of all your uploaded documents, search for specific documents, and even organize them into folders or categories.</li>
-                <li>Edit and Share: Our application allows you to make edits to your documents directly within the platform. You can highlight text, add comments, and make annotations. You can also share your documents with others by generating shareable links or inviting collaborators.</li>
-                <li>Document Security: We prioritize the security and privacy of your documents. All documents are stored securely using encryption techniques, and access to your documents is protected with user authentication and authorization.</li>
-               <li>Collaboration: Collaboration is made easy with our application. You can invite others to collaborate on your documents, allowing them to view, edit, or comment on specific sections. Real-time collaboration ensures seamless teamwork and efficient document collaboration.</li>
-               <li>Document History and Version Control: Our application keeps track of document changes, maintaining a comprehensive history of revisions. You can easily revert to previous versions or compare different versions of the same document.</li>
-               <li>Document Organization: To keep your documents organized, you can create folders, tags, or categories. This helps you categorize and locate your documents quickly and easily.</li>
+                <li>Sign up: Start by creating an account with your email address and password. This will grant you access to this application.</li>
+                <li>Once account is created, you'll be logged in automatically. Once you're logged in, you can easily upload your documents. Simply click on the 'Upload' button and select the file you wish to upload. My application supports various file formats, including 'PDF', 'jpeg', 'jpg', 'png', 'gif', 'pdf', 'webp' and 'avif'. Please not, for demo accounts, only one image can be uploaded at a time. </li>
+               <li>Manage Documents: After uploading your documents, you can manage them efficiently. You can view a list of all your uploaded documents, search for specific documents, see all document count in your account delete your account or delete entire document catalogue.</li>
+                <li>Document Security: We prioritize the security and privacy of your documents. All documents are stored securely using encryption techniques, and access to your documents is protected with user authentication and authorization. Only you can see, modify, and or delete your documents. </li>
                <li>Mobile Accessibility: Access your documents on the go! Our application is fully responsive and accessible on mobile devices, allowing you to manage your documents from anywhere, anytime.</li>
-               <li>Account Management: You have full control over your account settings. You can update your profile information, change your password, and manage notification preferences.</li>
                 </ul>
             </div>
             <div class="modal-footer" style="border:2px solid #13283b80;background-color: #13283b80;">

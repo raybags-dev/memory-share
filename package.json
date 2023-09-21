@@ -6,8 +6,8 @@
     "type": "module",
     "scripts": {
         "dev": "nodemon index.js",
-        "test": "jest --detectOpenHandles --watch",
-        "test:watch": "nodemon --exec 'npm test",
+        "test": "mocha --require @babel/register tests",
+        "test:watch": "nodemon --exec 'npm test'",
         "start": "node index.js"
     },
     "engines": {
@@ -44,8 +44,14 @@
         "whatwg-fetch": "^3.6.2"
     },
     "devDependencies": {
+        "@babel/register": "^7.22.15",
+        "chai": "^4.3.8",
+        "chai-http": "^4.4.0",
         "find-free-port": "^2.0.0",
         "husky": "^8.0.3",
-        "nodemon": "^2.0.20"
+        "mocha": "^10.2.0",
+        "mocha-watch": "^0.1.0",
+        "nodemon": "^2.0.20",
+        "sinon": "^16.0.0"
     }
 }

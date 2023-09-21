@@ -5,6 +5,7 @@ import {
   AllUserDocs,
   NotSupported,
   FindOneItem,
+  FindOneItemForDowload,
   GetPaginatedDocs,
   deleteUserAndOwnDocs,
   deleteUserDocs,
@@ -19,6 +20,7 @@ export default async app => {
   DocsUploader(app)
   AllUserDocs(app)
   FindOneItem(app)
+  FindOneItemForDowload(app)
   GetPaginatedDocs(app)
   deleteUserAndOwnDocs(app)
   deleteUserDocs(app)

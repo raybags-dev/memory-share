@@ -214,8 +214,6 @@ a {
     height: -webkit-fit-content !important;
     height: -moz-fit-content !important;
     height: fit-content !important;
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
     margin-top: -10%;
     padding-bottom: 0% !important;
     padding-top: .5rem !important;
@@ -647,4 +645,25 @@ a {
         filter: blur(10px);
         opacity: .2;
     }
+}
+
+.download-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1000 !important;
+    padding: .1rem;
+    text-align: center;
+    cursor: cell;
+    margin: auto;
+    border-radius: .1rem;
+    color: #9f9e9e;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.download-btn:hover {
+    cursor: pointer;
+    color: rgb(135, 238, 135);
 }
