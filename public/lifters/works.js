@@ -91,7 +91,6 @@ export async function emptyMainContainer () {
   })
   contBTN.click()
 }
-
 export function formatDate (timestamp) {
   const date = new Date(timestamp)
   const year = date.getUTCFullYear()
@@ -123,7 +122,6 @@ export async function fetchData (page = 1) {
     }
 
     const url = `${baseUrl}?page=${page}&perPage=${perPage}`
-
     const res = await API_CLIENT.post(url, {}, { headers })
 
     if (res.statusText == 'OK') {
@@ -430,5 +428,40 @@ export async function deleteUserProf () {
     Notify('Request could not be processed, try again later!')
   } finally {
     runSpinner(true)
+  }
+}
+// handle file download
+export async function downloadImageById (imageId) {
+  try {
+    const { token } = JSON.parse(sessionStorage.getItem('token'))
+
+    const baseUrl = '/raybags/v1/wizard/uploader/download'
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+    const endpoint = `${baseUrl}/${imageId}`
+
+    Notify('Download in progress...')
+    runSpinner(false)
+
+    const response = await axios.post(
+      endpoint,
+      {},
+      { headers, responseType: 'blob' }
+    )
+    const blob = new Blob([response.data], { type: 'image/png' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${imageId}.png`
+    link.style.display = 'none'
+
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    Notify('File downloaded.')
+    runSpinner(true)
+  } catch (error) {
+    console.error('Error downloading image:', error)
   }
 }

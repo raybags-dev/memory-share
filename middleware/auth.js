@@ -139,7 +139,7 @@ export const isAdmin = async (req, res, next) => {
   if (!req.user.isAdmin) {
     return res.status(403).json({
       message:
-        'Access denied: admin privileges required! Please contact Raymond if you need to delete your documents!'
+        'Access denied: admin privileges required! Contact Raymond  for assistance!'
     })
   }
   next()

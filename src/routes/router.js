@@ -15,7 +15,8 @@ import { sendEmail, emailerhandler } from '../../middleware/emailer.js'
 import {
   dbFileUploader,
   deleteFromS3,
-  checkAndUpdateDocumentUrls
+  checkAndUpdateDocumentUrls,
+  createFileReadStream
 } from '../../middleware/bd_worker.js'
 import { GenToken } from '../../middleware/generateToken.js'
 
@@ -255,13 +256,44 @@ export function FindOneItem (app) {
           return res.status(200).json({ message: 'Success', ...updatedDoc })
         }
 
-        const updatedDoc = await checkAndUpdateDocumentUrls([document])
-        res.status(200).json(...updatedDoc)
+        res.status(403).json({ message: 'Access denied' })
       } catch (error) {
         console.error(error)
         res.status(500).json({ error: 'Server error' })
       }
     })
+  )
+}
+export function FindOneItemForDowload (app) {
+  app.post(
+    '/raybags/v1/wizard/uploader/download/:id',
+    authMiddleware,
+    checkDocumentAccess,
+    async (req, res) => {
+      console.log('endpoint is being hit')
+      try {
+        const itemId = req.params.id
+        const userId = req.user.data._id
+        const document = await DOCUMENT.findOne({ _id: new ObjectId(itemId) })
+        if (!document) {
+          return res.status(404).json({ message: 'Document not found' })
+        }
+        if (document.user.toString() !== userId.toString()) {
+          return res.status(403).json({ message: 'Access denied' })
+        }
+        const updatedDoc = await checkAndUpdateDocumentUrls([document])
+        // Content-Disposition header with the filename from updatedDoc
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${updatedDoc[0].filename}"`
+        )
+        const fileStream = await createFileReadStream(updatedDoc[0].data)
+        fileStream.pipe(res)
+      } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: 'Server error' })
+      }
+    }
   )
 }
 export function GetPaginatedDocs (app) {
