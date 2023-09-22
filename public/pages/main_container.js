@@ -13,7 +13,7 @@ import { logOutUser, LOGIN_HTML } from '../pages/login.js'
 
 export async function MAIN_PAGE () {
   let pageContent = `
-      <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #293c4c80;">
+      <nav class="navbar navbar-expand-lg navbar-dark glassy" style="background-color: #1b1a1ab3;">
         <div class="container-fluid">
           <a class="navbar-brand" href="https://raybags.herokuapp.com" title="see portifolio" target="_blank">
           <img src="../images/logo.png" alt="" width="40" height="40" style="border-radius:50%;">
