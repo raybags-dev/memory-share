@@ -34,7 +34,7 @@ export async function SIGNUP_HTML () {
               </div>
               <div class="mb-3">
                   <label for="exampleInputPassword1" class="form-label">Password</label>
-                  <input type="password" name="password" placeholder="Enter your password" class="form-control"
+                  <input type="password" name="password" autocomplete="current-password webauthn" placeholder="Enter your password" class="form-control"
                       id="exampleInputPassword1" required>
                   <div class="invalid-feedback">Please enter your password.</div>
               </div>

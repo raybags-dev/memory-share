@@ -31,7 +31,7 @@ export async function LOGIN_HTML () {
             <div class="mb-3">
                   <label for="exampleInputPassword1" class="form-label">Password</label>
                   <input type="password" name="password" placeholder="Enter your password" class="form-control"
-                      id="exampleInputPassword1" required>
+                      id="exampleInputPassword1" autocomplete="current-password webauthn"  required>
                   <div class="invalid-feedback">Please enter your password.</div>
               </div>
             <div class="d-grid gap-2">
