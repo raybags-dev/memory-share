@@ -15,8 +15,8 @@ export async function MAIN_PAGE () {
   let pageContent = `
       <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #293c4c80;">
         <div class="container-fluid">
-          <a class="navbar-brand" href="https://raybags.herokuapp.com" target="_blank">
-          <img src="https://github.com/raybags-web-dev/image_base/blob/master/images/logo/logo9_5_21257.jpeg?raw=true" alt="" width="40" height="40" style="border-radius:50%;">
+          <a class="navbar-brand" href="https://raybags.herokuapp.com" title="see portifolio" target="_blank">
+          <img src="../images/logo.png" alt="" width="40" height="40" style="border-radius:50%;">
           </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

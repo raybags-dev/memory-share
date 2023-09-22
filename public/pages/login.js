@@ -7,7 +7,7 @@ export async function LOGIN_HTML () {
     <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
         <a class="navbar-brand p-2 mb-1" href="#">
-            <img src="https://github.com/raybags-web-dev/image_base/blob/master/images/logo/logo9_5_21251.jpeg?raw=true" alt="" width=40" height="40" style="border-radius: 50%;filter: gray(100%)"
+            <img src="../images/logo.png" alt="" width=40" height="40" style="border-radius: 50%;filter: gray(100%)"
                 class="d-inline-block align-text-top">
         </a>
   
