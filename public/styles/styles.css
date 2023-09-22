@@ -39,9 +39,9 @@ body {
     -ms-user-select: none;
     user-select: none;
     scroll-behavior: smooth;
-    background: linear-gradient(rgba(1, 44, 82, 0.7),
-            rgb(37, 40, 54)),
-        url("https://github.com/raybags-web-dev/image_base/blob/master/images/faniture3.jpeg?raw=true") center/cover no-repeat fixed;
+    background: linear-gradient(rgba(26, 26, 26, 0.7),
+            rgb(26, 26, 26)),
+        url("../images/bg-water.jpeg") center/cover no-repeat fixed;
 }
 
 body::after {
@@ -110,14 +110,12 @@ a {
 
 .form-control {
     border: none;
-    opacity: .6;
 }
 
 #search____input {
     padding: .5rem;
     background-image: unset;
     background-image: linear-gradient(to top, hwb(0 10% 70% / 0.1) 0%, hwb(216 45% 45% / 0.1) 100%);
-
 }
 
 .select-img-form {
@@ -395,10 +393,14 @@ a {
     }
 }
 
+.glassy {
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+}
+
 #search____input {
     background-color: transparent;
     border: 2px solid transparent;
-    border-color: #dbdbdb0a #dbdbdb0a #dbdbdb0a #dbdbdb0a;
     box-shadow: none;
     color: white;
     width: 100%;
