@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { config } from 'dotenv'
 config()
-const { ACCESS_TOKEN } = process.env
+const { ACCESS_TOKEN, ENCRYPTION_KEY } = process.env
 import { USER_MODEL } from '../src/models/user.js'
 import { DOCUMENT } from '../src/models/documentModel.js'
 
@@ -181,5 +181,23 @@ export const validateDocumentOwnership = async (req, res, next) => {
   } catch (error) {
     console.log(error)
     return res.status(500).json({ error: 'Server error' })
+  }
+}
+
+export async function verifySecretKey (req, res, next) {
+  try {
+    // Check if the secret key is provided in the request headers
+    const clientSecretKey = req.headers['x-secret-key']
+
+    // Compare the provided secret key with the actual secret key
+    if (!clientSecretKey || clientSecretKey !== ENCRYPTION_KEY) {
+      return res.status(401).json({ message: 'Unauthorized' })
+    }
+
+    // If the secret key is valid, allow the user to proceed
+    next()
+  } catch (error) {
+    console.error('Error in verifySecretKey middleware:', error)
+    res.status(500).json({ message: 'Internal Server Error' })
   }
 }
