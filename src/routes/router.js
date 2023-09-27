@@ -340,17 +340,19 @@ export function deleteUserAndOwnDocs (app) {
       // Check if the user exists
       const user = await USER_MODEL.findById(
         { _id: userId },
-        { isAdmin: 0, password: 0, _id: 0, userId: 0 }
+        { isAdmin: 0, password: 0, _id: 0 }
       )
       if (!user) {
         return res.status(404).json({ error: 'User not found' })
       }
       // Delete all documents associated with the user
       await DOCUMENT.deleteMany({ user: userId })
+      await USER_ID_MODEL.deleteOne({ _id: user.userId.toString() })
       // Delete the user
       const { acknowledged } = await USER_MODEL.deleteOne({
         _id: userId
       })
+
       const { name, email, createdAt } = user
       res.status(200).json({
         status: acknowledged,
