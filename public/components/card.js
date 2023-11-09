@@ -310,8 +310,7 @@ export async function DisplayUserProfileHTML () {
     runSpinner(false, 'Failed!')
     Notify('There seems to be an issue with your profile account')
     await hideUploadForm(true)
-    setTimeout(() => runSpinner(true), 5000)
-    return
+    return setTimeout(() => runSpinner(true), 5000)
   }
 
   const {

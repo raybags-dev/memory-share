@@ -1,6 +1,7 @@
 import { LOGIN_HTML } from '../pages/login.js'
 import { SIGNUP_HTML } from '../pages/signup.js'
 import { CARD, userGuideModel } from '../components/card.js'
+import { hideUploadForm } from '../pages/main_container.js'
 
 // api client
 export const API_CLIENT = axios.create({
@@ -133,9 +134,6 @@ export async function fetchData (page = 1) {
         }
         return data
       } else {
-        if (page > 1) {
-          Notify(`Page: ${page}`)
-        }
         showSearchBar(true)
         return data
       }
@@ -192,7 +190,6 @@ export async function PaginateData () {
         }
       })
       setTimeout(async () => {
-        // Set up the intersection observer and start observing the second-to-last card
         let loading = false
         let target = container?.children[container.children.length - 2]
         const observer = new IntersectionObserver(
@@ -351,26 +348,30 @@ export async function fetchUserProfile () {
     runSpinner(true)
   }
 }
+
 // delete user documents
 export async function deleteUserDocuments () {
-  runSpinner(false, 'deleting...')
   try {
-    const { token } = JSON.parse(sessionStorage.getItem('token'))
-    const userID = document.querySelector('[data-pro-id]')
-    const idValue = userID?.dataset.proId
+    let sys_message = await confirmAction()
 
-    const baseUrl = '/delete-user-docs'
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-    const url = `${baseUrl}/${idValue}`
-    const res = await API_CLIENT.delete(url, { headers })
+    if (sys_message === 'confirmed!') {
+      const { token } = JSON.parse(sessionStorage.getItem('token'))
+      const userID = document.querySelector('[data-pro-id]')
+      const idValue = userID?.dataset.proId
 
-    if (res.statusText == 'OK') {
-      await emptyMainContainer()
-      runSpinner(true)
-      Notify('All documents have been deleted')
+      const baseUrl = '/delete-user-docs'
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+      const url = `${baseUrl}/${idValue}`
+      const res = await API_CLIENT.delete(url, { headers })
+
+      if (res.statusText == 'OK') {
+        await emptyMainContainer()
+        runSpinner(true)
+        Notify('All documents have been deleted')
+      }
     }
   } catch (error) {
     if (error instanceof TypeError) {
@@ -392,25 +393,29 @@ export async function deleteUserDocuments () {
 }
 // delete user profile
 export async function deleteUserProf () {
-  runSpinner(false, 'Deleting...')
   try {
-    const { token } = JSON.parse(sessionStorage.getItem('token'))
-    const userID = document.querySelector('[data-pro-id]')
-    const idValue = userID?.dataset.proId
+    let sys_message = await confirmAction()
 
-    const baseUrl = '/delete-user-and-docs'
-    const headers = {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-    const url = `${baseUrl}/${idValue}`
-    const res = await API_CLIENT.delete(url, { headers })
+    if (sys_message === 'confirmed!') {
+      runSpinner(false, 'Deleteting account...')
+      const { token } = JSON.parse(sessionStorage.getItem('token'))
+      const userID = document.querySelector('[data-pro-id]')
+      const idValue = userID?.dataset.proId
 
-    if (res.statusText == 'OK') {
-      localStorage.clear()
-      sessionStorage.clear()
-      await SIGNUP_HTML()
-      Notify('Account deleted!')
+      const baseUrl = '/delete-user-and-docs'
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+      const url = `${baseUrl}/${idValue}`
+      const res = await API_CLIENT.delete(url, { headers })
+
+      if (res.statusText == 'OK') {
+        localStorage.clear()
+        sessionStorage.clear()
+        await SIGNUP_HTML()
+        Notify('Account deleted!')
+      }
     }
   } catch (error) {
     if (error instanceof TypeError) {
@@ -464,4 +469,52 @@ export async function downloadImageById (imageId) {
   } catch (error) {
     console.error('Error downloading image:', error)
   }
+}
+export function confirmAction () {
+  return new Promise(resolve => {
+    const modalHTML = `
+      <div class="modal fade" style="backdrop-filter: blur(7px) !important;" id="exampleModalToggle" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content bg-dark text-light">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5 text-danger" id="exampleModalToggleLabel">Danger zone</h1>
+              <button type="button" class="btn-close btn-primary" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-muted">
+            By clicking 'Proceed', you will permanently delete your data. This action cannot be reversed.
+            Are you sure you want to proceed and delete your account ? 
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn-lg bg-transparent btn-outline-danger proceed_delete" data-bs-dismiss="modal">Proceed</button>
+              <button type="button" class="btn-lg bg-transparent btn-outline-success cancel_delete" data-bs-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a class="btn btn-transparent" id="modalToggleButton" data-bs-toggle="modal" href="#exampleModalToggle" role="button" style="display:none;"></a>`
+    const offContainer = document.getElementById('off__Container')
+    offContainer?.insertAdjacentHTML('beforeend', modalHTML)
+
+    const big_caro_img = document.getElementById('carocel_big')
+    // Click the button to show the modal after it's appended
+    const modalButton = document?.getElementById('modalToggleButton')
+    modalButton.click()
+
+    document
+      .querySelector('.proceed_delete')
+      .addEventListener('click', async () => {
+        if (big_caro_img) big_caro_img.remove()
+        await hideUploadForm(true)
+        resolve('confirmed!')
+      })
+
+    document
+      .querySelector('.cancel_delete')
+      .addEventListener('click', async () => {
+        if (big_caro_img) big_caro_img.remove()
+        await hideUploadForm(true)
+        Notify('Process aborted.')
+        resolve('Aborted.')
+      })
+  })
 }
