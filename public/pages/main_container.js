@@ -37,7 +37,7 @@ export async function MAIN_PAGE () {
         </div>
       </nav>
       <main id="main__wrapper" class="container my-10 position-relative">
-        <div class="container pb-3 sticky-top mt-1 off__Container">
+        <div class="container pb-3 sticky-top mt-1 off__Container" style="height:100px;">
           <form id="upload_formm" class="select-img-form text-danger sticky-top hide">
             <label class="label">
               <input  class="select-image-input" type="file" ref="inputRef" multiple>
@@ -92,6 +92,7 @@ export async function MAIN_PAGE () {
     await hideUploadForm(false)
     await DisplayUserProfileHTML()
   })
+  await setUpBackToTop()
 }
 export async function genCardCarucel () {
   try {
@@ -222,4 +223,35 @@ export async function hideUploadForm (isVisible) {
   if (!isVisible) return form?.classList.add('hide')
 
   form?.classList.remove('hide')
+}
+
+export async function setUpBackToTop () {
+  const buttonTopInnerHTML = `<a href="#" class="back-to-top" aria-label="Back to Top">&uarr;</a>`
+
+  const mainContainer = document.getElementById('off__Container')
+  mainContainer?.insertAdjacentHTML('beforeend', buttonTopInnerHTML)
+
+  const backToTopButton = document.querySelector('.back-to-top')
+
+  mainContainer?.addEventListener('scroll', function () {
+    if (mainContainer.scrollTop > 0) {
+      //backToTopButton.style.display = 'block'
+      backToTopButton.classList.add('show-to-top-btn')
+    } else {
+      //backToTopButton.style.display = 'none'
+      backToTopButton.classList.remove('show-to-top-btn')
+    }
+  })
+
+  backToTopButton.addEventListener('click', function (e) {
+    e.preventDefault()
+    if (mainContainer) {
+      mainContainer.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  })
+
+  if (mainContainer && mainContainer.innerHTML.trim() === '') {
+    //backToTopButton.style.display = 'none'
+    backToTopButton.classList.remove('show-to-top-btn')
+  }
 }
