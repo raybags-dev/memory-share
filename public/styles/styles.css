@@ -118,19 +118,28 @@ a {
     background-image: linear-gradient(to top, hwb(0 10% 70% / 0.1) 0%, hwb(216 45% 45% / 0.1) 100%);
 }
 
-.select-img-form {
+/* .select-img-form {
     margin: 30px auto 10px;
     text-align: center;
     position: -webkit-sticky;
     position: sticky;
-    top: 1%;
+    bottom: 10px;
+    left: 10px;
     opacity: 1;
     z-index: 100;
     width: -webkit-max-content;
     width: -moz-max-content;
     width: max-content;
     opacity: .7;
+} */
+
+#upload_formm {
+    position: fixed !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    z-index: 1000;
 }
+
 
 .select-img-form:hover {
     opacity: 1;
@@ -178,7 +187,7 @@ a {
 
 .label:hover {
     background: transparent;
-    color: var(--green);
+    color: var(--red);
 }
 
 .label span {
@@ -190,7 +199,7 @@ a {
 
 .label:hover span {
     background: var(--primary);
-    color: var(--green);
+    color: var(--red);
     width: 80%;
     height: 80%;
 }
@@ -283,7 +292,9 @@ a {
     min-width: 100%;
     min-height: 100%;
     max-height: 100%;
-
+    -o-object-fit: contain;
+    object-fit: contain;
+    overflow: hidden !important;
     border: 5px solid #7e7e7e1a;
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
@@ -299,6 +310,11 @@ a {
     display: grid;
     place-content: center;
     align-items: center;
+}
+
+.img_card {
+    -o-object-fit: cover !important;
+    object-fit: cover !important;
 }
 
 .big_box {

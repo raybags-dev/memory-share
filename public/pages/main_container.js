@@ -37,14 +37,12 @@ export async function MAIN_PAGE () {
         </div>
       </nav>
       <main id="main__wrapper" class="container my-10 position-relative">
-        <div class="container pb-3 sticky-top mt-1 off__Container" style="height:100px;">
-          <form id="upload_formm" class="select-img-form text-danger sticky-top hide">
+          <form id="upload_formm" class="select-img-form text-danger hide">
             <label class="label">
               <input  class="select-image-input" type="file" ref="inputRef" multiple>
               <span>+</span>
             </label>
           </form>
-        </div>
         <div id="off__Container" class="row row-cols-1 row-cols-md-3 g-2" style="transition:.5s !important;">
         </div>
       </main>
