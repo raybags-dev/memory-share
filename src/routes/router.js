@@ -347,19 +347,20 @@ export function deleteUserAndOwnDocs (app) {
       }
 
       if (user.email === KABWEJUMBIRA) {
+        const warning_notice = {
+          title: '===== Importnat notice ===== ',
+          body: `Important notice from 'memory-share'. Some one has just tried to delete your account associated with < ${KABWEJUMBIRA} >.\n\nAttention required.`
+        }
+        await sendEmail(warning_notice, RECIPIENT_EMAIL, emailerhandler)
         return res
           .status(403)
           .json({ error: 'FORBIDDEN: You cannot delete this account!' })
       }
 
-      if (user)
-        // Delete all documents associated with the user
-        await DOCUMENT.deleteMany({ user: userId })
+      if (user) await DOCUMENT.deleteMany({ user: userId })
       await USER_ID_MODEL.deleteOne({ _id: user.userId.toString() })
       // Delete the user
-      const { acknowledged } = await USER_MODEL.deleteOne({
-        _id: userId
-      })
+      const { acknowledged } = await USER_MODEL.deleteOne({ _id: userId })
 
       const { name, email, createdAt } = user
       res.status(200).json({
@@ -386,9 +387,15 @@ export async function deleteUserDocs (app) {
       }
 
       if (user.email === KABWEJUMBIRA) {
-        return res
-          .status(403)
-          .json({ error: 'FORBIDDEN: You cannot delete this account!' })
+        const warning_notice2 = {
+          title: '===== Importnat notice ===== ',
+          body: `Important notice from 'memory-share'.\n\nSome one has just tried to delete your account associated with < ${KABWEJUMBIRA} >.\n\nAttention required.`
+        }
+        await sendEmail(warning_notice2, RECIPIENT_EMAIL, emailerhandler)
+
+        return res.status(403).json({
+          error: 'FORBIDDEN: You cannot delete the content of this account!'
+        })
       }
 
       // Find all documents associated with the user
@@ -475,9 +482,7 @@ export function GetAllUsers (app) {
       const users = await USER_MODEL.find(
         {},
         { token: 0, password: 0, __v: 0 }
-      ).sort({
-        createdAt: -1
-      })
+      ).sort({ createdAt: -1 })
 
       const updatedUsers = await Promise.all(
         users.map(async user => {

@@ -64,7 +64,7 @@ export const loginUser = async (req, res, next) => {
     res.status(500).json({ error: 'Server error', message: error.message })
   }
 }
-//   extract token
+//  extract token
 export const extractTokenMiddleware = (req, res, next) => {
   const authHeader = req.headers['authorization']
   if (authHeader) {
@@ -144,7 +144,7 @@ export const isAdmin = async (req, res, next) => {
   }
   next()
 }
-//   check if user exist middleware
+//  check if user exist middleware
 export const checkUserExists = async (req, res, next) => {
   try {
     const { userId } = req.params
@@ -183,7 +183,6 @@ export const validateDocumentOwnership = async (req, res, next) => {
     return res.status(500).json({ error: 'Server error' })
   }
 }
-
 export async function verifySecretKey (req, res, next) {
   try {
     // Check if the secret key is provided in the request headers

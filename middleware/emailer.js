@@ -7,18 +7,18 @@ const { EMAIL_PROVIDER, EMAIL_FOR_NOTIFICATION, EMAIL__APP_PASS } = process.env
 
 // Configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
-  service: EMAIL_PROVIDER, // Email service provider
+  service: EMAIL_PROVIDER,
   auth: {
-    user: EMAIL_FOR_NOTIFICATION, // Email address
-    pass: EMAIL__APP_PASS // Email password or an app-specific password
+    user: EMAIL_FOR_NOTIFICATION,
+    pass: EMAIL__APP_PASS
   }
 })
 
 export async function sendEmail (emailData, recipient, callback) {
   // Create the email options
   const mailOptions = {
-    from: EMAIL_FOR_NOTIFICATION, // Email address
-    to: recipient, // Recipient's email address
+    from: EMAIL_FOR_NOTIFICATION,
+    to: recipient,
     subject: emailData.title,
     text: emailData.body
   }
