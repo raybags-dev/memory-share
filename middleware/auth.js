@@ -100,7 +100,7 @@ export const authMiddleware = async (req, res, next) => {
     const user = await USER_MODEL.findOne({ email: userEmail }).maxTimeMS(10000)
 
     if (!user) {
-      return res.status(401).json({ error: 'Could not locate user!' })
+      return res.status(401).json({ error: 'Could not find user!' })
     }
 
     // Check if the user's identifier in the token matches the identifier in the user's record

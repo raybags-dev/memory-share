@@ -13,7 +13,9 @@ import { logOutUser, LOGIN_HTML } from '../pages/login.js'
 
 export async function MAIN_PAGE () {
   let pageContent = `
-      <nav class="navbar navbar-expand-lg navbar-dark glassy" style="background-color: #1b1a1ab3;">
+      <nav  class="navbar navbar-expand-lg navbar-dark glassy" style="background-color: #1b1a1ab3;">
+      <div class="container container-fluid img__conta">
+      </div>
         <div class="container-fluid">
           <a class="navbar-brand" href="https://raybags.herokuapp.com" title="see portifolio" target="_blank">
           <img src="../images/logo.png" alt="" width="40" height="40" style="border-radius:50%;">
@@ -71,10 +73,6 @@ export async function MAIN_PAGE () {
         await searchDatabase()
       }
     }, 1000)
-  }
-  async function clearSearchInput () {
-    searchInput.value = ''
-    searchDatabase()
   }
   searchInput?.addEventListener('input', debounceSearchDatabase)
   hideUploadForm(true)
@@ -219,7 +217,6 @@ export async function uploadFiles () {
 export async function hideUploadForm (isVisible) {
   let form = document.getElementById('upload_formm')
   if (!isVisible) return form?.classList.add('hide')
-
   form?.classList.remove('hide')
 }
 
@@ -233,10 +230,8 @@ export async function setUpBackToTop () {
 
   mainContainer?.addEventListener('scroll', function () {
     if (mainContainer.scrollTop > 0) {
-      //backToTopButton.style.display = 'block'
       backToTopButton.classList.add('show-to-top-btn')
     } else {
-      //backToTopButton.style.display = 'none'
       backToTopButton.classList.remove('show-to-top-btn')
     }
   })
@@ -249,7 +244,40 @@ export async function setUpBackToTop () {
   })
 
   if (mainContainer && mainContainer.innerHTML.trim() === '') {
-    //backToTopButton.style.display = 'none'
     backToTopButton.classList.remove('show-to-top-btn')
   }
+}
+export async function animateImages (imageDataArray) {
+  const container = document.querySelector('.img__conta')
+  let currentIndex = 0
+
+  const loadImage = () => {
+    if (imageDataArray.length === 0) retun
+    if (currentIndex >= imageDataArray.length) currentIndex = 0
+
+    const imageData = imageDataArray[currentIndex]
+    const imageUrl = getImageUrlWithSignature(imageData)
+    const existingImage = container.querySelector(`img[src="${imageUrl}"]`)
+
+    if (existingImage) existingImage.remove()
+
+    const img = document.createElement('img')
+    img.src = imageUrl
+    img.classList.add('d-block', 'w-100', 'img-fluid', 'in_image_anime')
+
+    container?.append(img)
+
+    setTimeout(() => {
+      img.remove()
+      currentIndex++
+      loadImage()
+    }, 4000)
+  }
+
+  const getImageUrlWithSignature = imageData => {
+    const { url, signature } = imageData
+    return `${url}?${signature}`
+  }
+
+  loadImage()
 }
