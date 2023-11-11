@@ -1,7 +1,7 @@
 import { LOGIN_HTML } from '../pages/login.js'
 import { SIGNUP_HTML } from '../pages/signup.js'
 import { CARD, userGuideModel } from '../components/card.js'
-import { hideUploadForm } from '../pages/main_container.js'
+import { hideUploadForm, animateImages } from '../pages/main_container.js'
 
 // api client
 export const API_CLIENT = axios.create({
@@ -182,6 +182,7 @@ export async function PaginateData () {
   try {
     const data = await fetchData(page)
     if (data && data.length) {
+      await animateImages(data)
       data.forEach(async obj => {
         try {
           await CARD(obj)
@@ -200,6 +201,7 @@ export async function PaginateData () {
               loading = true
               const data = await fetchData(++page)
               if (data && data.length) {
+                // await animateImages(data)
                 data.forEach(async obj => {
                   await CARD(obj)
                 })
@@ -348,43 +350,37 @@ export async function fetchUserProfile () {
     runSpinner(true)
   }
 }
-
 // delete user documents
 export async function deleteUserDocuments () {
   try {
     let sys_message = await confirmAction()
-
     if (sys_message === 'confirmed!') {
       const { token } = JSON.parse(sessionStorage.getItem('token'))
-      const userID = document.querySelector('[data-pro-id]')
-      const idValue = userID?.dataset.proId
+      const { _id: userId } = await fetchUserProfile()
 
       const baseUrl = '/delete-user-docs'
       const headers = {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
-      const url = `${baseUrl}/${idValue}`
+      const url = `${baseUrl}/${userId}`
       const res = await API_CLIENT.delete(url, { headers })
 
       if (res.statusText == 'OK') {
+        if (res.data.message === 'User has no documents to delete') {
+          return Notify('There is nothing to delete!.')
+        }
         await emptyMainContainer()
         runSpinner(true)
-        Notify('All documents have been deleted')
+        Notify('All documents have been deleted' || res.data)
       }
     }
   } catch (error) {
     if (error instanceof TypeError) {
       Notify('An error occurred while processing your request.')
-      showSearchBar(false)
-      setTimeout(async () => {
-        return await LOGIN_HTML()
-      }, 2000)
+      return
     }
-    if (error?.response.status == 401) {
-      Notify('Session expired. Please login!')
-      return LOGIN_HTML()
-    }
+
     console.log(error.message)
     Notify('Request could not be processed, try again later!')
   } finally {
@@ -399,15 +395,14 @@ export async function deleteUserProf () {
     if (sys_message === 'confirmed!') {
       runSpinner(false, 'Deleteting account...')
       const { token } = JSON.parse(sessionStorage.getItem('token'))
-      const userID = document.querySelector('[data-pro-id]')
-      const idValue = userID?.dataset.proId
+      const { _id: userId } = await fetchUserProfile()
 
       const baseUrl = '/delete-user-and-docs'
       const headers = {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
-      const url = `${baseUrl}/${idValue}`
+      const url = `${baseUrl}/${userId}`
       const res = await API_CLIENT.delete(url, { headers })
 
       if (res.statusText == 'OK') {

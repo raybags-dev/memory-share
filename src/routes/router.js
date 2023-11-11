@@ -7,7 +7,8 @@ import { cacheResponse, getCachedData } from '../../middleware/redis.js'
 import { ObjectId } from 'mongodb'
 import { config } from 'dotenv'
 config()
-const { RECIPIENT_EMAIL, AWS_BUCKET_NAME, AWS_REGION } = process.env
+const { RECIPIENT_EMAIL, AWS_BUCKET_NAME, AWS_REGION, KABWEJUMBIRA } =
+  process.env
 
 import { asyncMiddleware } from '../../middleware/asyncErros.js'
 import { sendEmail, emailerhandler } from '../../middleware/emailer.js'
@@ -334,7 +335,6 @@ export function deleteUserAndOwnDocs (app) {
   app.delete(
     '/raybags/v1/delete-user-and-docs/:userId',
     authMiddleware,
-    isAdmin,
     asyncMiddleware(async (req, res) => {
       const userId = req.params.userId
       // Check if the user exists
@@ -345,8 +345,16 @@ export function deleteUserAndOwnDocs (app) {
       if (!user) {
         return res.status(404).json({ error: 'User not found' })
       }
-      // Delete all documents associated with the user
-      await DOCUMENT.deleteMany({ user: userId })
+
+      if (user.email === KABWEJUMBIRA) {
+        return res
+          .status(403)
+          .json({ error: 'FORBIDDEN: You cannot delete this account!' })
+      }
+
+      if (user)
+        // Delete all documents associated with the user
+        await DOCUMENT.deleteMany({ user: userId })
       await USER_ID_MODEL.deleteOne({ _id: user.userId.toString() })
       // Delete the user
       const { acknowledged } = await USER_MODEL.deleteOne({
@@ -366,7 +374,6 @@ export async function deleteUserDocs (app) {
   app.delete(
     '/raybags/v1/delete-user-docs/:userId',
     authMiddleware,
-    isAdmin,
     asyncMiddleware(async (req, res) => {
       const userId = req.params.userId
       // Check if the user exists
@@ -377,6 +384,13 @@ export async function deleteUserDocs (app) {
       if (!user) {
         return res.status(404).json({ error: 'User not found' })
       }
+
+      if (user.email === KABWEJUMBIRA) {
+        return res
+          .status(403)
+          .json({ error: 'FORBIDDEN: You cannot delete this account!' })
+      }
+
       // Find all documents associated with the user
       const documents = await DOCUMENT.find({ user: userId })
       if (documents.length === 0) {
