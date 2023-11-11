@@ -754,7 +754,7 @@ a {
     padding: 10px 20px;
     border: none;
     cursor: pointer;
-    text-shadow: 1px 1px 1px red;
+    text-shadow: 1px 1px 1px rgb(76, 76, 76);
 }
 
 .download-btn:hover {
