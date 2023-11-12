@@ -92,12 +92,31 @@ a {
 }
 
 .log___in,
-.sign___up {
+.sign___up,
+.update___password {
     position: absolute;
-    top: 40%;
+    top: 41%;
     left: 50%;
+    opacity: 0;
     transform: translate(-50%, -50%);
     max-width: 800px;
+    transition: .5s;
+    -webkit-animation: animatepages infinite forwards ease-in .5s;
+    animation: animatepages 1 forwards ease-in .5s;
+}
+
+@-webkit-keyframes animatepages {
+    to {
+        top: 40%;
+        opacity: 1;
+    }
+}
+
+@keyframes animatepages {
+    to {
+        top: 40%;
+        opacity: 1;
+    }
 }
 
 #login___form,

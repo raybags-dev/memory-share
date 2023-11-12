@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
+import { randomBytes } from 'crypto'
 
 const userIdSchema = new mongoose.Schema({}, { timestamps: true })
 
@@ -41,12 +42,28 @@ const userModel = {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'UserId',
     required: true
+  },
+  password_reset_token: {
+    type: String
   }
 }
 
 const userSchema = new mongoose.Schema(userModel, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true }
 })
+
+// Virtual field for password reset token
+userSchema.virtual('passwordResetToken').get(function () {
+  return generatePasswordResetToken()
+})
+
+// Method to set the password reset token
+userSchema.methods.setPasswordResetToken = async function () {
+  this.password_reset_token = await generatePasswordResetToken()
+  await this.save()
+  return this.password_reset_token
+}
 
 userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
@@ -77,9 +94,19 @@ userSchema.pre('save', function (next) {
   if (this.isModified('password')) {
     this.password = bcrypt.hashSync(this.password, 8)
   }
-  this.version = this.version + 1
+  // Only increment the version if the password is modified
+  if (this.isModified('password') || this.isNew) {
+    this.version = this.version + 1
+  }
   next()
 })
+
 const USER_MODEL = mongoose.model('User', userSchema)
 const USER_ID_MODEL = mongoose.model('UserId', userIdSchema)
+
+export async function generatePasswordResetToken () {
+  const token = randomBytes(64).toString('hex')
+  return token
+}
+
 export { USER_MODEL, USER_ID_MODEL }

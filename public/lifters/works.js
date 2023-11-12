@@ -404,6 +404,7 @@ export async function deleteUserProf () {
       }
       const url = `${baseUrl}/${userId}`
       const res = await API_CLIENT.delete(url, { headers })
+      console.log(res.data.message)
 
       if (res.statusText == 'OK') {
         localStorage.clear()
@@ -413,6 +414,13 @@ export async function deleteUserProf () {
       }
     }
   } catch (error) {
+    if (
+      error?.response.data.error ===
+      'FORBIDDEN: You cannot delete this account!'
+    )
+      return Notify('This account can not be deleted!')
+
+    console.log(error?.response.status)
     if (error instanceof TypeError) {
       Notify('An error occurred while processing your request.')
       showSearchBar(false)
