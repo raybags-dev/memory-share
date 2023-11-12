@@ -101,8 +101,10 @@ a {
     transform: translate(-50%, -50%);
     max-width: 800px;
     transition: .5s;
+    border-radius: .4rem;
     -webkit-animation: animatepages infinite forwards ease-in .5s;
     animation: animatepages 1 forwards ease-in .5s;
+    background-image: linear-gradient(to right, #434343 0%, black 100%);
 }
 
 @-webkit-keyframes animatepages {

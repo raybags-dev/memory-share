@@ -22,7 +22,7 @@ export async function LOGIN_HTML () {
   <main id="main__wrapper" class="container container-fluid my-10 position-relative">
     <div class="container log___in container-fluid">
         <h3 class="text-center p-3 text-white">LOGIN</h3>
-        <form id="login___form" class="shadow-lg p-3 rounded pt-2 text-white">
+        <form id="login___form" class=" p-3 rounded pt-2 text-white">
             <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Email address</label>
                 <input type="email" name="email" class="form-control" placeholder="Enter your email"
@@ -34,10 +34,10 @@ export async function LOGIN_HTML () {
                   <input type="password" name="password" placeholder="Enter your password" class="form-control"
                       id="exampleInputPassword1" autocomplete="current-password webauthn"  required>
                   <div class="invalid-feedback">Please enter your password.</div>
-                  <div class="form-check form-switch mt-3 mb-3">
+            </div>
+            <div class="form-check form-switch mt-3 mb-3">
                       <input class="form-check-input"  type="checkbox" role="switch" id="flexSwitchCheckDefault">
                       <label class="form-check-label" for="flexSwitchCheckDefault">Forgot password</label>
-                  </div>
             </div>
             <div class="d-grid gap-2">
                 <button type="submit" style="box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1), 0 0 0 2px rgb(255, 255, 255, .4),
