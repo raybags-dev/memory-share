@@ -6,7 +6,7 @@ import { USER_MODEL } from '../src/models/user.js'
 import { DOCUMENT } from '../src/models/documentModel.js'
 
 export const generateJWTToken = async (data, version) => {
-  const expiresIn = 60000 // expiration time of token
+  const expiresIn = 60000
   const payload = {
     data,
     email: data.email,
@@ -16,48 +16,81 @@ export const generateJWTToken = async (data, version) => {
   }
 
   return new Promise((resolve, reject) => {
-    jwt.sign(
-      payload,
-      ACCESS_TOKEN, //secret key
-      { expiresIn },
-      (err, token) => {
-        if (err) reject(err)
-        resolve(token)
-      }
-    )
+    jwt.sign(payload, ACCESS_TOKEN, { expiresIn }, (err, token) => {
+      if (err) reject(err)
+      resolve(token)
+    })
   })
 }
+
 // login user
 export const loginUser = async (req, res, next) => {
-  const { email = '', password = '' } = req.body
+  const { email = '', password = '', verification_token } = req.body
+
   try {
-    // Check if user with email exists in database
     const user = await USER_MODEL.findOne({ email })
     if (!user) {
       return res
         .status(401)
         .json({ error: 'Unauthorized. Signup to use this service.' })
     }
-    // Check if password matches user's password in database
+
+    if (verification_token) {
+      try {
+        if (verification_token !== user.password_reset_token) {
+          return res.status(401).json({ error: 'Invalid verification token' })
+        }
+
+        user.password = password
+        await user.save()
+        console.log(user)
+
+        // clear verifiaction Token when
+        user.password_reset_token = undefined
+        await user.save()
+
+        const token = await generateJWTToken(
+          {
+            email: user.email,
+            _id: user._id,
+            isAdmin: user.isAdmin,
+            version: user.version
+          },
+          user.version
+        )
+
+        res.setHeader('authorization', `Bearer ${token}`)
+        req.user = user.toObject()
+        return res
+          .status(200)
+          .json({ message: 'Password updated successfully.' })
+      } catch (error) {
+        console.log(error)
+        return res
+          .status(500)
+          .json({ error: 'Error updating password', message: error.message })
+      }
+    }
+
     const isMatch = await user.comparePassword(password)
     if (!isMatch) {
       return res.status(401).json({ error: 'Invalid email or password' })
     }
+
     // If user exists and password is correct, generate JWT token
     const token = await generateJWTToken(
       {
         email: user.email,
         _id: user._id,
-        isAdmin: user.isAdmin, // include isAdmin in token payload
-        version: user.version // include version in token payload
+        isAdmin: user.isAdmin,
+        version: user.version
       },
       user.version
     )
-    // Set token in response header
+
+    // Set token in the response header
     res.setHeader('authorization', `Bearer ${token}`)
-    // Add the user object to the request object
     req.user = user.toObject()
-    // Call next to proceed to next middleware/route handler
     next()
   } catch (error) {
     console.log(error)

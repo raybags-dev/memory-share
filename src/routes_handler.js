@@ -11,7 +11,9 @@ import {
   deleteUserDocs,
   DeleteOneDoc,
   GetAllUsers,
-  GetUser
+  GetUser,
+  ForgotPassword,
+  UpdatePassword
 } from './routes/router.js'
 
 export default async app => {
@@ -27,5 +29,7 @@ export default async app => {
   DeleteOneDoc(app)
   GetAllUsers(app)
   GetUser(app)
+  ForgotPassword(app)
+  UpdatePassword(app)
   app.use(NotSupported)
 }

@@ -19,7 +19,7 @@ import {
   checkAndUpdateDocumentUrls,
   createFileReadStream
 } from '../../middleware/bd_worker.js'
-import { GenToken } from '../../middleware/generateToken.js'
+import { genVerificationToken } from '../../middleware/generateToken.js'
 
 import { USER_MODEL, USER_ID_MODEL } from '../models/user.js'
 import { DOCUMENT } from '../models/documentModel.js'
@@ -69,7 +69,6 @@ export async function CreateUser (app) {
     }
   })
 }
-//login handler
 export async function Login (app) {
   app.post('/raybags/v1/user/login', loginUser, async (req, res) => {
     try {
@@ -178,7 +177,7 @@ export async function DocsUploader (app) {
               filename: uuidv4() + '.' + fileType,
               data: resizedImage,
               user: req.user.data._id,
-              token: await GenToken(),
+              token: await genVerificationToken(),
               contentType: file.mimetype,
               encoding: file.encoding,
               size: file.size
@@ -216,7 +215,7 @@ export async function DocsUploader (app) {
     })
   )
 }
-export function AllUserDocs (app) {
+export async function AllUserDocs (app) {
   app.post(
     '/raybags/v1/uploader/user-docs',
     authMiddleware,
@@ -241,7 +240,7 @@ export function AllUserDocs (app) {
     })
   )
 }
-export function FindOneItem (app) {
+export async function FindOneItem (app) {
   app.post(
     '/raybags/v1/wizard/uploader/:id',
     authMiddleware,
@@ -265,7 +264,7 @@ export function FindOneItem (app) {
     })
   )
 }
-export function FindOneItemForDowload (app) {
+export async function FindOneItemForDowload (app) {
   app.post(
     '/raybags/v1/wizard/uploader/download/:id',
     authMiddleware,
@@ -297,7 +296,7 @@ export function FindOneItemForDowload (app) {
     }
   )
 }
-export function GetPaginatedDocs (app) {
+export async function GetPaginatedDocs (app) {
   app.post(
     '/raybags/v1/uploader/paginated-user-documents',
     authMiddleware,
@@ -331,7 +330,7 @@ export function GetPaginatedDocs (app) {
     })
   )
 }
-export function deleteUserAndOwnDocs (app) {
+export async function deleteUserAndOwnDocs (app) {
   app.delete(
     '/raybags/v1/delete-user-and-docs/:userId',
     authMiddleware,
@@ -427,7 +426,7 @@ export async function deleteUserDocs (app) {
     })
   )
 }
-export function DeleteOneDoc (app) {
+export async function DeleteOneDoc (app) {
   app.delete(
     '/raybags/v1/delete-doc/:id',
     authMiddleware,
@@ -473,7 +472,7 @@ export function DeleteOneDoc (app) {
     })
   )
 }
-export function GetAllUsers (app) {
+export async function GetAllUsers (app) {
   app.post(
     '/raybags/v1/uploader/get-users',
     authMiddleware,
@@ -501,7 +500,7 @@ export function GetAllUsers (app) {
     })
   )
 }
-export function GetUser (app) {
+export async function GetUser (app) {
   app.post(
     '/raybags/v1/uploader/get-user',
     authMiddleware,
@@ -524,6 +523,55 @@ export function GetUser (app) {
     })
   )
 }
-export function NotSupported (req, res, next) {
+export async function NotSupported (req, res, next) {
   res.status(502).sendFile(fallbackPagePath)
+}
+export async function ForgotPassword (app) {
+  app.post(
+    '/raybags/v1/user/forgot-password',
+    asyncMiddleware(async (req, res) => {
+      const { email } = req.body
+
+      // Find the user based on the email in the request body
+      const the_user = await USER_MODEL.findOne({ email: req.body.email })
+      if (!the_user) {
+        return res.status(409).send({
+          error:
+            'The account associated with the email address provided could not be found.'
+        })
+      }
+
+      const resetToken = await the_user.setPasswordResetToken()
+      // send email to user for token.
+      const emailData = {
+        title: 'Important: Request to update password',
+        body: `A request to update the password for this account was received successfully. This is your token to update your password.\n\nVerification Token: ${resetToken}\n\nThe Token will be active for 24hrs.`
+      }
+
+      try {
+        await sendEmail(emailData, email, resetToken, emailerhandler)
+        res.status(200).json({ message: 'Password reset email sent.' })
+      } catch (error) {
+        console.error('Error generating verification token:', error)
+        res.status(500).json({ error: 'Error generating verification token.' })
+      }
+    })
+  )
+}
+export async function UpdatePassword (app) {
+  app.post('/raybags/v1/user/update/password', loginUser, async (req, res) => {
+    try {
+      // Find the user based on the email in the request body
+      const user = await USER_MODEL.findOne({ email: req.body.email })
+      // Generate a new JWT token for the user
+      const token = user.generateAuthToken()
+      // Return the user object and JWT token
+      const userObject = user.toObject()
+      delete userObject.password
+      res.status(200).json({ user: userObject, token })
+    } catch (error) {
+      console.log(error.message)
+      res.status(500).json({ error: 'Server error' })
+    }
+  })
 }

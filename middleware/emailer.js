@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer'
 import { config } from 'dotenv'
+import { generatePasswordResetToken } from '../src/models/user.js'
 
 config()
 
@@ -14,13 +15,25 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-export async function sendEmail (emailData, recipient, callback) {
+export async function sendEmail (
+  emailData,
+  recipient,
+  verificationToken,
+  callback
+) {
+  // Check if verificationToken is provided before modifying the email body
+  const emailBody = verificationToken
+    ? `${emailData.body}\n\nVerification Link: ${await generateVerificationLink(
+        verificationToken
+      )}`
+    : emailData.body
+
   // Create the email options
   const mailOptions = {
     from: EMAIL_FOR_NOTIFICATION,
     to: recipient,
     subject: emailData.title,
-    text: emailData.body
+    text: emailBody
   }
 
   // Send the email
@@ -33,6 +46,20 @@ export async function sendEmail (emailData, recipient, callback) {
       if (callback) callback(null, info.response)
     }
   })
+}
+
+export async function generateVerificationLink (verificationToken) {
+  try {
+    let randomToken = await generatePasswordResetToken()
+    if (verificationToken) {
+      return verificationToken
+    } else {
+      return randomToken
+    }
+  } catch (error) {
+    console.error('Error generating verification link:', error)
+    return ''
+  }
 }
 
 export async function emailerhandler (error, response) {
