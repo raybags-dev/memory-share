@@ -19,7 +19,7 @@ export async function SIGNUP_HTML () {
   <main id="main__wrapper" class="container container-fluid my-10 position-relative">
       <div class="container sign___up container-fluid">
           <h3 class="text-center p-3 text-white">SIGNUP</h3>
-          <form class="shadow-lg p-3 rounded pt-2 text-white" id="signup_form">
+          <form class="p-3 rounded pt-2 text-white" id="signup_form">
               <div class="mb-3">
                   <label for="exampleInputName" class="form-label">Name</label>
                   <input type="text" name="name" class="form-control" id="exampleInputName"

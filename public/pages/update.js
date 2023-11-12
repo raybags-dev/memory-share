@@ -20,7 +20,7 @@ export async function UPDATE_PASSWORD_HTML () {
   <main id="main__wrapper" class="container container-fluid my-10 position-relative">
     <div class="container update___password container-fluid">
         <h3 class="text-center p-3 text-white">UPDATE PASSWORD</h3>
-        <form id="update_password_form" class="shadow-lg p-3 rounded pt-2 text-white">
+        <form id="update_password_form" class="p-3 rounded pt-2 text-white">
             <div class="mb-3">
                 <label for="userInputEmail" class="form-label">Email address</label>
                 <input type="email" name="email" class="form-control" placeholder="Enter your email"
