@@ -99,6 +99,11 @@ export async function UPDATE_PASSWORD_HTML () {
       runSpinner(false, 'Failed!')
       const errorMessage = error.response.data.error || 'An error occurred.'
       Notify(`${errorMessage}.`)
+      displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Process failed. the token can be found in your email'
+      ])
       setTimeout(() => runSpinner(true), 100)
     }
   })
