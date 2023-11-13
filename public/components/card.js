@@ -6,7 +6,8 @@ import {
   Notify,
   fetchUserProfile,
   deleteUserDocuments,
-  deleteUserProf
+  deleteUserProf,
+  displayLabel
 } from '../lifters/works.js'
 import { hideUploadForm } from '../pages/main_container.js'
 import { LOGIN_HTML } from '../pages/login.js'
@@ -270,7 +271,11 @@ export async function deleteDocument (documentId = '') {
   try {
     const { token } = JSON.parse(sessionStorage.getItem('token'))
     if (!token) {
-      return Notify('Session expired! Login required!')
+      return displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Session expired! Login required!'
+      ])
     }
     let colElem = [...document.querySelectorAll('.col')].find(
       card => card.dataset.id === documentId
@@ -290,12 +295,20 @@ export async function deleteDocument (documentId = '') {
         colElem.classList.add('del_effect')
         // remove the card from the DOM
         setTimeout(() => colElem.remove(), 500)
-        return Notify('Success: Document deleted!')
+        return displayLabel([
+          'main__wrapper',
+          'alert-success',
+          'Success: Document deleted!'
+        ])
       }
     }, 500)
   } catch (error) {
     if (error instanceof TypeError) {
-      Notify('Sorry, an error occurred while processing your request.')
+      displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Sorry, an error occurred while processing your request.'
+      ])
       return await LOGIN_HTML()
     }
   } finally {
@@ -306,7 +319,11 @@ export async function DisplayUserProfileHTML () {
   let profile_object = await fetchUserProfile()
   if (profile_object === null || profile_object === undefined) {
     runSpinner(false, 'Failed!')
-    Notify('There seems to be an issue with your profile account')
+    displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      'There seems to be an issue with your profile account.'
+    ])
     await hideUploadForm(true)
     return setTimeout(() => runSpinner(true), 5000)
   }
@@ -405,7 +422,7 @@ export async function userGuideModel () {
             <div class="modal-body text-light" style="background-color: #13283b80;">
               <ul style="opacity:0.5;">
                 <li>Sign up: Start by creating an account with your email address and password. This will grant you access to this application.</li>
-                <li>Once account is created, you'll be logged in automatically. Once you're logged in, you can easily upload your documents. Simply click on the 'Upload' button and select the file you wish to upload. My application supports various file formats, including 'PDF', 'jpeg', 'jpg', 'png', 'gif', 'pdf', 'webp' and 'avif'. Please not, for demo accounts, only one image can be uploaded at a time. </li>
+                <li>Once account is created, you'll be logged in automatically. Once you're logged in, you can easily upload your documents. Simply click on the 'Upload' button and select the file you wish to upload. This application supports various file formats, including 'PDF', 'jpeg', 'jpg', 'png', 'gif', 'pdf', 'webp' and 'avif'. Please note, for demo accounts, a maximum of 5 files can be uploaded at a time. </li>
                <li>Manage Documents: After uploading your documents, you can manage them efficiently. You can view a list of all your uploaded documents, search for specific documents, see all document count in your account delete your account or delete entire document catalogue.</li>
                 <li>Document Security: We prioritize the security and privacy of your documents. All documents are stored securely using encryption techniques, and access to your documents is protected with user authentication and authorization. Only you can see, modify, and or delete your documents. </li>
                <li>Mobile Accessibility: Access your documents on the go! Our application is fully responsive and accessible on mobile devices, allowing you to manage your documents from anywhere, anytime.</li>

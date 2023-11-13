@@ -1,6 +1,11 @@
 import { SIGNUP_HTML } from '../pages/signup.js'
 import { passwordNotice, disableElement } from '../pages/update.js'
-import { API_CLIENT, runSpinner, Notify } from '../lifters/works.js'
+import {
+  API_CLIENT,
+  runSpinner,
+  Notify,
+  displayLabel
+} from '../lifters/works.js'
 import { MAIN_PAGE } from '../pages/main_container.js'
 
 export async function LOGIN_HTML () {
@@ -84,7 +89,7 @@ export async function LOGIN_HTML () {
         // Redirect to main page
         sessionStorage.setItem('redirected', true)
         //   show logout button
-        Notify(`Login successfull`)
+        displayLabel(['main__wrapper', 'alert-success', 'Loginsuccessfull 😀'])
         setTimeout(async () => {
           runSpinner(true)
           history.pushState(null, null, '/')
@@ -94,7 +99,7 @@ export async function LOGIN_HTML () {
     } catch (error) {
       runSpinner(false, 'Failed!')
       const errorMessage = error.response.data.error || 'An error occurred.'
-      Notify(`${errorMessage}.`)
+      displayLabel(['main__wrapper', 'alert-danger', `${errorMessage}`])
       if (errorMessage.includes('Unauthorized')) {
         document.querySelector('#checker').classList.add('hide_2')
       }
@@ -119,8 +124,8 @@ export async function loginUser (user) {
       sessionStorage.setItem('token', JSON.stringify({ token, email }))
       // Redirect to main page
       sessionStorage.setItem('redirected', true)
-      Notify(`Login successfull`)
-      //   show logout button
+      Notify(`Login successful 😀`)
+      displayLabel(['main__wrapper', 'alert-danger', `Login successful 😀`])
       setTimeout(() => {
         runSpinner(true)
         MAIN_PAGE()
@@ -130,7 +135,11 @@ export async function loginUser (user) {
     console.log(passwordsuggest)
     runSpinner(false, 'Failed!')
     const errorMessage = error.response.data.error || 'An error occurred.'
-    Notify(`Session: ${errorMessage}.`)
+    displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      `Session error: ${errorMessage}`
+    ])
     setTimeout(() => runSpinner(true), 800)
     console.log(error)
   } finally {
@@ -142,13 +151,13 @@ export async function logOutUser (isLogout) {
     const sessionToken = sessionStorage.getItem('token')
     if (sessionToken) {
       Notify(`Logout successful!`)
+      displayLabel(['main__wrapper', 'alert-secondary', 'Logout successful!'])
       //   hide logout btn
       setTimeout(() => {
         sessionStorage.removeItem('token')
         sessionStorage.removeItem('redirected')
       }, 500)
     }
-    // navigate to the login page
     await LOGIN_HTML()
   }
 }

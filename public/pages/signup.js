@@ -1,5 +1,10 @@
 import { LOGIN_HTML, loginUser } from '../pages/login.js'
-import { API_CLIENT, runSpinner, Notify } from '../lifters/works.js'
+import {
+  API_CLIENT,
+  runSpinner,
+  Notify,
+  displayLabel
+} from '../lifters/works.js'
 
 export async function SIGNUP_HTML () {
   let pageContent = `
@@ -76,7 +81,11 @@ export async function SIGNUP_HTML () {
         const storedUser = { name, email, isUser: true }
         localStorage.setItem('user', JSON.stringify(storedUser))
 
-        Notify(`Success: ${storedUser.name} account created.`)
+        displayLabel([
+          'main__wrapper',
+          'alert-success',
+          `Success: ${storedUser.name} account created 🥳`
+        ])
         setTimeout(() => {
           history.pushState(null, null, '/')
           runSpinner(true)
@@ -87,6 +96,11 @@ export async function SIGNUP_HTML () {
         return
       }
       Notify('Something went wrong, try again later.')
+      displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Opps. something went wrong, try again later.'
+      ])
       setTimeout(() => runSpinner(true), 3000)
     } catch (error) {
       console.log(error.message)
