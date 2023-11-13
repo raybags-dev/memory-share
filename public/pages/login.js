@@ -22,7 +22,7 @@ export async function LOGIN_HTML () {
   <main id="main__wrapper" class="container container-fluid my-10 position-relative">
     <div class="container log___in container-fluid">
         <h3 class="text-center p-3 text-white">LOGIN</h3>
-        <form id="login___form" class=" p-3 rounded pt-2 text-white">
+        <form id="login___form" class=" p-3 rounded pt-2 text-white container-fluid">
             <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Email address</label>
                 <input type="email" name="email" class="form-control" placeholder="Enter your email"
@@ -35,7 +35,7 @@ export async function LOGIN_HTML () {
                       id="exampleInputPassword1" autocomplete="current-password webauthn"  required>
                   <div class="invalid-feedback">Please enter your password.</div>
             </div>
-            <div class="form-check form-switch mt-3 mb-3">
+            <div id="checker" class="form-check form-switch mt-3 mb-3 hide_2">
                       <input class="form-check-input"  type="checkbox" role="switch" id="flexSwitchCheckDefault">
                       <label class="form-check-label" for="flexSwitchCheckDefault">Forgot password</label>
             </div>
@@ -95,6 +95,12 @@ export async function LOGIN_HTML () {
       runSpinner(false, 'Failed!')
       const errorMessage = error.response.data.error || 'An error occurred.'
       Notify(`${errorMessage}.`)
+      if (errorMessage.includes('Unauthorized')) {
+        document.querySelector('#checker').classList.add('hide_2')
+      }
+      if (errorMessage.trim() === 'Invalid email or password') {
+        document.querySelector('#checker').classList.remove('hide_2')
+      }
       setTimeout(() => runSpinner(true), 100)
     }
   })
@@ -121,6 +127,7 @@ export async function loginUser (user) {
       }, 100)
     }
   } catch (error) {
+    console.log(passwordsuggest)
     runSpinner(false, 'Failed!')
     const errorMessage = error.response.data.error || 'An error occurred.'
     Notify(`Session: ${errorMessage}.`)
