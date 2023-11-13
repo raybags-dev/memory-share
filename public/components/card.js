@@ -82,7 +82,6 @@ export async function runSkeleto (isDone) {
     })
   }
 }
-// big Carucel
 export async function DisplayeBigImage (
   imgurl,
   email,
@@ -104,7 +103,7 @@ export async function DisplayeBigImage (
     }" style="z-index:200">
     <div class="container __bigOne__">
     <div class="del_btn_cont">
-    <span class="lead">&#10006;</span>
+    <button type="button" class="btn-close lead" aria-label="Close"></button>
     </div>
     
     <div class="prev__btn">
@@ -119,9 +118,8 @@ export async function DisplayeBigImage (
     </div>
     <div class="card big_box bg-transparent" data-user="${
       userId && userId
-    }"  style="width:60%;height:70% !important">
+    }" style="width:60%;height:70% !important">
         <div class="details_btn"><span>&#9737;</span></div>
-
           <img  src="${
             imgurl || ''
           }" class="card-img-top img-fluid" loading="lazy" alt="..." style="border-radius:.2rem;"  onerror="this.onerror=null;this.src='${fallback_img}'">

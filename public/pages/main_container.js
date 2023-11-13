@@ -13,7 +13,7 @@ import { logOutUser, LOGIN_HTML } from '../pages/login.js'
 
 export async function MAIN_PAGE () {
   let pageContent = `
-      <nav  class="navbar navbar-expand-lg navbar-dark glassy" style="background-color: #1b1a1ab3;">
+      <nav  class="navbar navbar-expand-lg navbar-dark glassy" style="background-color: transparent;">
       <div class="container container-fluid img__conta">
       </div>
         <div class="container-fluid">
