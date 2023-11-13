@@ -131,6 +131,7 @@ export async function fetchData (page = 1) {
       if (data.length < perPage) {
         if (page > 1) {
           Notify(`Last page: ${page}`)
+          displayLabel(['main__wrapper', 'alert-success', `Last page`])
         }
         return data
       } else {
@@ -143,6 +144,12 @@ export async function fetchData (page = 1) {
 
     if (error instanceof TypeError) {
       Notify('An error occurred while processing your request. Please login!')
+      displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        `An error occured while processing your request. Please login again!`
+      ])
+
       showSearchBar(false)
       setTimeout(async () => {
         return await LOGIN_HTML()
@@ -152,11 +159,21 @@ export async function fetchData (page = 1) {
       runSpinner(true)
       showSearchBar(false)
       userGuideModel()
+      displayLabel([
+        'main__wrapper',
+        'alert-secondary',
+        `You dont seem to have any documents saved.`
+      ])
       return
     }
 
     if (error?.response.status == 401) {
-      Notify('Session expired. Please login!')
+      displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        `Session expired. Please login again.`
+      ])
+
       document.getElementById('log___out').style.display = 'none'
       return LOGIN_HTML()
     }
@@ -232,7 +249,12 @@ export async function PaginateData () {
     }
   } catch (error) {
     if (error instanceof TypeError) {
-      Notify('Sorry, an error occurred while processing your request.')
+      displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        `Sorry, an error occurred while processing your request.`
+      ])
+
       showSearchBar(false)
       return await LOGIN_HTML()
     }
@@ -292,7 +314,7 @@ export async function searchDatabase () {
     }
   } catch (error) {
     if (error.response.data.error == 'Documents not found') {
-      Notify('No maches were found!')
+      displayLabel(['main__wrapper', 'alert-warning', `No matches were found!`])
       console.log(error.message)
     }
   } finally {
@@ -337,11 +359,21 @@ export async function fetchUserProfile () {
       return
     }
     if (error?.response.status == 401) {
-      Notify('Session expired. Please login!')
+      displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        `Session expired. Please login!`
+      ])
       return LOGIN_HTML()
     }
     if (error?.response.status == 404) {
-      showNotification('Account not found. Please sign up!')
+      Notify('Account not found. Please sign up!')
+      displayLabel([
+        'main__wrapper',
+        'alert-warning',
+        `Sorry. To use this application, you must signup!`
+      ])
+
       SIGNUP_HTML()
       return
     }
@@ -368,21 +400,37 @@ export async function deleteUserDocuments () {
 
       if (res.statusText == 'OK') {
         if (res.data.message === 'User has no documents to delete') {
-          return Notify('There is nothing to delete!.')
+          return displayLabel([
+            'main__wrapper',
+            'alert-warning',
+            'There is nothing to delete!.'
+          ])
         }
         await emptyMainContainer()
         runSpinner(true)
-        Notify('All documents have been deleted' || res.data)
+        return displayLabel([
+          'main__wrapper',
+          'alert-success',
+          `${'All documents have been deleted' || res.data}`
+        ])
       }
     }
   } catch (error) {
     if (error instanceof TypeError) {
-      Notify('An error occurred while processing your request.')
+      displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'An error occurred while processing your request.'
+      ])
       return
     }
 
     console.log(error.message)
-    Notify('Request could not be processed, try again later!')
+    displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      'Request could not be processed, try again later!'
+    ])
   } finally {
     runSpinner(true)
   }
@@ -411,29 +459,42 @@ export async function deleteUserProf () {
         sessionStorage.clear()
         await SIGNUP_HTML()
         Notify('Account deleted!')
+        displayLabel(['main__wrapper', 'alert-success', 'Account deleted!'])
       }
     }
   } catch (error) {
     if (
       error?.response.data.error ===
       'FORBIDDEN: You cannot delete this account!'
-    )
-      return Notify('This account can not be deleted!')
+    ) {
+      return displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Account can not be deleted!'
+      ])
+    }
+    if (error?.message == 'Request failed with status code 403') {
+      return displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Contents of this account can not be deleted!'
+      ])
+    }
 
-    console.log(error?.response.status)
-    if (error instanceof TypeError) {
-      Notify('An error occurred while processing your request.')
-      showSearchBar(false)
-      setTimeout(async () => {
-        return await LOGIN_HTML()
-      }, 2000)
-    }
     if (error?.response.status == 401) {
-      Notify('Session expired. Please login!')
-      return LOGIN_HTML()
+      displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Session expired. Please login!'
+      ])
+      return
     }
+    displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      'Request could not be processed, try again later!'
+    ])
     console.log(error.message)
-    Notify('Request could not be processed, try again later!')
   } finally {
     runSpinner(true)
   }
@@ -467,7 +528,11 @@ export async function downloadImageById (imageId) {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    Notify('File downloaded.')
+    displayLabel([
+      'main__wrapper',
+      'alert-success',
+      'File downloaded successfully'
+    ])
     runSpinner(true)
   } catch (error) {
     console.error('Error downloading image:', error)
@@ -517,7 +582,27 @@ export function confirmAction () {
         if (big_caro_img) big_caro_img.remove()
         await hideUploadForm(true)
         Notify('Process aborted.')
+        displayLabel([
+          'main__wrapper',
+          'alert-secondary',
+          `This process aborted has been cancelled.`
+        ])
         resolve('Aborted.')
       })
   })
+}
+
+export async function displayLabel ([anchorId, labelClass, labelText]) {
+  const label = document.createElement('div')
+  label?.classList.add('alert', labelClass, 'text-center', 'main___alert')
+  label.textContent = labelText
+  // Append label to the specified anchor
+  const anchor = document.getElementById(anchorId)
+  if (anchor) {
+    anchor.appendChild(label)
+    await new Promise(resolve => setTimeout(resolve, 5000))
+    anchor.removeChild(label)
+  } else {
+    console.error(`Parent element '${anchorId}' for lable not found.`)
+  }
 }

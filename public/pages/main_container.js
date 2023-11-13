@@ -5,7 +5,8 @@ import {
   Notify,
   fetchData,
   searchDatabase,
-  downloadImageById
+  downloadImageById,
+  displayLabel
 } from '../lifters/works.js'
 import { DisplayeBigImage, DisplayUserProfileHTML } from '../components/card.js'
 import { CARD } from '../components/card.js'
@@ -150,10 +151,20 @@ export async function uploadFiles () {
     const files = inputRef?.files
 
     if (!token || token === undefined) {
+      displayLabel([
+        'main__wrapper',
+        'alert-warning',
+        'The current session has expired.'
+      ])
       return Notify('Session terminated. Login required!')
     }
     if (!files || files.length === 0) {
-      return Notify('Please select files to upload')
+      displayLabel([
+        'main__wrapper',
+        'alert-warning',
+        'You must select a file to upload.'
+      ])
+      return Notify('Something went wrong.')
     }
     const formData = new FormData()
     for (let i = 0; i < files.length; i++) {
@@ -169,6 +180,11 @@ export async function uploadFiles () {
     if (response.statusText == 'OK') {
       runSpinner(true)
       Notify('Uploaded successful')
+      displayLabel([
+        'main__wrapper',
+        'alert-success',
+        'File uploaded successfully'
+      ])
 
       let newData = await fetchData(1)
       let container = document.querySelector('#off__Container')
@@ -188,25 +204,45 @@ export async function uploadFiles () {
     }
   } catch (error) {
     if (error.response && error.response.status == 429)
-      return Notify('Max limit upload for demo account reached!')
-
+      return displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Max limit for test account reached.'
+      ])
     if (error.response && error.response.status == 428)
-      return Notify('Document selection not allowed for a demo account!')
+      return displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Limit reached for a demo account!.'
+      ])
 
     if (error instanceof TypeError)
-      return Notify('Sorry, an error occurred while processing your request.')
+      return displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Sorry an error occured try again later.'
+      ])
 
     if (error.response.status === 409) {
-      Notify(`Duplicates detected.`)
+      displayLabel(['main__wrapper', 'alert-danger', 'Duplicates detected!'])
       setTimeout(() => location.reload(), 1500)
       return
     }
     if (error instanceof TypeError && error.message.includes('token')) {
       Notify('Your session has expired. Please login!')
+      displayLabel([
+        'main__wrapper',
+        'alert-warning',
+        'Your session has expired. Please login!'
+      ])
       await LOGIN_HTML()
     }
     if (error?.response.status == 401)
-      return Notify('Session expired. Please login!')
+      return displayLabel([
+        'main__wrapper',
+        'alert-warning',
+        'Your session has expired. Please login!'
+      ])
 
     console.log('Something went wrong: ' + error)
   } finally {

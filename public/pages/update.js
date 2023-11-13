@@ -1,4 +1,9 @@
-import { API_CLIENT, runSpinner, Notify } from '../lifters/works.js'
+import {
+  API_CLIENT,
+  runSpinner,
+  Notify,
+  displayLabel
+} from '../lifters/works.js'
 import { MAIN_PAGE } from '../pages/main_container.js'
 import { LOGIN_HTML } from './login.js'
 
@@ -79,7 +84,11 @@ export async function UPDATE_PASSWORD_HTML () {
         // Redirect to main page
         sessionStorage.setItem('redirected', true)
         //   show logout button
-        Notify(`Paswwrod update successfull`)
+        displayLabel([
+          'main__wrapper',
+          'alert-success',
+          'Password update successfull'
+        ])
         setTimeout(async () => {
           runSpinner(true)
           history.pushState(null, null, '/')
@@ -94,12 +103,10 @@ export async function UPDATE_PASSWORD_HTML () {
     }
   })
 }
-// notification for password change request
-
 export async function passwordNotice () {
   runSpinner(false)
-  const noticeHtml = `<div class="alert alert-secondary" role="alert">
-    You request for a password change has been received successfully.  A secret token to facilitate a password reset has been send to your email address associated with this account. Follow these steps to update your password: <br>1. Copy the token in your email.<br>2. Click on  <a id="show_html" href="#">this_link</a> and fill in the form accordingly.
+  const noticeHtml = `<div class="alert alert-transparent text-light" role="alert">
+    You request for a password change has been received successfully.  A secret token to facilitate a password reset has been send to your email address associated with this account. Follow these steps to update your password: <br>1. Copy the token in your email.<br>2. Click on  <a id="show_html" href="#">this link</a> and fill in the form accordingly.
   </div>`
 
   const emailDefault = JSON.parse(sessionStorage?.getItem('token'))
@@ -109,12 +116,16 @@ export async function passwordNotice () {
   try {
     let url = 'user/forgot-password'
     if (!email || email === undefined)
-      return Notify('Please enter yoru email address below!')
+      return displayLabel([
+        'main__wrapper',
+        'alert-warning',
+        'Please enter your email address...'
+      ])
 
     const response = await API_CLIENT.post(url, { email })
     if (response.status == 200) {
       runSpinner(true)
-      Notify(`Request accepted!`)
+      displayLabel(['main__wrapper', 'alert-success', 'Request accespted!'])
       setTimeout(async () => {
         runSpinner(true)
         document.querySelector('.log___in').innerHTML = noticeHtml
@@ -124,7 +135,7 @@ export async function passwordNotice () {
   } catch (error) {
     runSpinner(false)
     const errorMessage = error.response.data.error || 'An error occurred.'
-    Notify(`Opps: ${errorMessage}.`)
+    displayLabel(['main__wrapper', 'alert-danger', `YOpps: ${errorMessage}`])
     setTimeout(() => runSpinner(true), 800)
     console.log(error.message)
   } finally {
@@ -140,7 +151,6 @@ export async function disableElement (isDisabled, element) {
     console.error('Element not found:', element)
   }
 }
-
 // render update function html
 export async function renderUpdateHTML (element) {
   let link_element = document.querySelector(element)

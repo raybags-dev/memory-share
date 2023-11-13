@@ -210,10 +210,16 @@
         .next__btn span {
           font-size: 2rem !important;
         }
-
         .back-to-top {
           width: 40px !important;
           height: 40px !important;
+        }
+        .main___alert {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100vw !important;
+          text-align: center;
         }
       }
 
@@ -275,6 +281,33 @@
       .back-to-top:hover {
         color: #ffffff99;
         box-shadow: inset 0px -2px 1px 2px rgba(189, 189, 189, 0.2);
+      }
+      .main___alert {
+        display: flex;
+        flex-wrap: wrap;
+        z-index: 1000;
+        position: fixed;
+        left: -50%;
+        bottom: -2% !important;
+        opacity: 0;
+        width: max-content;
+        transition: all 0.3s;
+        animation: notice-wrapper 4.5s forwards ease-in-out;
+      }
+
+      @keyframes notice-wrapper {
+        10% {
+          left: 0%;
+          opacity: 1;
+        }
+        80% {
+          left: 0%;
+          opacity: 1;
+        }
+        100% {
+          left: -50%;
+          opacity: 0;
+        }
       }
     </style>
     <link rel="stylesheet" href="./styles/styles.css" />
