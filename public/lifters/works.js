@@ -585,14 +585,17 @@ export function confirmAction () {
         displayLabel([
           'main__wrapper',
           'alert-secondary',
-          `This process aborted has been cancelled.`
+          `This process has been aborted.`
         ])
         resolve('Aborted.')
       })
   })
 }
-
 export async function displayLabel ([anchorId, labelClass, labelText]) {
+  document.querySelector('.main___alert')?.remove()
+  // if (labeExist) {
+  //   labeExist
+  // }
   const label = document.createElement('div')
   label?.classList.add('alert', labelClass, 'text-center', 'main___alert')
   label.textContent = labelText

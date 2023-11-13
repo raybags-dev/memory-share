@@ -119,17 +119,21 @@ export async function loginUser (user) {
     let url = '/user/login'
     const response = await API_CLIENT.post(url, { email, password })
     if (response.status == 200) {
+      await displayLabel([
+        'main__wrapper',
+        'alert-success',
+        'Login successful...'
+      ])
       runSpinner(true)
       const token = response.headers.authorization.split(' ')[1]
       sessionStorage.setItem('token', JSON.stringify({ token, email }))
       // Redirect to main page
       sessionStorage.setItem('redirected', true)
-      Notify(`Login successful 😀`)
-      displayLabel(['main__wrapper', 'alert-danger', `Login successful 😀`])
-      setTimeout(() => {
+      Notify(`Login successful`)
+      setTimeout(async () => {
         runSpinner(true)
-        MAIN_PAGE()
-      }, 100)
+        await MAIN_PAGE()
+      }, 800)
     }
   } catch (error) {
     console.log(passwordsuggest)
