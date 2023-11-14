@@ -27,10 +27,10 @@ export async function MAIN_PAGE () {
           <div class="collapse navbar-collapse bg-transparent" id="navbarScroll">
               <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll bg-transparent" style="--bs-scroll-height: 100px;">
                 <li class="nav-item dropdown">
-                  <a class="dropdown-item dropdown-item-dark text-white bg-transparent user_profile_link"href="#">Account</a>
+                  <a class="dropdown-item  dropdown-item-dark text-white bg-transparent user_profile_link"href="#">Account</a>
                 </li>
                 <li class="nav-item dropdown">
-                  <a class="dropdown-item dropdown-item-dark text-white bg-transparent logoutuser_link" href="#">Logout</a>
+                  <a class="dropdown-item  dropdown-item-dark text-white bg-transparent logoutuser_link" href="#">Logout</a>
                 </li>
               </ul>
             <form class="d-flex" style="max-height:inherit !important">

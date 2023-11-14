@@ -77,7 +77,7 @@ export async function runSkeleto (isDone) {
       } else {
         image.addEventListener('load', () => {
           let skeleton = card.querySelector('.skeleton')
-          setTimeout(() => skeleton.classList.add('hide_2'), 800)
+          setTimeout(() => skeleton.classList.add('hide'), 800)
         })
       }
     })
@@ -102,10 +102,10 @@ export async function DisplayeBigImage (
     <div id="carocel_big" class="container control_big_cont" data-carucel="${
       _id && _id
     }" style="z-index:200">
-    <div class="container __bigOne__">
     <div class="del_btn_cont">
-    <button type="button" class="btn-close lead" aria-label="Close"></button>
+    <button type="button" class="btn-close lead btn-danger" aria-label="Close"></button>
     </div>
+    <div class="container __bigOne__">
     
     <div class="prev__btn">
     <span class="lead">&#10094;</span>
@@ -114,9 +114,7 @@ export async function DisplayeBigImage (
     <div class="main-del-cont" style="cursor:pointer !important;z-index:1000 !important;">
     <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
     </div>
-    <div class="big_spinnerr hide_2">
-    <span class="big_caro_loader"></span>
-    </div>
+
     <div class="card big_box bg-transparent" data-user="${
       userId && userId
     }" style="width:60%;height:70% !important">
@@ -186,18 +184,11 @@ export async function DisplayeBigImage (
     }
   })
 
-  function handle_bigCau_container (isReady) {
-    let element = document.querySelector('.big_spinnerr')
-    return isReady && !element.classList.contains('hide_2')
-      ? element.classList.add('hide_2')
-      : element.classList.remove('hide_2')
-  }
   let currentIndex = 0 // Track the current image index
   let images = [] // Array to store the image URLs
 
   // Helper function to update the image source
   function updateImage () {
-    handle_bigCau_container(false)
     const imgElement = document.querySelector('#carocel_big .card-img-top')
 
     if (images.length > 0) {
@@ -219,15 +210,6 @@ export async function DisplayeBigImage (
     } else {
       nextBTN.style.display = 'block' // Show next button
     }
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          handle_bigCau_container(true)
-        }
-      })
-    })
-
-    observer.observe(imgElement)
   }
 
   // Helper function to add image URLs to the images array

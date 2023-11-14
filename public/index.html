@@ -71,9 +71,9 @@
         width: 100%;
         height: 100%;
         z-index: 101;
+        top: 0;
         border-radius: 0.3rem;
-        max-width: 85%;
-        max-height: 90%;
+        max-width: 90%;
         margin: 0 auto;
         object-fit: contain;
         transition: clip-path ease-in 0.1s;
@@ -123,15 +123,15 @@
         border-radius: 0.3rem;
         z-index: 3000;
         display: grid;
-        color: #f95454;
         cursor: pointer;
         place-content: center;
       }
 
-      .del_btn_cont span {
+      .del_btn_cont button {
         font-weight: 500;
         z-index: 5000;
         cursor: pointer;
+        color: red;
       }
 
       .main-del-cont {
@@ -145,7 +145,7 @@
         border-radius: 0.4rem;
         border-radius: 0.2rem;
         padding: 0.2rem;
-        transition: 0.2s;
+        transition: 0.1s;
         cursor: pointer !important;
         backdrop-filter: blur(10px);
       }
@@ -160,7 +160,7 @@
       .main-del-cont:hover i {
         opacity: 1;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.1s;
         color: #f75c5c;
       }
 
@@ -171,7 +171,7 @@
       @media screen and (max-width: 759px) {
         #carocel_big .container {
           min-width: 98%;
-          height: 90%;
+          height: 100%;
           padding-left: unset;
           padding-right: unset;
         }
@@ -201,7 +201,7 @@
       @media screen and (max-width: 557px) {
         #carocel_big .container {
           width: 100 !important;
-          height: 90%;
+          height: 100%;
         }
       }
 
@@ -225,8 +225,8 @@
 
       .details_btn {
         position: absolute;
-        left: 4%;
-        top: 97%;
+        left: 3%;
+        top: 95%;
         padding: 0.3rem;
         border-radius: 0.3rem;
         transform: translate(-50%, -50%);
@@ -242,7 +242,7 @@
       }
 
       .details_btn span {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         font-weight: 800;
         color: white;
       }
@@ -308,6 +308,17 @@
           left: -50%;
           opacity: 0;
         }
+      }
+      .nav-item {
+        border-radius: 0.3rem;
+        margin: 0.1rem;
+        background-color: rgba(52, 52, 52, 0.4);
+        border: 2px solid transparent;
+        transition: 0.3s;
+      }
+      .nav-item:hover {
+        background-color: rgba(52, 52, 52, 0.6);
+        border: 2px solid rgba(145, 145, 145, 0.3);
       }
     </style>
     <link rel="stylesheet" href="./styles/styles.css" />
