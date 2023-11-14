@@ -606,6 +606,6 @@ export async function displayLabel ([anchorId, labelClass, labelText]) {
     await new Promise(resolve => setTimeout(resolve, 5000))
     anchor.removeChild(label)
   } else {
-    console.error(`Parent element '${anchorId}' for lable not found.`)
+    console.log(`anchor '${anchor}' could not be found`)
   }
 }
