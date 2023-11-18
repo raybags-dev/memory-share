@@ -57,6 +57,7 @@ body::after {
 }
 
 #main__wrapper {
+    position: relative;
     overflow-y: auto;
     height: 92vh;
     transition: var(--animate-card);
@@ -287,10 +288,18 @@ a {
 }
 
 #off__Container {
-    transition: all ease-in .3s !important;
     overflow: auto;
     height: 93vh;
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    overflow-x: auto;
 }
+
+.sm-card {
+    flex: 0 0 auto;
+}
+
+
 
 #notifications {
     position: fixed !important;
@@ -371,6 +380,7 @@ a {
 }
 
 .card {
+    position: relative;
     min-width: 100%;
     min-height: 100%;
     max-height: 100%;
@@ -397,72 +407,8 @@ a {
 .img_card {
     -o-object-fit: cover !important;
     object-fit: cover !important;
-}
+    border: .2rem solid red;
 
-.big_box {
-    min-width: 100%;
-    min-height: 100%;
-    margin: 0 auto;
-    border: 0 transparent !important;
-    background: rgb(20, 20, 20, 0.5) !important;
-    padding: .7rem !important;
-}
-
-.prev__btn,
-.next__btn {
-    position: absolute;
-    overflow: hidden;
-    width: -webkit-fit-content;
-    width: -moz-fit-content;
-    width: fit-content;
-    height: -webkit-fit-content;
-    height: -moz-fit-content;
-    height: fit-content;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.prev__btn {
-    position: absolute;
-    top: 50%;
-    left: 2%;
-    z-index: 300;
-    transform: translate(-50%, 0) !important;
-}
-
-.next__btn {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    z-index: 300;
-    transform: translate(-50%, 0) !important;
-}
-
-.prev__btn span,
-.next__btn span {
-    font-size: 4rem;
-    cursor: pointer !important;
-    color: #ffffff80;
-    z-index: 700;
-    transition: all .2s;
-    text-align: center;
-}
-
-.prev__btn span {
-    padding-left: 1rem;
-}
-
-
-.prev__btn:hover span,
-.next__btn:hover span {
-    color: #ffffff;
-}
-
-.prev__btn:active span,
-.next__btn:active span {
-    color: red;
 }
 
 .heading {
@@ -536,7 +482,7 @@ a {
 }
 
 .card:hover .img-container img {
-    transform: scale(1.0999);
+    transform: scale(1.03119);
     transition: .3s;
 }
 
@@ -601,7 +547,7 @@ a {
     cursor: pointer;
     -webkit-backdrop-filter: blur(100px);
     backdrop-filter: blur(100px);
-    background: rgb(32, 32, 32);
+    background: rgb(46, 46, 46);
     opacity: 0.8;
     z-index: 999;
 }
@@ -703,7 +649,7 @@ a {
 }
 
 .download-btn {
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
     z-index: 1000 !important;
@@ -730,5 +676,58 @@ a {
     .sign___up,
     .update___password {
         background-image: unset;
+    }
+}
+
+.doc_delete_loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 80px;
+    height: 80px;
+    margin-top: -40px;
+    /* Half of the height */
+    margin-left: -40px;
+    /* Half of the width */
+    z-index: 2000;
+    border: 2px solid;
+    border-color: transparent #FFF;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    -webkit-animation: rotation 1s linear infinite;
+    animation: rotation 1s linear infinite;
+}
+
+
+.doc_delete_loader::after {
+    position: absolute;
+    content: '';
+    box-sizing: border-box;
+    left: 50%;
+    top: 50%;
+    border: 24px solid;
+    border-color: transparent rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@-webkit-keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
     }
 }

@@ -8,8 +8,8 @@ import {
   downloadImageById,
   displayLabel
 } from '../lifters/works.js'
-import { DisplayeBigImage, DisplayUserProfileHTML } from '../components/card.js'
-import { CARD } from '../components/card.js'
+import { DisplayUserProfileHTML, generateSubCards } from '../components/card.js'
+import { CARD, DisplayeBigImage } from '../components/card.js'
 import { logOutUser, LOGIN_HTML } from '../pages/login.js'
 
 export async function MAIN_PAGE () {
@@ -40,13 +40,14 @@ export async function MAIN_PAGE () {
         </div>
       </nav>
       <main id="main__wrapper" class="container my-10 position-relative">
-          <form id="upload_formm" class="select-img-form text-danger hide">
+          <form id="upload_formm" class="select-img-form text-danger">
             <label class="label">
               <input  class="select-image-input" type="file" ref="inputRef" multiple>
               <span>+</span>
             </label>
           </form>
         <div id="off__Container" class="row row-cols-1 row-cols-md-3 g-2" style="transition:.5s !important;">
+
         </div>
       </main>
     `
@@ -54,10 +55,7 @@ export async function MAIN_PAGE () {
   await PaginateData()
   const selectImgForm = document.querySelector('.select-img-form')
   selectImgForm?.addEventListener('change', uploadFiles)
-  // generate card carucel
   await genCardCarucel()
-
-  // handle db search
   let mySearchTimeout = null
   let searchInput = document.querySelector('#search____input')
 
@@ -76,20 +74,49 @@ export async function MAIN_PAGE () {
     }, 1000)
   }
   searchInput?.addEventListener('input', debounceSearchDatabase)
-  hideUploadForm(true)
-
-  // logout user
+  // hideUploadForm(true)
   const logoutLink = document.querySelector('.logoutuser_link')
   logoutLink?.addEventListener('click', async () => {
     logOutUser(true)
   })
-  // display user profile big carucel
   const userProfileLink = document.querySelector('.user_profile_link')
   userProfileLink?.addEventListener('click', async () => {
-    await hideUploadForm(false)
+    // await hideUploadForm(false)
     await DisplayUserProfileHTML()
   })
   await setUpBackToTop()
+  await animateImages()
+  let cardContainerr = document.querySelector('#off__Container')
+  cardContainerr?.addEventListener('click', async function (event) {
+    const isCard = event.target.classList.contains('card')
+    const isImg = event.target.classList.contains('card-img-top')
+    const isTrashCan = event.target.classList.contains('fa-trash-can')
+    const isDownloadBtn = event.target.classList.contains('download-btn')
+
+    if ((isImg || isCard) && !isTrashCan && !isDownloadBtn) {
+      const cardElement = event.target.closest('.sm-card')
+      if (cardElement) {
+        const dataId = cardElement.getAttribute('data-id')
+        const imgElement = cardElement.querySelector('.card-img-top')
+        const imgSrc = imgElement ? imgElement.getAttribute('src') : null
+        const ulElement = cardElement.querySelector('.card-body ul')
+        const createdAt = ulElement?.querySelector('.creat_at')?.textContent
+        await DisplayeBigImage(dataId, imgSrc, createdAt)
+
+        //call elemnet to create all cards.
+        Array.from(document.querySelectorAll('.main___card')).forEach(
+          async (card, index) => {
+            const cardDataId = card.getAttribute('data-card')
+            const imgElement = card.querySelector('.card-img-top')
+            const imgSrc = imgElement ? imgElement.getAttribute('src') : null
+            const ulElement = card.querySelector('.card-body ul')
+            const createdAt = ulElement?.querySelector('.creat_at')?.textContent
+            await generateSubCards(cardDataId, imgSrc, createdAt)
+          }
+        )
+      }
+    }
+  })
 }
 export async function genCardCarucel () {
   try {
@@ -116,27 +143,7 @@ export async function genCardCarucel () {
         const userId = liElements[1]?.textContent
         const originalName = liElements[2]?.textContent
         const fileName = liElements[3]?.textContent
-        const size = liElements[4]?.textContent
-        const encoding = liElements[5]?.textContent
-        const createdAt = liElements[6]?.textContent
-        const updatedAt = liElements[7]?.textContent
-        const contentType = liElements[8]?.textContent
         const _id = liElements[9]?.textContent
-
-        DisplayeBigImage(
-          imgSrc,
-          email,
-          userId,
-          originalName,
-          fileName,
-          size,
-          encoding,
-          createdAt,
-          updatedAt,
-          contentType,
-          _id
-        )
-        hideUploadForm(false)
       }
     })
   } catch (e) {
@@ -249,13 +256,11 @@ export async function uploadFiles () {
     runSpinner(true)
   }
 }
-// hide/show upload btn
 export async function hideUploadForm (isVisible) {
   let form = document.getElementById('upload_formm')
   if (!isVisible) return form?.classList.add('hide')
   form?.classList.remove('hide')
 }
-
 export async function setUpBackToTop () {
   const buttonTopInnerHTML = `<a href="#" class="back-to-top" aria-label="Back to Top">&uarr;</a>`
 
@@ -283,16 +288,29 @@ export async function setUpBackToTop () {
     backToTopButton.classList.remove('show-to-top-btn')
   }
 }
-export async function animateImages (imageDataArray) {
+export async function animateImages () {
+  let imageDataArray = await extractImageUrls()
+  if (!imageDataArray.length) return
+
   const container = document.querySelector('.img__conta')
   let currentIndex = 0
 
-  const loadImage = () => {
-    if (imageDataArray.length === 0) retun
+  const loadImage = async () => {
+    const newImageDataArray = await extractImageUrls()
+    if (JSON.stringify(newImageDataArray) !== JSON.stringify(imageDataArray)) {
+      imageDataArray = newImageDataArray
+      container.innerHTML = '' // Clear the container
+    }
+
+    if (imageDataArray.length === 0) return
     if (currentIndex >= imageDataArray.length) currentIndex = 0
 
-    const imageData = imageDataArray[currentIndex]
-    const imageUrl = getImageUrlWithSignature(imageData)
+    const imageUrl = imageDataArray[currentIndex]
+
+    if (!imageUrl || imageUrl.trim() === 'null') {
+      imageUrl = '../images/bg-water.jpeg'
+    }
+
     const existingImage = container.querySelector(`img[src="${imageUrl}"]`)
 
     if (existingImage) existingImage.remove()
@@ -310,10 +328,40 @@ export async function animateImages (imageDataArray) {
     }, 4000)
   }
 
-  const getImageUrlWithSignature = imageData => {
-    const { url, signature } = imageData
-    return `${url}?${signature}`
+  loadImage()
+}
+export async function extractImageUrls () {
+  const cards = document.querySelectorAll('#off__Container .sm-card')
+  const urls = []
+
+  if (!cards.length) return urls
+
+  cards.forEach(card => {
+    const img = card.querySelector('.img-container img')
+    if (img) {
+      const imageUrl = img.getAttribute('src')
+      urls.push(imageUrl)
+    }
+  })
+
+  const mutationObserver = new MutationObserver(() => {
+    refreshImageUrls()
+  })
+
+  mutationObserver.observe(document.getElementById('off__Container'), {
+    childList: true,
+    subtree: true
+  })
+  function refreshImageUrls () {
+    const updatedUrls = []
+    cards.forEach(card => {
+      const img = card.querySelector('.img-container img')
+      if (img) {
+        const imageUrl = img.getAttribute('src')
+        updatedUrls.push(imageUrl)
+      }
+    })
   }
 
-  loadImage()
+  return urls
 }

@@ -1,7 +1,7 @@
 import { LOGIN_HTML } from '../pages/login.js'
 import { SIGNUP_HTML } from '../pages/signup.js'
 import { CARD, userGuideModel } from '../components/card.js'
-import { hideUploadForm, animateImages } from '../pages/main_container.js'
+import { hideUploadForm } from '../pages/main_container.js'
 
 // api client
 export const API_CLIENT = axios.create({
@@ -99,7 +99,7 @@ export function formatDate (timestamp) {
   const day = String(date.getUTCDate()).padStart(2, '0')
   const hours = String(date.getUTCHours()).padStart(2, '0')
   const minutes = String(date.getUTCMinutes()).padStart(2, '0')
-  return `${year}-${month}-${day}-${hours}:${minutes}`
+  return `${year}-${month}-${day}`
 }
 export function formatEmail (email) {
   const atIndex = email.indexOf('@')
@@ -199,7 +199,6 @@ export async function PaginateData () {
   try {
     const data = await fetchData(page)
     if (data && data.length) {
-      await animateImages(data)
       data.forEach(async obj => {
         try {
           await CARD(obj)
@@ -592,20 +591,26 @@ export function confirmAction () {
   })
 }
 export async function displayLabel ([anchorId, labelClass, labelText]) {
-  document.querySelector('.main___alert')?.remove()
-  // if (labeExist) {
-  //   labeExist
-  // }
+  const existingAlert = document.querySelector('.main___alert')
+  if (existingAlert) {
+    existingAlert.remove()
+  }
   const label = document.createElement('div')
-  label?.classList.add('alert', labelClass, 'text-center', 'main___alert')
+  label.classList.add('alert', labelClass, 'text-center', 'main___alert')
   label.textContent = labelText
-  // Append label to the specified anchor
+
   const anchor = document.getElementById(anchorId)
   if (anchor) {
     anchor.appendChild(label)
-    await new Promise(resolve => setTimeout(resolve, 5000))
-    anchor.removeChild(label)
+
+    // Automatically remove the label after 5000 milliseconds (5 seconds)
+    setTimeout(() => {
+      // Check if the label is still a child of the anchor before trying to remove it
+      if (anchor.contains(label)) {
+        anchor.removeChild(label)
+      }
+    }, 5000)
   } else {
-    console.log(`anchor '${anchor}' could not be found`)
+    console.log(`Anchor with ID '${anchorId}' could not be found`)
   }
 }

@@ -10,7 +10,6 @@ import {
   displayLabel
 } from '../lifters/works.js'
 import { hideUploadForm } from '../pages/main_container.js'
-import { LOGIN_HTML } from '../pages/login.js'
 export async function CARD (data, isNew = false) {
   const {
     url,
@@ -29,10 +28,13 @@ export async function CARD (data, isNew = false) {
   let fall_back = '../images/_404_.jpeg'
   let cardContent = `
   <div class="col sm-card bg-transparent" style="padding:.2rem;" data-id="${_id}">
-  <div class="card  bg-transparent rounded" style="object-fit:contain !important;">
+  <div class="card main___card  bg-transparent rounded" style="object-fit:contain !important;" data-card="${_id}">
+    <div class="main-del-cont" style="cursor:pointer !important;z-index:1000 !important;">
+    <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
+    </div>
+      <i id="${_id}" class="fa-solid fa-download download-btn ${_id}"></i>
   <div class="skeleton"></div>
   <div class="img-container" style="width:100% !important;object-fit:cover !important;">
-  <i id="${_id}" class="fa-solid fa-download download-btn ${_id}"></i>
         <img src="${
           `${url}?${signature}` || ''
         }" class="card-img-top  border-dark img-fluid hide_2 img_card ${_id}" loading="lazy" alt="..." onload="this.classList.remove('hide_2')" onerror="this.onerror=null;this.src='${fall_back}'">
@@ -42,16 +44,18 @@ export async function CARD (data, isNew = false) {
   )}</div>
     <div class="card-body text-white">
       <ul class="list-group rounded">
-        <li class="list-group-item bg-transparent">${formatEmail(email)}</li>
+        <li class="list-group-item bg-transparent name">${formatEmail(
+          email
+        )}</li>
         <li class="list-group-item bg-transparent text-white">${user}</li>
         <li class="list-group-item bg-transparent text-white">${originalname}</li>
-        <li class="list-group-item bg-transparent text-white">${filename}</li>
+        <li class="list-group-item bg-transparent text-white file_n">${filename}</li>
         <li class="list-group-item bg-transparent text-white">${size}</li>
         <li class="list-group-item bg-transparent text-white">${encoding}</li>
-        <li class="list-group-item bg-transparent text-white">${createdAt}</li>
+        <li class="list-group-item bg-transparent text-white creat_at">${createdAt}</li>
         <li class="list-group-item bg-transparent text-white">${updatedAt}</li>
         <li class="list-group-item bg-transparent text-white">${contentType}</li>
-        <li class="list-group-item bg-transparent text-white">${_id}</li>
+        <li class="list-group-item bg-transparent text-white user__id">${_id}</li>
       </ul>
     </div>
   </div>
@@ -83,173 +87,53 @@ export async function runSkeleto (isDone) {
     })
   }
 }
-export async function DisplayeBigImage (
-  imgurl,
-  email,
-  userId,
-  originalname,
-  filename,
-  size,
-  encoding,
-  createdAt,
-  updaedAt,
-  contenttype,
-  _id
-) {
-  runSpinner(false, 'Fetching...')
-  let fallback_img = '../images/_404_.jpeg'
+export async function DisplayeBigImage (dataId, imgSrc, createdAt) {
   const innerBodyBig = `
-    <div id="carocel_big" class="container control_big_cont" data-carucel="${
-      _id && _id
-    }" style="z-index:200">
-    <div class="del_btn_cont">
-    <button type="button" class="btn-close lead btn-danger" aria-label="Close"></button>
-    </div>
-    <div class="container __bigOne__">
-    
-    <div class="prev__btn">
-    <span class="lead">&#10094;</span>
-    </div>
-    
-    <div class="main-del-cont" style="cursor:pointer !important;z-index:1000 !important;">
-    <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
-    </div>
-
-    <div class="card big_box bg-transparent" data-user="${
-      userId && userId
-    }" style="width:60%;height:70% !important">
-        <div class="details_btn"><span>&#9737;</span></div>
-          <img  src="${
-            imgurl || ''
-          }" class="card-img-top img-fluid" loading="lazy" alt="..." style="border-radius:.2rem;"  onerror="this.onerror=null;this.src='${fallback_img}'">
-          <div id="description" class="card-body hide" style="z-index: 100;">
-            <h5 class="card-title">${email && email}</h5>
-            <hr>
-            <p class="">Id: ${userId && userId}</p>
-            <p class="">Original file: ${originalname && originalname}</p>
-            <p class="">New file: ${filename && filename}</p>
-            <p class=""> File size: ${size && size}</p>
-            <p class="">Encoding type: ${encoding && encoding}</p>
-            <p class="">Content type: ${contenttype && contenttype}</p>
-            <p class="card-text"><small>Created: ${
-              createdAt && createdAt
-            }</small></p>
-            <p class="card-text"><small>Updated: ${
-              updaedAt && updaedAt
-            }</small></p>
-          </div>
+        <div id="carouselExampleCaptions" class="carousel carucel___main slide" data-big="${dataId}">
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
         </div>
-        <div class="next__btn">
-        <span class="lead">&#10095;</span>
+        <div class="carousel-inner sub_bigContainer">
+              <div class="carousel-item active" data-image-id="${dataId}">
+                <img src="${imgSrc}" class="d-block big__image w-100" alt="...">
+                <div class="carousel-caption d-none d-md-block" style=";position:fixed;top:10%;left:10%;width:max-content;height:max-content;transform:translate(-50%,-50%);z-index:4000;">
+                <p style="padding:.4rem;border-radius:.4rem;text-shadow:1px 1px 1px black;backdrop-filter:blur(5px);background-color:#53535333;">${formatDate(
+                  createdAt
+                )}</p>
+                </div>
+              </div>
         </div>
-      </div>
-    </div>`
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+        <span class="close_bigimg_caru">&#9747;</span>
+      </div>`
 
-  const container = document.getElementById('innerBody')
-  container?.insertAdjacentHTML('afterbegin', innerBodyBig)
+  const container__main_body = document.getElementById('off__Container')
+  container__main_body?.insertAdjacentHTML('afterbegin', innerBodyBig)
   // finished appending remove spinner
   setTimeout(() => runSpinner(true), 100)
 
-  const closeButton = document.querySelector('#carocel_big .lead')
-  closeButton?.addEventListener('click', async () => {
-    container?.removeChild(document.getElementById('carocel_big'))
-    await hideUploadForm(true)
-  })
-
-  let IMGCONT = document.querySelector('#carocel_big')
-  IMGCONT.addEventListener('click', function (event) {
-    if (!IMGCONT.contains(event.target)) {
-      removeElementFromDOM(IMGCONT)
-    }
-  })
-
-  // delete document
-  let btn = document.querySelector('.main-del-cont')
-  btn?.addEventListener('click', async () => {
-    Notify('Deleting document...')
-    await deleteDocument(_id)
-    await hideUploadForm(true)
-  })
-
-  document.querySelector('.details_btn')?.addEventListener('click', () => {
-    document.querySelector('#description')?.classList.toggle('hide')
-  })
-  // remove big carucel
-  document.addEventListener('click', async event => {
-    const carocelBig = document.getElementById('carocel_big')
-    const clickIsOutside = event.target.classList.contains('control_big_cont')
-    if (carocelBig && clickIsOutside) {
-      carocelBig?.remove()
-      await hideUploadForm(true)
-    }
-  })
-
-  let currentIndex = 0 // Track the current image index
-  let images = [] // Array to store the image URLs
-
-  // Helper function to update the image source
-  function updateImage () {
-    const imgElement = document.querySelector('#carocel_big .card-img-top')
-
-    if (images.length > 0) {
-      const imageUrl = images[currentIndex]
-      imgElement.src = imageUrl
-    } else {
-      imgElement.src = fallback_img
-    }
-
-    // Hide or show prev/next buttons based on currentIndex
-    if (currentIndex === 1) {
-      prevBTN.style.display = 'none' // Hide prev button
-    } else {
-      prevBTN.style.display = 'block' // Show prev button
-    }
-
-    if (currentIndex === images.length - 1) {
-      nextBTN.style.display = 'none' // Hide next button
-    } else {
-      nextBTN.style.display = 'block' // Show next button
-    }
-  }
-
-  // Helper function to add image URLs to the images array
-  function addImage (url) {
-    images.push(url)
-  }
-
-  // Retrieve image URLs from all images in the DOM
-  const imageElements = document.querySelectorAll('.card-img-top')
-  imageElements.forEach(imgElement => {
-    addImage(imgElement.src)
-  })
-
-  // Find the index of the current image in the images array
-  currentIndex = images.findIndex(imageUrl => imageUrl === imgurl)
-
-  // Add logic to cycle through images when prev or next button is clicked
-  const prevBTN = document.querySelector('.prev__btn')
-  const nextBTN = document.querySelector('.next__btn')
-
-  prevBTN?.addEventListener('click', () => {
-    if (currentIndex > 0) {
-      currentIndex--
-      updateImage()
-    }
-  })
-
-  nextBTN?.addEventListener('click', () => {
-    if (currentIndex < images.length - 1) {
-      currentIndex++
-    }
-    updateImage()
+  // remove carousel when close btn clicked
+  const closeButton = document.querySelector('.close_bigimg_caru')
+  closeButton?.addEventListener('click', async event => {
+    event.stopPropagation()
+    const carouselElement = document.querySelector('.carucel___main')
+    container__main_body?.removeChild(carouselElement)
   })
 }
-function removeElementFromDOM (elementAnchor) {
+export function removeElementFromDOM (elementAnchor) {
   if (document.contains(elementAnchor)) {
     elementAnchor.remove()
   }
 }
 export async function deleteDocument (documentId = '') {
+  if (!documentId) return
   try {
     const { token } = JSON.parse(sessionStorage.getItem('token'))
     if (!token) {
@@ -259,14 +143,13 @@ export async function deleteDocument (documentId = '') {
         'Session expired! Login required!'
       ])
     }
+    await Notify('Deleting document...')
+    hideUploadForm(false)
     let colElem = [...document.querySelectorAll('.col')].find(
       card => card.dataset.id === documentId
     )
     let docId = colElem?.dataset.id
-
-    // remove big carocel
-    let carocelll = document.querySelector('#carocel_big')
-    removeElementFromDOM(carocelll)
+    await IsProcessRunning(true, docId)
 
     setTimeout(async () => {
       let url = `delete-doc/${docId}`
@@ -274,27 +157,30 @@ export async function deleteDocument (documentId = '') {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.status === 200) {
+        await IsProcessRunning(false, docId)
+
         colElem.classList.add('del_effect')
         // remove the card from the DOM
         setTimeout(() => colElem.remove(), 500)
-        return displayLabel([
+        displayLabel([
           'main__wrapper',
           'alert-success',
-          'Success: Document deleted!'
+          'Success: Selected document deleted!'
         ])
+        await Notify('done')
+        return setTimeout(async () => await hideUploadForm(true), 1500)
       }
     }, 500)
   } catch (error) {
     if (error instanceof TypeError) {
-      displayLabel([
+      return displayLabel([
         'main__wrapper',
         'alert-danger',
         'Sorry, an error occurred while processing your request.'
       ])
-      return await LOGIN_HTML()
     }
   } finally {
-    runSpinner(true)
+    await runSpinner(true)
   }
 }
 export async function DisplayUserProfileHTML () {
@@ -323,7 +209,7 @@ export async function DisplayUserProfileHTML () {
       <div id="carocel_big" class="container control_big_cont" style="z-index: 200;">
       <div class="container">
         <div class="del_btn_cont">
-          <span class="lead">&#10006;</span>
+          <span class="lead text-danger">&#10006;</span>
         </div>
             <ul class="list-group prof-bad text-white" style="position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);width:100%;height:auto;">
                 <li class="list-group-item bg-transparent text-light">Name: ${
@@ -344,20 +230,21 @@ export async function DisplayUserProfileHTML () {
                 <li class="list-group-item bg-transparent text-light">Document total: ${
                   (count && count) || 0
                 }</li>
-                <div class="text-white border-transparent d-flex mt-3 gap-2">
-                  <a href="#" class="btn del_all_docs btn-lg bg-transparent btn-danger text-white">Delete all documents</a>
-                  <a href="#" class="btn del_profile btn-lg bg-transparent btn-danger text-white">Delete your profile</a>
+                <div class="text-white border-transparent d-grid gap-2  p-3">
+                  <a href="#" class="btn del_all_docs btn-lg bg-transparent btn-danger text-white">Delete documents</a>
+                  <a href="#" class="btn del_profile btn-lg bg-transparent btn-danger text-white float-end">Delete profile</a>
                 </div>
             </ul>
       </div>
     </div>`
 
-  const container = document.getElementById('innerBody')
+  const container = document.querySelector('#off__Container')
+
   container?.insertAdjacentHTML('afterbegin', innerBodyBig)
   // finished appending remove spinner
   setTimeout(() => runSpinner(true), 100)
 
-  const closeButton = document.querySelector('#carocel_big .lead')
+  const closeButton = document.querySelector('.del_btn_cont .lead')
   closeButton?.addEventListener('click', async () => {
     container?.removeChild(document.getElementById('carocel_big'))
     await hideUploadForm(true)
@@ -378,16 +265,6 @@ export async function DisplayUserProfileHTML () {
   let deleleteAllDocs = document.querySelector('.del_all_docs')
   deleleteAllDocs?.addEventListener('click', async () => {
     await deleteUserDocuments()
-  })
-
-  // remove big carucel
-  document.addEventListener('click', async event => {
-    const carocelBig = document.getElementById('carocel_big')
-    const clickIsOutside = event.target.classList.contains('control_big_cont')
-    if (carocelBig && clickIsOutside) {
-      carocelBig?.remove()
-      await hideUploadForm(true)
-    }
   })
 }
 export async function userGuideModel () {
@@ -423,4 +300,94 @@ export async function userGuideModel () {
     const modal_btn = document.querySelector('.modaal_cont')
     modal_btn?.click()
   }, 2000)
+}
+export async function IsProcessRunning (isRunning, id) {
+  const cardSelector = `[data-id="${id}"]`
+  const existingLoader = document.querySelector(
+    `${cardSelector} .doc_delete_loader`
+  )
+
+  if (isRunning) {
+    if (!existingLoader) {
+      const loader = document.createElement('span')
+      loader.classList.add('doc_delete_loader')
+
+      // Find the main___card element
+      const mainCard = document.querySelector(cardSelector)
+
+      if (mainCard) {
+        mainCard
+          .querySelector('.main-del-cont')
+          ?.insertAdjacentElement('afterend', loader)
+      }
+    }
+  } else {
+    if (existingLoader) {
+      existingLoader.remove()
+    }
+  }
+}
+document.addEventListener('DOMContentLoaded', function () {
+  ;(async function () {
+    try {
+      document.addEventListener('click', async function (event) {
+        const target = event.target
+
+        // Check if the clicked element has the class 'main-del-cont'
+        if (target.classList.contains('fa-trash-can')) {
+          const parentCard = target.closest('.sm-card')
+          // If parent card is found, extract the data-id attribute
+          if (parentCard) {
+            const docId = parentCard.dataset.id
+            await deleteDocument(docId)
+          }
+        }
+      })
+    } catch (e) {
+      console.log(e.message)
+    }
+  })()
+})
+
+export async function generateSubCards (dataId, imgSrc, createdAt) {
+  let f_bk = '../images/_404_.jpeg'
+  const subCarouselCard = `
+    <div class="carousel-item" data-image-id="${dataId}">
+        <img src="${imgSrc || f_bk}" class="d-block big__image w-100" alt="...">
+        <div class="carousel-caption d-none d-md-block" style=";position:fixed;top:10%;left:10%;width:max-content;height:max-content;transform:translate(-50%,-50%);z-index:4000;">
+          <p style="padding:.4rem;border-radius:.4rem;text-shadow:1px 1px 1px black;backdrop-filter:blur(5px);background-color:#53535333;">${formatDate(
+            createdAt
+          )}</p>
+        </div>
+      </div>`
+
+  try {
+    const subcardContainer = document.querySelector('.sub_bigContainer')
+    subcardContainer?.insertAdjacentHTML('beforeend', subCarouselCard)
+
+    // Update the carousel using Bootstrap's Carousel methods
+    const carouselElement = document.querySelector('.carucel___main .carousel')
+    bootstrap.Carousel.getInstance(carouselElement)
+
+    // Create a new indicator button
+    const indicatorContainer = document.querySelector(
+      '.carucel___main .carousel-indicators'
+    )
+    const newIndicator = document.createElement('button')
+    newIndicator.type = 'button'
+    newIndicator.setAttribute('data-bs-target', '.carucel___main .carousel')
+    newIndicator.setAttribute(
+      'data-bs-slide-to',
+      subcardContainer.children.length - 1
+    )
+    newIndicator.setAttribute(
+      'aria-label',
+      `Slide ${subcardContainer.children.length}`
+    )
+
+    // Add the new indicator to the container
+    indicatorContainer?.appendChild(newIndicator)
+  } catch (e) {
+    console.log(e.message)
+  }
 }
