@@ -22,11 +22,12 @@ export async function sendEmail (
   callback
 ) {
   // Check if verificationToken is provided before modifying the email body
-  const emailBody = verificationToken
-    ? `${emailData.body}\n\nVerification Link: ${await generateVerificationLink(
-        verificationToken
-      )}`
-    : emailData.body
+  const verificationLink = verificationToken
+    ? `Verification Link: ${verificationToken}`
+    : ''
+
+  // Include both the email body and verification link
+  const emailBody = `${emailData.body}\n\n${verificationLink}`
 
   // Create the email options
   const mailOptions = {
@@ -50,11 +51,12 @@ export async function sendEmail (
 
 export async function generateVerificationLink (verificationToken) {
   try {
-    let randomToken = await generatePasswordResetToken()
+    // If a verificationToken is provided, use it directly
     if (verificationToken) {
       return verificationToken
     } else {
-      return randomToken
+      // Otherwise, generate a new token
+      return await generatePasswordResetToken()
     }
   } catch (error) {
     console.error('Error generating verification link:', error)

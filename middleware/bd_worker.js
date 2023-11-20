@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk'
 import { promisify } from 'util'
 import { Readable } from 'stream'
-import { sendEmail, emailerhandler } from './emailer.js'
+import { sendEmail } from './emailer.js'
 import {
   S3Client,
   CreateBucketCommand,
@@ -68,7 +68,7 @@ export const createBucket = async () => {
       title: 'Document deleted successful',
       body: `S3 bucket "${AWS_BUCKET_NAME}" successfully created in ${AWS_REGION}.`
     }
-    await sendEmail(createBucketEmailData, RECIPIENT_EMAIL, emailerhandler)
+    await sendEmail(createBucketEmailData, RECIPIENT_EMAIL)
 
     console.log('Bucket created successfully.\n')
     return AWS_BUCKET_NAME
@@ -159,7 +159,7 @@ export async function saveImagesToS3 (files) {
       title: 'Upload successful',
       body: `There has been a successful upload to your S3 bucket "${AWS_BUCKET_NAME}" in ${AWS_REGION}. A total of ${urls.length}, was uploaded successfuly`
     }
-    await sendEmail(uploadEmailData, RECIPIENT_EMAIL, emailerhandler)
+    await sendEmail(uploadEmailData, RECIPIENT_EMAIL)
 
     return urls
   } catch (err) {
@@ -183,7 +183,7 @@ export async function deleteFromS3 (filename) {
         title: 'Document deleted successful',
         body: `This document:\n${filename}\n has succesfully been deleted from your S3 bucket "${AWS_BUCKET_NAME}" in ${AWS_REGION}.`
       }
-      await sendEmail(deleteEmailData, RECIPIENT_EMAIL, emailerhandler)
+      await sendEmail(deleteEmailData, RECIPIENT_EMAIL)
       return console.log(`File ${filename} deleted successfully from S3`)
     }
   } catch (err) {

@@ -16,7 +16,7 @@ const {
 } = process.env
 
 import { asyncMiddleware } from '../../middleware/asyncErros.js'
-import { sendEmail, emailerhandler } from '../../middleware/emailer.js'
+import { sendEmail } from '../../middleware/emailer.js'
 
 import {
   dbFileUploader,
@@ -87,7 +87,7 @@ export async function CreateUser (app) {
         title: 'User successfully created in your s3 bucket',
         body: `A user:\n${user}\n has successfully been created in your S3 bucket: "${AWS_BUCKET_NAME}" in: ${AWS_REGION}.`
       }
-      await sendEmail(createUserEmailData, RECIPIENT_EMAIL, emailerhandler)
+      await sendEmail(createUserEmailData, RECIPIENT_EMAIL)
 
       res
         .status(201)
@@ -379,7 +379,7 @@ export async function deleteUserAndOwnDocs (app) {
           title: '===== Importnat notice ===== ',
           body: `Important notice from 'memory-share'. Some one has just tried to delete your account associated with < ${KABWEJUMBIRA} >.\n\nAttention required.`
         }
-        await sendEmail(warning_notice, RECIPIENT_EMAIL, emailerhandler)
+        await sendEmail(warning_notice, RECIPIENT_EMAIL)
         return res
           .status(403)
           .json({ error: 'FORBIDDEN: You cannot delete this account!' })
@@ -419,7 +419,7 @@ export async function deleteUserDocs (app) {
           title: '===== Importnat notice ===== ',
           body: `Important notice from 'memory-share'.\n\nSome one has just tried to delete your account associated with < ${KABWEJUMBIRA} >.\n\nAttention required.`
         }
-        await sendEmail(warning_notice2, RECIPIENT_EMAIL, emailerhandler)
+        await sendEmail(warning_notice2, RECIPIENT_EMAIL)
 
         return res.status(403).json({
           error: 'FORBIDDEN: You cannot delete the content of this account!'
@@ -439,7 +439,7 @@ export async function deleteUserDocs (app) {
         title: 'User documents deleted!',
         body: `All user documents '${documents.length}', have been deleted from your S3 bucket: "${AWS_BUCKET_NAME}" in: ${AWS_REGION}.`
       }
-      await sendEmail(deleteUserDocsEmailData, RECIPIENT_EMAIL, emailerhandler)
+      await sendEmail(deleteUserDocsEmailData, RECIPIENT_EMAIL)
 
       const { name, email, createdAt } = user
       res.status(200).json({
@@ -572,7 +572,7 @@ export async function ForgotPassword (app) {
       }
 
       try {
-        await sendEmail(emailData, email, resetToken, emailerhandler)
+        await sendEmail(emailData, email, resetToken)
         res.status(200).json({ message: 'Password reset email sent.' })
       } catch (error) {
         console.error('Error generating verification token:', error)
