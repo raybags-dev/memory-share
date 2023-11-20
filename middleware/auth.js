@@ -22,7 +22,6 @@ export const generateJWTToken = async (data, version) => {
     })
   })
 }
-
 // login user
 export const loginUser = async (req, res, next) => {
   const { email = '', password = '', verification_token } = req.body
@@ -43,8 +42,6 @@ export const loginUser = async (req, res, next) => {
 
         user.password = password
         await user.save()
-        console.log(user)
-
         // clear verifiaction Token when
         user.password_reset_token = undefined
         await user.save()
@@ -144,9 +141,10 @@ export const authMiddleware = async (req, res, next) => {
     req.locals = { user } // attach user object to req.locals
     next()
   } catch (error) {
-    return res
-      .status(401)
-      .json({ error: 'Invalid token', message: error.message })
+    return res.status(401).json({
+      error: 'Invalid token',
+      message: error.message && 'This login session expired'
+    })
   }
 }
 export const checkDocumentAccess = async (req, res, next) => {

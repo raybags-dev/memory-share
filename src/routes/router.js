@@ -7,8 +7,13 @@ import { cacheResponse, getCachedData } from '../../middleware/redis.js'
 import { ObjectId } from 'mongodb'
 import { config } from 'dotenv'
 config()
-const { RECIPIENT_EMAIL, AWS_BUCKET_NAME, AWS_REGION, KABWEJUMBIRA } =
-  process.env
+const {
+  RECIPIENT_EMAIL,
+  AWS_BUCKET_NAME,
+  AWS_REGION,
+  KABWEJUMBIRA,
+  SECRET_ADMIN_TOKEN
+} = process.env
 
 import { asyncMiddleware } from '../../middleware/asyncErros.js'
 import { sendEmail, emailerhandler } from '../../middleware/emailer.js'
@@ -41,34 +46,58 @@ const fallbackPagePath = new URL(
 export async function CreateUser (app) {
   app.post('/raybags/v1/uploader/create-user', async (req, res) => {
     try {
-      const { name, email, password, isAdmin } = req.body
+      const { name, email, password, isAdmin, secret } = req.body
+      console.log(secret)
+      if (!secret && isAdmin) {
+        return res.status(400).send({ error: 'Unauthorized!' })
+      }
+
+      // Check if user is an admin based on the secret token
+      const isAdminUser = secret === `${SECRET_ADMIN_TOKEN}`
+
+      // Set isAdmin based on the check
+      const userIsAdmin = isAdmin || isAdminUser
+
       // Check if user already exists in the database
       const existingUser = await USER_MODEL.findOne({ email })
       if (existingUser) {
         return res.status(409).send({ error: 'User already exists' })
       }
+
       // Create a new userId document and extract its _id
       const newUserId = await USER_ID_MODEL.create({})
       const userId = newUserId._id
+
       // Create a new user instance and save it to the database
-      const user = new USER_MODEL({ name, email, password, userId, isAdmin })
+      const user = new USER_MODEL({
+        name,
+        email,
+        password,
+        userId,
+        isAdmin: userIsAdmin
+      })
       await user.save()
+
       // Generate a JWT for the user and send back the newly created user and JWT as a response
       const token = user.generateAuthToken()
-      // notify incase of successful user creation
+
+      // Notify in case of successful user creation
       const createUserEmailData = {
-        title: 'User  successful created in your s3 bucket',
-        body: `A user:\n${user}\n has succesfully been created in your S3 bucket: "${AWS_BUCKET_NAME}" in: ${AWS_REGION}.`
+        title: 'User successfully created in your s3 bucket',
+        body: `A user:\n${user}\n has successfully been created in your S3 bucket: "${AWS_BUCKET_NAME}" in: ${AWS_REGION}.`
       }
       await sendEmail(createUserEmailData, RECIPIENT_EMAIL, emailerhandler)
+
       res
         .status(201)
         .send({ user: { name, email, isAdmin: user.isAdmin }, token })
     } catch (error) {
+      console.error('Error processing request:', error)
       res.status(400).send({ error: error.message })
     }
   })
 }
+
 export async function Login (app) {
   app.post('/raybags/v1/user/login', loginUser, async (req, res) => {
     try {
@@ -270,7 +299,6 @@ export async function FindOneItemForDowload (app) {
     authMiddleware,
     checkDocumentAccess,
     async (req, res) => {
-      console.log('endpoint is being hit')
       try {
         const itemId = req.params.id
         const userId = req.user.data._id

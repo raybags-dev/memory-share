@@ -215,7 +215,7 @@ a {
 
 #upload_formm {
     position: fixed !important;
-    bottom: 7px !important;
+    bottom: 4px !important;
     left: 10px !important;
     z-index: 1000;
     border-radius: 50%;
