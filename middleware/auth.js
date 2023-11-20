@@ -22,7 +22,6 @@ export const generateJWTToken = async (data, version) => {
     })
   })
 }
-// login user
 export const loginUser = async (req, res, next) => {
   const { email = '', password = '', verification_token } = req.body
 
@@ -94,7 +93,6 @@ export const loginUser = async (req, res, next) => {
     res.status(500).json({ error: 'Server error', message: error.message })
   }
 }
-//  extract token
 export const extractTokenMiddleware = (req, res, next) => {
   const authHeader = req.headers['authorization']
   if (authHeader) {
@@ -104,41 +102,35 @@ export const extractTokenMiddleware = (req, res, next) => {
   next()
 }
 export const authMiddleware = async (req, res, next) => {
-  // Check if Authorization header is present
-  const authHeader = req.headers['authorization']
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Missing Authorization header' })
-  }
-  // Extract JWT token from Authorization header
-  const [bearer, token] = authHeader.split(' ')
-  if (bearer !== 'Bearer' || !token) {
-    return res.status(401).json({ error: 'Invalid Authorization header' })
-  }
-  // Verify and decode JWT token
   try {
-    const decodedToken = jwt.verify(token, ACCESS_TOKEN)
-    // Attach decoded token to request object for use in subsequent middleware or routes
-    req.user = decodedToken
-    req.token = token // Attach token to request object for use in subsequent middleware or routes
+    const authHeader = req.headers['authorization']
+    if (!authHeader) {
+      return res.status(401).json({ error: 'Missing Authorization header' })
+    }
 
-    const userEmail = decodedToken.data.email
+    const [bearer, token] = authHeader.split(' ')
+    if (bearer !== 'Bearer' || !token) {
+      return res.status(401).json({ error: 'Invalid Authorization header' })
+    }
+
+    const decodedToken = jwt.verify(token, ACCESS_TOKEN)
+    req.user = decodedToken.data
+
+    const userEmail = req.user.email
     if (!userEmail) {
       return res.status(401).json({ error: 'Missing email in token data' })
     }
 
-    // Check if user with email exists in database
     const user = await USER_MODEL.findOne({ email: userEmail }).maxTimeMS(10000)
-
     if (!user) {
       return res.status(401).json({ error: 'Could not find user!' })
     }
 
-    // Check if the user's identifier in the token matches the identifier in the user's record
     if (decodedToken.data.version !== user.version) {
       return res.status(401).json({ error: 'User has been deleted!' })
     }
 
-    req.locals = { user } // attach user object to req.locals
+    req.locals = { user }
     next()
   } catch (error) {
     return res.status(401).json({
@@ -165,7 +157,6 @@ export const checkDocumentAccess = async (req, res, next) => {
     res.status(500).json({ error: 'Server error', message: 'Try again later' })
   }
 }
-//   check user is admin
 export const isAdmin = async (req, res, next) => {
   if (!req.user.isAdmin) {
     return res.status(403).json({
@@ -175,7 +166,6 @@ export const isAdmin = async (req, res, next) => {
   }
   next()
 }
-//  check if user exist middleware
 export const checkUserExists = async (req, res, next) => {
   try {
     const { userId } = req.params
@@ -216,15 +206,10 @@ export const validateDocumentOwnership = async (req, res, next) => {
 }
 export async function verifySecretKey (req, res, next) {
   try {
-    // Check if the secret key is provided in the request headers
     const clientSecretKey = req.headers['x-secret-key']
-
-    // Compare the provided secret key with the actual secret key
     if (!clientSecretKey || clientSecretKey !== ENCRYPTION_KEY) {
       return res.status(401).json({ message: 'Unauthorized' })
     }
-
-    // If the secret key is valid, allow the user to proceed
     next()
   } catch (error) {
     console.error('Error in verifySecretKey middleware:', error)

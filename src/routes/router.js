@@ -47,16 +47,17 @@ export async function CreateUser (app) {
   app.post('/raybags/v1/uploader/create-user', async (req, res) => {
     try {
       const { name, email, password, isAdmin, secret } = req.body
-      console.log(secret)
-      if (!secret && isAdmin) {
-        return res.status(400).send({ error: 'Unauthorized!' })
-      }
 
       // Check if user is an admin based on the secret token
       const isAdminUser = secret === `${SECRET_ADMIN_TOKEN}`
 
       // Set isAdmin based on the check
-      const userIsAdmin = isAdmin || isAdminUser
+      const userIsAdmin = isAdmin && isAdminUser
+
+      // If isAdmin is explicitly provided in the request and secret is not valid, return Unauthorized
+      if (isAdmin && !isAdminUser) {
+        return res.status(400).send({ error: 'Unauthorized!' })
+      }
 
       // Check if user already exists in the database
       const existingUser = await USER_MODEL.findOne({ email })
@@ -424,22 +425,16 @@ export async function deleteUserDocs (app) {
           error: 'FORBIDDEN: You cannot delete the content of this account!'
         })
       }
-
-      // Find all documents associated with the user
       const documents = await DOCUMENT.find({ user: userId })
       if (documents.length === 0) {
         return res
           .status(200)
           .json({ message: 'User has no documents to delete' })
       }
-      // Loop through each document and delete from AWS S3 and MongoDB
       for (const document of documents) {
-        // Delete from AWS S3
         await deleteFromS3(document.filename)
-        // Delete from MongoDB
         await document.delete()
       }
-      // notify incase of successful deleted
       const deleteUserDocsEmailData = {
         title: 'User documents deleted!',
         body: `All user documents '${documents.length}', have been deleted from your S3 bucket: "${AWS_BUCKET_NAME}" in: ${AWS_REGION}.`
@@ -589,11 +584,8 @@ export async function ForgotPassword (app) {
 export async function UpdatePassword (app) {
   app.post('/raybags/v1/user/update/password', loginUser, async (req, res) => {
     try {
-      // Find the user based on the email in the request body
       const user = await USER_MODEL.findOne({ email: req.body.email })
-      // Generate a new JWT token for the user
       const token = user.generateAuthToken()
-      // Return the user object and JWT token
       const userObject = user.toObject()
       delete userObject.password
       res.status(200).json({ user: userObject, token })
