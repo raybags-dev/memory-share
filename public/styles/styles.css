@@ -12,8 +12,8 @@
     --red: red;
     --white: rgb(72, 72, 72);
     --black: black;
-    --scrollbarBG: #10464d33;
-    --thumb-bg: #3a556b80;
+    --scrollbarBG: hsla(187, 66%, 18%, .005);
+    --thumb-bg: hsla(207, 30%, 32%, 0.005);
 }
 
 *,
@@ -419,26 +419,6 @@ a {
     text-shadow: 2px 3px 1px rgba(252, 248, 248, 0.4) !important;
 }
 
-@media screen and (max-width: 400px) {
-    .label {
-        width: 40px;
-        height: 40px;
-    }
-
-    .label span {
-        font-size: 23px;
-    }
-
-    .heading {
-        font-size: 20px;
-    }
-
-    @media screen and (max-width: 351px) {
-        .heading {
-            font-size: 15px;
-        }
-    }
-}
 
 .glassy {
     -webkit-backdrop-filter: blur(2px);
@@ -570,14 +550,7 @@ a {
     outline: 4px solid rgb(228, 227, 227);
 }
 
-@media screen and (max-width: 769px) {
-    .backdrop img {
-        min-width: 90%;
-        min-height: 70%;
-        -o-object-fit: contain;
-        object-fit: contain;
-    }
-}
+
 
 .big_spinnerr {
     background-color: transparent;
@@ -670,15 +643,6 @@ a {
     color: var(--red)
 }
 
-@media screen and (max-width: 447px) {
-
-    .log___in,
-    .sign___up,
-    .update___password {
-        background-image: unset;
-    }
-}
-
 .doc_delete_loader {
     position: fixed;
     top: 50%;
@@ -686,9 +650,7 @@ a {
     width: 80px;
     height: 80px;
     margin-top: -40px;
-    /* Half of the height */
     margin-left: -40px;
-    /* Half of the width */
     z-index: 2000;
     border: 2px solid;
     border-color: transparent #FFF;
@@ -729,5 +691,142 @@ a {
 
     100% {
         transform: rotate(360deg);
+    }
+}
+
+.image-descriptions {
+    border-radius: 0.4rem;
+    position: fixed;
+    top: auto;
+    bottom: -5%;
+    opacity: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: -webkit-fit-content;
+    height: -moz-fit-content;
+    height: fit-content;
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+    background-color: rgba(255, 255, 255, 0.7);
+    width: 30%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    z-index: 50;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    transition: background-color, transform 0.3s ease;
+    -webkit-animation: bring-in-form 1 forwards ease-in-out .4s;
+    animation: bring-in-form 1 forwards ease-in-out .4s;
+}
+
+@-webkit-keyframes bring-in-form {
+    to {
+        bottom: 1%;
+        opacity: 1;
+    }
+}
+
+@keyframes bring-in-form {
+    to {
+        bottom: 1%;
+        opacity: 1;
+    }
+}
+
+.image-descriptions input {
+    padding: 10px;
+    width: 100%;
+    border-radius: .4rem;
+    border: 2px solid #ccc;
+    box-sizing: border-box;
+    outline: 2px solid transparent;
+    background-color: rgba(255, 255, 255, 0.7);
+    transition: background-color, outline 0.3s ease;
+}
+
+.image-descriptions input:focus {
+    background-color: rgba(255, 255, 255, 1);
+    transition: background-color, outline 0.3s ease;
+}
+
+.image-descriptions input:focus-within {
+    outline: rgb(135, 135, 135) 2px solid;
+    background-color: rgba(255, 255, 255, 0.7);
+    transition: background-color 0.3s ease;
+}
+
+@media screen and (max-width: 1213px) {
+    .image-descriptions {
+        border-radius: 0.4rem;
+        position: fixed;
+        bottom: -5%;
+        left: 50%;
+        opacity: 0;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        max-width: 90%;
+        padding: 5px;
+        transition: transform, opacity 0.3s ease-in-out;
+    }
+
+    @-webkit-keyframes bring-in-form {
+        to {
+            bottom: 5%;
+            opacity: 1;
+        }
+    }
+
+    @keyframes bring-in-form {
+        to {
+            bottom: 5%;
+            opacity: 1;
+        }
+    }
+
+}
+
+@media screen and (max-width: 769px) {
+    .backdrop img {
+        min-width: 90%;
+        min-height: 70%;
+        -o-object-fit: contain;
+        object-fit: contain;
+    }
+}
+
+@media screen and (max-width: 447px) {
+
+    .log___in,
+    .sign___up,
+    .update___password {
+        background-image: unset;
+    }
+
+    .image-descriptions {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .label {
+        width: 40px;
+        height: 40px;
+    }
+
+    .label span {
+        font-size: 23px;
+    }
+
+    .heading {
+        font-size: 20px;
+    }
+
+    @media screen and (max-width: 351px) {
+        .heading {
+            font-size: 15px;
+        }
     }
 }

@@ -7,7 +7,9 @@ import {
   fetchUserProfile,
   deleteUserDocuments,
   deleteUserProf,
-  displayLabel
+  displayLabel,
+  saveToLocalStorage,
+  fetchFromLocalStorage
 } from '../lifters/works.js'
 import { hideUploadForm } from '../pages/main_container.js'
 export async function CARD (data, isNew = false) {
@@ -294,12 +296,17 @@ export async function userGuideModel () {
         </div>
       </div>
     `
-  const container = document.getElementById('innerBody')
-  container?.insertAdjacentHTML('afterbegin', userGuideServiceModal)
-  setTimeout(async () => {
-    const modal_btn = document.querySelector('.modaal_cont')
-    modal_btn?.click()
-  }, 2000)
+  //check if guide has been shown already
+  const userGuideShown = await fetchFromLocalStorage('userGuideShown')
+  if (!userGuideShown) {
+    const container = document.getElementById('innerBody')
+    container?.insertAdjacentHTML('afterbegin', userGuideServiceModal)
+    setTimeout(async () => {
+      const modal_btn = document.querySelector('.modaal_cont')
+      modal_btn?.click()
+    }, 2000)
+    saveToLocalStorage('userGuideShown', true)
+  }
 }
 export async function IsProcessRunning (isRunning, id) {
   const cardSelector = `[data-id="${id}"]`
@@ -348,7 +355,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   })()
 })
-
 export async function generateSubCards (dataId, imgSrc, createdAt) {
   let f_bk = '../images/_404_.jpeg'
   const subCarouselCard = `
