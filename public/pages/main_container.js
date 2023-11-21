@@ -40,14 +40,13 @@ export async function MAIN_PAGE () {
         </div>
       </nav>
       <main id="main__wrapper" class="container my-10 position-relative">
-          <form id="upload_formm" class="select-img-form text-danger">
-            <label class="label">
-              <input  class="select-image-input" type="file" ref="inputRef" multiple>
-              <span>+</span>
-            </label>
-          </form>
+              <form id="upload_formm" class="select-img-form text-danger">
+              <label class="label">
+                <input id="file_input" class="select-image-input" type="file" ref="inputRef" multiple>
+                <span>+</span>
+              </label>
+            </form>
         <div id="off__Container" class="row row-cols-1 row-cols-md-3 g-2" style="transition:.5s !important;">
-
         </div>
       </main>
     `
@@ -59,6 +58,35 @@ export async function MAIN_PAGE () {
   let mySearchTimeout = null
   let searchInput = document.querySelector('#search____input')
 
+  // ***********
+  // document
+  //   .querySelector('.select-image-input')
+  //   .addEventListener('change', function (event) {
+  //     const selectedFiles = event.target.files
+  //     const imageDescriptionsContainer = document.querySelector(
+  //       '.image-descriptions'
+  //     )
+
+  //     // Clear existing content
+  //     imageDescriptionsContainer.innerHTML = ''
+
+  //     if (selectedFiles.length > 0) {
+  //       imageDescriptionsContainer.style.display = 'block'
+  //     } else {
+  //       imageDescriptionsContainer.style.display = 'none'
+  //     }
+
+  //     for (let i = 0; i < selectedFiles.length; i++) {
+  //       const descriptionInput = document.createElement('input')
+  //       descriptionInput.type = 'text'
+  //       descriptionInput.placeholder = `Description for Image ${i + 1}`
+  //       descriptionInput.name = `imageDescription${i + 1}`
+
+  //       imageDescriptionsContainer.appendChild(descriptionInput)
+  //     }
+  //   })
+
+  // ***********
   function debounceSearchDatabase (e) {
     if (e && e.preventDefault) e.preventDefault()
     clearTimeout(mySearchTimeout)

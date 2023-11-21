@@ -88,9 +88,9 @@ export async function emptyMainContainer () {
   const contBTN = document.querySelector('.del_btn_cont .lead')
 
   offContainer.forEach(card => {
-    card.parentNode.removeChild(card)
+    card?.parentNode.removeChild(card)
   })
-  contBTN.click()
+  contBTN?.click()
 }
 export function formatDate (timestamp) {
   const date = new Date(timestamp)
@@ -111,12 +111,13 @@ export function formatEmail (email) {
   return ''
 }
 export async function fetchData (page = 1) {
-  runSpinner(false, 'loading...')
   try {
-    const { token } = JSON.parse(sessionStorage.getItem('token'))
+    runSpinner(false, 'loading...')
 
+    const { token } = JSON.parse(sessionStorage.getItem('token'))
     const baseUrl = '/uploader/paginated-user-documents'
     const perPage = 10
+
     const headers = {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -125,14 +126,12 @@ export async function fetchData (page = 1) {
     const url = `${baseUrl}?page=${page}&perPage=${perPage}`
     const res = await API_CLIENT.post(url, {}, { headers })
 
-    if (res.statusText == 'OK') {
+    if (res.statusText === 'OK') {
       setTimeout(() => runSpinner(true), 500)
+
       const data = res.data.data || []
+
       if (data.length < perPage) {
-        if (page > 1) {
-          Notify(`Last page: ${page}`)
-          displayLabel(['main__wrapper', 'alert-success', `Last page`])
-        }
         return data
       } else {
         showSearchBar(true)
@@ -140,51 +139,52 @@ export async function fetchData (page = 1) {
       }
     }
   } catch (error) {
-    let off_cards = document.querySelectorAll('.col')
+    handleFetchDataError(error)
+  } finally {
+    runSpinner(true)
+  }
+}
+function notifyAndDisplayLabel (message, alertClass) {
+  Notify(message)
+  displayLabel(['main__wrapper', alertClass, message])
+}
+function handleFetchDataError (error) {
+  const offCards = document.querySelectorAll('.col')
 
-    if (error instanceof TypeError) {
-      Notify('An error occurred while processing your request. Please login!')
-      displayLabel([
-        'main__wrapper',
-        'alert-danger',
-        `An error occured while processing your request. Please login again!`
-      ])
-
-      showSearchBar(false)
-      setTimeout(async () => {
-        return await LOGIN_HTML()
-      }, 2000)
-    }
-    if (error?.response.status == 404 && !off_cards?.length) {
-      runSpinner(true)
-      showSearchBar(false)
-      userGuideModel()
-      displayLabel([
-        'main__wrapper',
-        'alert-secondary',
-        `You dont seem to have any documents saved.`
-      ])
-      return
-    }
-
-    if (error?.response.status == 401) {
+  switch (error?.response?.status) {
+    case 404:
+      if (!offCards?.length) {
+        runSpinner(true)
+        showSearchBar(false)
+        userGuideModel()
+        displayLabel([
+          'main__wrapper',
+          'alert-secondary',
+          `You don't seem to have any documents saved.`
+        ])
+      }
+      break
+    case 401:
       displayLabel([
         'main__wrapper',
         'alert-danger',
         `Session expired. Please login again.`
       ])
-
       document.getElementById('log___out').style.display = 'none'
-      return LOGIN_HTML()
-    }
-    if (error?.response.status == 404) {
-      showNotification('Account not found. Please sign up!')
+      LOGIN_HTML()
+      break
+    case 404:
+      notifyAndDisplayLabel(
+        'Account not found. Please sign up!',
+        'alert-warning'
+      )
       SIGNUP_HTML()
-      return
-    }
-    console.log(error.message)
-  } finally {
-    runSpinner(true)
+      break
+    default:
+      Notify('An error occurred while processing your request. Please login!')
+      showSearchBar(false)
+      setTimeout(async () => await LOGIN_HTML(), 2000)
+      break
   }
 }
 export async function PaginateData () {
@@ -381,124 +381,145 @@ export async function fetchUserProfile () {
     runSpinner(true)
   }
 }
+// ==============================
 // delete user documents
 export async function deleteUserDocuments () {
   try {
-    let sys_message = await confirmAction()
-    if (sys_message === 'confirmed!') {
-      const { token } = JSON.parse(sessionStorage.getItem('token'))
-      const { _id: userId } = await fetchUserProfile()
+    const sysMessage = await confirmAction()
+    if (sysMessage !== 'confirmed!') return
 
-      const baseUrl = '/delete-user-docs'
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-      const url = `${baseUrl}/${userId}`
-      const res = await API_CLIENT.delete(url, { headers })
+    const { token } = JSON.parse(sessionStorage.getItem('token'))
+    const { _id: userId } = await fetchUserProfile()
+    runSpinner(false, 'deleting')
 
-      if (res.statusText == 'OK') {
-        if (res.data.message === 'User has no documents to delete') {
-          return displayLabel([
-            'main__wrapper',
-            'alert-warning',
-            'There is nothing to delete!.'
-          ])
-        }
-        await emptyMainContainer()
-        runSpinner(true)
-        return displayLabel([
-          'main__wrapper',
-          'alert-success',
-          `${'All documents have been deleted' || res.data}`
-        ])
-      }
+    const baseUrl = '/delete-user-docs'
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+
+    const url = `${baseUrl}/${userId}`
+    const res = await API_CLIENT.delete(url, { headers })
+
+    if (res.statusText === 'OK') {
+      handleDocDeleteSuccess(res.data.message)
+      setTimeout(() => runSpinner(true, 'done'), 4000)
     }
   } catch (error) {
-    if (error instanceof TypeError) {
-      displayLabel([
-        'main__wrapper',
-        'alert-danger',
-        'An error occurred while processing your request.'
-      ])
-      return
-    }
+    runSpinner(true)
+    handleDocDeleteError(error)
+  }
+}
 
+function handleDocDeleteSuccess (message) {
+  if (message === 'User has no documents to delete') {
+    displayLabel([
+      'main__wrapper',
+      'alert-warning',
+      'There is nothing to delete!'
+    ])
+  } else {
+    emptyMainContainer()
+    displayLabel([
+      'main__wrapper',
+      'alert-success',
+      'All documents have been deleted'
+    ])
+  }
+}
+function handleDocDeleteError (error) {
+  if (error instanceof TypeError) {
+    displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      'An error occurred while processing your request.'
+    ])
+  } else if (error?.response?.status === 404) {
+    displayLabel([
+      'main__wrapper',
+      'alert-warning',
+      'User not found or has no documents.'
+    ])
+  } else {
     console.log(error.message)
     displayLabel([
       'main__wrapper',
       'alert-danger',
-      'Request could not be processed, try again later!'
+      'Request could not be processed. Try again later!'
     ])
-  } finally {
-    runSpinner(true)
   }
 }
-// delete user profile
+// ==============================
 export async function deleteUserProf () {
   try {
-    let sys_message = await confirmAction()
+    const sysMessage = await confirmAction()
 
-    if (sys_message === 'confirmed!') {
-      runSpinner(false, 'Deleteting account...')
-      const { token } = JSON.parse(sessionStorage.getItem('token'))
-      const { _id: userId } = await fetchUserProfile()
-
-      const baseUrl = '/delete-user-and-docs'
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-      const url = `${baseUrl}/${userId}`
-      const res = await API_CLIENT.delete(url, { headers })
-      console.log(res.data.message)
-
-      if (res.statusText == 'OK') {
-        localStorage.clear()
-        sessionStorage.clear()
-        await SIGNUP_HTML()
-        Notify('Account deleted!')
-        displayLabel(['main__wrapper', 'alert-success', 'Account deleted!'])
-      }
-    }
-  } catch (error) {
-    if (
-      error?.response.data.error ===
-      'FORBIDDEN: You cannot delete this account!'
-    ) {
-      return displayLabel([
-        'main__wrapper',
-        'alert-danger',
-        'Account can not be deleted!'
-      ])
-    }
-    if (error?.message == 'Request failed with status code 403') {
-      return displayLabel([
-        'main__wrapper',
-        'alert-danger',
-        'Contents of this account can not be deleted!'
-      ])
-    }
-
-    if (error?.response.status == 401) {
-      displayLabel([
-        'main__wrapper',
-        'alert-danger',
-        'Session expired. Please login!'
-      ])
+    if (sysMessage !== 'confirmed!') {
       return
     }
-    displayLabel([
-      'main__wrapper',
-      'alert-danger',
-      'Request could not be processed, try again later!'
-    ])
-    console.log(error.message)
+
+    runSpinner(false, 'Deleting account...')
+
+    const { token } = JSON.parse(sessionStorage.getItem('token'))
+    const { _id: userId } = await fetchUserProfile()
+
+    const baseUrl = '/delete-user-and-docs'
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+
+    const url = `${baseUrl}/${userId}`
+    const res = await API_CLIENT.delete(url, { headers })
+
+    if (res.statusText === 'OK') {
+      handleProfileDeleteSuccess()
+    }
+  } catch (error) {
+    handleProfileDeleteError(error)
   } finally {
     runSpinner(true)
   }
 }
-// handle file download
+async function handleProfileDeleteSuccess () {
+  localStorage.clear()
+  sessionStorage.clear()
+  SIGNUP_HTML().then(() => {
+    Notify('Account deleted!')
+    displayLabel(['main__wrapper', 'alert-success', 'Account deleted!'])
+  })
+}
+async function handleProfileDeleteError (error) {
+  if (
+    error?.response?.data.error === 'FORBIDDEN: You cannot delete this account!'
+  ) {
+    displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      'Account cannot be deleted!'
+    ])
+  } else if (error?.message === 'Request failed with status code 403') {
+    displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      'Contents of this account cannot be deleted!'
+    ])
+  } else if (error?.response?.status === 401) {
+    displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      'Session expired. Please login!'
+    ])
+  } else {
+    console.log(error.message)
+    displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      'Request could not be processed. Try again later!'
+    ])
+  }
+}
+// ==============================
 export async function downloadImageById (imageId) {
   try {
     const { token } = JSON.parse(sessionStorage.getItem('token'))
@@ -612,5 +633,24 @@ export async function displayLabel ([anchorId, labelClass, labelText]) {
     }, 5000)
   } else {
     console.log(`Anchor with ID '${anchorId}' could not be found`)
+  }
+}
+
+export async function saveToLocalStorage (key, data) {
+  try {
+    const serializedData = JSON.stringify(data)
+    localStorage.setItem(key, serializedData)
+  } catch (error) {
+    console.error('Error saving to localStorage:', error)
+  }
+}
+
+export async function fetchFromLocalStorage (key) {
+  try {
+    const serializedData = localStorage.getItem(key)
+    return serializedData ? JSON.parse(serializedData) : null
+  } catch (error) {
+    console.error('Error fetching from localStorage:', error)
+    return null
   }
 }
