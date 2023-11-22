@@ -11,26 +11,23 @@ import {
   saveToLocalStorage,
   fetchFromLocalStorage
 } from '../lifters/works.js'
-import { hideUploadForm } from '../pages/main_container.js'
-export async function CARD (data, isNew = false) {
+async function CARD (data, isNew = false) {
   const {
     url,
     signature,
-    size,
     updatedAt,
     createdAt,
     user,
     _id,
-    contentType,
-    encoding,
     filename,
-    originalname
+    originalname,
+    description
   } = await data
   const { email } = JSON.parse(sessionStorage.getItem('token'))
   let fall_back = '../images/_404_.jpeg'
   let cardContent = `
   <div class="col sm-card bg-transparent" style="padding:.2rem;" data-id="${_id}">
-  <div class="card main___card  bg-transparent rounded" style="object-fit:contain !important;" data-card="${_id}">
+  <div class="card fade-card main___card  bg-transparent rounded" style="object-fit:contain !important;" data-card="${_id}">
     <div class="main-del-cont" style="cursor:pointer !important;z-index:1000 !important;">
     <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
     </div>
@@ -45,18 +42,16 @@ export async function CARD (data, isNew = false) {
     createdAt
   )}</div>
     <div class="card-body text-white">
-      <ul class="list-group rounded">
+      <div class="container img__desc">${description || ''}</div>
+      <ul class="list-group rounded d-none">
         <li class="list-group-item bg-transparent name">${formatEmail(
           email
         )}</li>
         <li class="list-group-item bg-transparent text-white">${user}</li>
         <li class="list-group-item bg-transparent text-white">${originalname}</li>
         <li class="list-group-item bg-transparent text-white file_n">${filename}</li>
-        <li class="list-group-item bg-transparent text-white">${size}</li>
-        <li class="list-group-item bg-transparent text-white">${encoding}</li>
         <li class="list-group-item bg-transparent text-white creat_at">${createdAt}</li>
         <li class="list-group-item bg-transparent text-white">${updatedAt}</li>
-        <li class="list-group-item bg-transparent text-white">${contentType}</li>
         <li class="list-group-item bg-transparent text-white user__id">${_id}</li>
       </ul>
     </div>
@@ -89,7 +84,7 @@ export async function runSkeleto (isDone) {
     })
   }
 }
-export async function DisplayeBigImage (dataId, imgSrc, createdAt) {
+export async function DisplayeBigImage (dataId, imgSrc, createdAt, description) {
   const innerBodyBig = `
         <div id="carouselExampleCaptions" class="carousel carucel___main slide" data-big="${dataId}">
         <div class="carousel-indicators">
@@ -105,6 +100,7 @@ export async function DisplayeBigImage (dataId, imgSrc, createdAt) {
                 </div>
               </div>
         </div>
+        <div class="description_cont">${description}</div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
           <span class="carousel-control-prev-icon" aria-hidden="true"></span>
           <span class="visually-hidden">Previous</span>
@@ -128,6 +124,38 @@ export async function DisplayeBigImage (dataId, imgSrc, createdAt) {
     const carouselElement = document.querySelector('.carucel___main')
     container__main_body?.removeChild(carouselElement)
   })
+
+  // const carouselElement = document.querySelector('.carucel___main')
+  // if (carouselElement) {
+  //   carouselElement.addEventListener('slid.bs.carousel', event => {
+  //     const activeSlide = event.relatedTarget
+  //     const descriptionCont = document.querySelector('.description_cont')
+  //     if (descriptionCont && activeSlide) {
+  //       const dataId = activeSlide.getAttribute('data-image-id')
+  //       const cardElement = document.querySelector(
+  //         `.sm-card[data-id="${dataId}"]`
+  //       )
+  //       const desc = cardElement?.querySelector('.img__desc')?.textContent
+  //       descriptionCont.textContent = desc
+  //     }
+  //   })
+  // }
+  const carouselElement = document.querySelector('.carucel___main')
+  if (carouselElement) {
+    carouselElement.addEventListener('slid.bs.carousel', event => {
+      const activeSlide = event.relatedTarget
+      const descriptionCont = document.querySelector('.description_cont')
+      if (descriptionCont && activeSlide) {
+        const dataId = activeSlide.getAttribute('data-image-id')
+        const cardElement = document.querySelector(
+          `.sm-card[data-id="${dataId}"]`
+        )
+        const descContainer = cardElement?.querySelector('.img__desc')
+        const desc = descContainer?.textContent || 'Not provided' // Default value if no description
+        descriptionCont.textContent = desc
+      }
+    })
+  }
 }
 export function removeElementFromDOM (elementAnchor) {
   if (document.contains(elementAnchor)) {
@@ -146,7 +174,6 @@ export async function deleteDocument (documentId = '') {
       ])
     }
     await Notify('Deleting document...')
-    hideUploadForm(false)
     let colElem = [...document.querySelectorAll('.col')].find(
       card => card.dataset.id === documentId
     )
@@ -170,7 +197,7 @@ export async function deleteDocument (documentId = '') {
           'Success: Selected document deleted!'
         ])
         await Notify('done')
-        return setTimeout(async () => await hideUploadForm(true), 1500)
+        return
       }
     }, 500)
   } catch (error) {
@@ -186,6 +213,8 @@ export async function deleteDocument (documentId = '') {
   }
 }
 export async function DisplayUserProfileHTML () {
+  document.querySelector('#carocel_big')?.remove()
+  document.querySelector('#uploadForm')?.remove()
   let profile_object = await fetchUserProfile()
   if (profile_object === null || profile_object === undefined) {
     runSpinner(false, 'Failed!')
@@ -194,7 +223,6 @@ export async function DisplayUserProfileHTML () {
       'alert-danger',
       'There seems to be an issue with your profile account.'
     ])
-    await hideUploadForm(true)
     return setTimeout(() => runSpinner(true), 5000)
   }
 
@@ -249,7 +277,6 @@ export async function DisplayUserProfileHTML () {
   const closeButton = document.querySelector('.del_btn_cont .lead')
   closeButton?.addEventListener('click', async () => {
     container?.removeChild(document.getElementById('carocel_big'))
-    await hideUploadForm(true)
   })
   let IMGCONT = document.querySelector('#carocel_big')
   IMGCONT.addEventListener('click', function (event) {
@@ -396,4 +423,8 @@ export async function generateSubCards (dataId, imgSrc, createdAt) {
   } catch (e) {
     console.log(e.message)
   }
+}
+export async function addCardWithDelay (obj, isNew = false, delay = 150) {
+  await new Promise(resolve => setTimeout(resolve, delay))
+  await CARD(obj, isNew)
 }

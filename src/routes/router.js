@@ -168,6 +168,7 @@ export async function DocsUploader (app) {
               })
             }
           }
+          const { description } = req.body
 
           const files = []
           for (const file of req.files) {
@@ -210,7 +211,8 @@ export async function DocsUploader (app) {
               token: await genVerificationToken(),
               contentType: file.mimetype,
               encoding: file.encoding,
-              size: file.size
+              size: file.size,
+              description
             })
           }
           await dbFileUploader(files, req, res)

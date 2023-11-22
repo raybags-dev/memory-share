@@ -50,7 +50,7 @@ export const dbFileUploader = async (files, req, res) => {
       files: validFiles
     })
   } catch (error) {
-    console.log(error)
+    console.log(error.message, 'in dbFileUploader')
     return res.status(500).json({
       status: 'Error',
       message:
