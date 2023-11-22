@@ -1,7 +1,6 @@
 import { LOGIN_HTML } from '../pages/login.js'
 import { SIGNUP_HTML } from '../pages/signup.js'
-import { CARD, userGuideModel } from '../components/card.js'
-import { hideUploadForm } from '../pages/main_container.js'
+import { userGuideModel, addCardWithDelay } from '../components/card.js'
 
 // api client
 export const API_CLIENT = axios.create({
@@ -199,13 +198,14 @@ export async function PaginateData () {
   try {
     const data = await fetchData(page)
     if (data && data.length) {
-      data.forEach(async obj => {
+      for (const obj of data) {
         try {
-          await CARD(obj)
+          await addCardWithDelay(obj)
         } catch (e) {
           console.log(e)
         }
-      })
+      }
+
       setTimeout(async () => {
         let loading = false
         let target = container?.children[container.children.length - 2]
@@ -217,9 +217,8 @@ export async function PaginateData () {
               loading = true
               const data = await fetchData(++page)
               if (data && data.length) {
-                // await animateImages(data)
                 data.forEach(async obj => {
-                  await CARD(obj)
+                  await addCardWithDelay(obj)
                 })
 
                 if (data.length < 10) {
@@ -381,7 +380,6 @@ export async function fetchUserProfile () {
     runSpinner(true)
   }
 }
-// ==============================
 // delete user documents
 export async function deleteUserDocuments () {
   try {
@@ -410,7 +408,6 @@ export async function deleteUserDocuments () {
     handleDocDeleteError(error)
   }
 }
-
 function handleDocDeleteSuccess (message) {
   if (message === 'User has no documents to delete') {
     displayLabel([
@@ -449,7 +446,6 @@ function handleDocDeleteError (error) {
     ])
   }
 }
-// ==============================
 export async function deleteUserProf () {
   try {
     const sysMessage = await confirmAction()
@@ -519,7 +515,6 @@ async function handleProfileDeleteError (error) {
     ])
   }
 }
-// ==============================
 export async function downloadImageById (imageId) {
   try {
     const { token } = JSON.parse(sessionStorage.getItem('token'))
@@ -592,7 +587,6 @@ export function confirmAction () {
       .querySelector('.proceed_delete')
       .addEventListener('click', async () => {
         if (big_caro_img) big_caro_img.remove()
-        await hideUploadForm(true)
         resolve('confirmed!')
       })
 
@@ -600,7 +594,6 @@ export function confirmAction () {
       .querySelector('.cancel_delete')
       .addEventListener('click', async () => {
         if (big_caro_img) big_caro_img.remove()
-        await hideUploadForm(true)
         Notify('Process aborted.')
         displayLabel([
           'main__wrapper',
@@ -635,7 +628,6 @@ export async function displayLabel ([anchorId, labelClass, labelText]) {
     console.log(`Anchor with ID '${anchorId}' could not be found`)
   }
 }
-
 export async function saveToLocalStorage (key, data) {
   try {
     const serializedData = JSON.stringify(data)
@@ -644,7 +636,6 @@ export async function saveToLocalStorage (key, data) {
     console.error('Error saving to localStorage:', error)
   }
 }
-
 export async function fetchFromLocalStorage (key) {
   try {
     const serializedData = localStorage.getItem(key)

@@ -14,7 +14,6 @@ const transporter = nodemailer.createTransport({
     pass: EMAIL__APP_PASS
   }
 })
-
 export async function sendEmail (
   emailData,
   recipient,

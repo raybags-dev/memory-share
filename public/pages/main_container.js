@@ -8,8 +8,12 @@ import {
   downloadImageById,
   displayLabel
 } from '../lifters/works.js'
-import { DisplayUserProfileHTML, generateSubCards } from '../components/card.js'
-import { CARD, DisplayeBigImage } from '../components/card.js'
+import {
+  DisplayUserProfileHTML,
+  generateSubCards,
+  addCardWithDelay
+} from '../components/card.js'
+import { DisplayeBigImage } from '../components/card.js'
 import { logOutUser, LOGIN_HTML } from '../pages/login.js'
 
 export async function MAIN_PAGE () {
@@ -40,53 +44,22 @@ export async function MAIN_PAGE () {
         </div>
       </nav>
       <main id="main__wrapper" class="container my-10 position-relative">
-              <form id="upload_formm" class="select-img-form text-danger">
-              <label class="label">
-                <input id="file_input" class="select-image-input" type="file" ref="inputRef" multiple>
-                <span>+</span>
-              </label>
-            </form>
+              <div class="label_class">
+                <label id="showForm" class="label"><span>+</span></label>
+              </div>
         <div id="off__Container" class="row row-cols-1 row-cols-md-3 g-2" style="transition:.5s !important;">
         </div>
       </main>
     `
   document.getElementById('innerBody').innerHTML = pageContent
   await PaginateData()
-  const selectImgForm = document.querySelector('.select-img-form')
-  selectImgForm?.addEventListener('change', uploadFiles)
+  const uploadLabel = document.querySelector('.label_class')
+  uploadLabel?.addEventListener('click', generateUploadForm)
+
   await genCardCarucel()
   let mySearchTimeout = null
   let searchInput = document.querySelector('#search____input')
 
-  // ***********
-  // document
-  //   .querySelector('.select-image-input')
-  //   .addEventListener('change', function (event) {
-  //     const selectedFiles = event.target.files
-  //     const imageDescriptionsContainer = document.querySelector(
-  //       '.image-descriptions'
-  //     )
-
-  //     // Clear existing content
-  //     imageDescriptionsContainer.innerHTML = ''
-
-  //     if (selectedFiles.length > 0) {
-  //       imageDescriptionsContainer.style.display = 'block'
-  //     } else {
-  //       imageDescriptionsContainer.style.display = 'none'
-  //     }
-
-  //     for (let i = 0; i < selectedFiles.length; i++) {
-  //       const descriptionInput = document.createElement('input')
-  //       descriptionInput.type = 'text'
-  //       descriptionInput.placeholder = `Description for Image ${i + 1}`
-  //       descriptionInput.name = `imageDescription${i + 1}`
-
-  //       imageDescriptionsContainer.appendChild(descriptionInput)
-  //     }
-  //   })
-
-  // ***********
   function debounceSearchDatabase (e) {
     if (e && e.preventDefault) e.preventDefault()
     clearTimeout(mySearchTimeout)
@@ -102,14 +75,12 @@ export async function MAIN_PAGE () {
     }, 1000)
   }
   searchInput?.addEventListener('input', debounceSearchDatabase)
-  // hideUploadForm(true)
   const logoutLink = document.querySelector('.logoutuser_link')
   logoutLink?.addEventListener('click', async () => {
     logOutUser(true)
   })
   const userProfileLink = document.querySelector('.user_profile_link')
   userProfileLink?.addEventListener('click', async () => {
-    // await hideUploadForm(false)
     await DisplayUserProfileHTML()
   })
   await setUpBackToTop()
@@ -129,7 +100,8 @@ export async function MAIN_PAGE () {
         const imgSrc = imgElement ? imgElement.getAttribute('src') : null
         const ulElement = cardElement.querySelector('.card-body ul')
         const createdAt = ulElement?.querySelector('.creat_at')?.textContent
-        await DisplayeBigImage(dataId, imgSrc, createdAt)
+        const desc = cardElement?.querySelector('.img__desc')?.textContent
+        await DisplayeBigImage(dataId, imgSrc, createdAt, desc)
 
         //call elemnet to create all cards.
         Array.from(document.querySelectorAll('.main___card')).forEach(
@@ -146,6 +118,48 @@ export async function MAIN_PAGE () {
     }
   })
 }
+export async function generateUploadForm () {
+  let formIsPresent = document.querySelector('#uploadForm')
+  if (!formIsPresent) {
+    const uploadHTML = `
+        <form id="uploadForm" class="select-img-form text-danger" enctype="multipart/form-data">
+        <div class="input-group mb3 input-group-lg my_inputs">
+          <input type="file" name="images" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" multiple required>
+          <button class="btn btn-lg  btn-outline-secondary sub__this_form" type="button" id="inputGroupFileAddon04">Button</button>
+        </div>
+  
+        <div class="input-group mb3 my_inputs">
+          <textarea type="text" name="description" id="descriptionInput" placeholder="Type  description here..." rows="6" class="form-control" aria-label="Description"></textarea>
+        </div>
+      </form>`
+
+    const container = document.querySelector('#main__wrapper')
+    container?.insertAdjacentHTML('afterbegin', uploadHTML)
+    // ***********
+    const submit____btn = document.querySelector('.sub__this_form')
+    submit____btn?.addEventListener('click', async () => {
+      let hasfinishUpload = await uploadFiles()
+      if (hasfinishUpload) {
+        document.querySelector('#uploadForm')?.remove()
+      }
+    })
+
+    // Listen for the Enter key press on the document
+    document.addEventListener('keydown', async event => {
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        let hasFinishUpload = await uploadFiles()
+        if (hasFinishUpload) {
+          document.querySelector('#uploadForm')?.remove()
+        }
+      }
+    })
+    // ***********
+  } else {
+    formIsPresent?.remove()
+  }
+}
+
 export async function genCardCarucel () {
   try {
     const cardContainer = document.querySelector('#off__Container')
@@ -178,12 +192,20 @@ export async function genCardCarucel () {
     console.log('Error from genCardCarucel: ' + e.message)
   }
 }
+
 export async function uploadFiles () {
   runSpinner(false, 'Uploading...')
   try {
     const { token } = JSON.parse(sessionStorage.getItem('token'))
-    const inputRef = document.querySelector('.select-image-input')
-    const files = inputRef?.files
+    const formData = new FormData()
+
+    // Select the input elements
+    const imagesInput = document.getElementById('inputGroupFile04')
+    const descriptionInput = document.getElementById('descriptionInput')
+
+    // Get the files from the input
+    const files = imagesInput.files
+    const description = descriptionInput.value.trim() || 'Not provided' // Use value property
 
     if (!token || token === undefined) {
       displayLabel([
@@ -193,6 +215,7 @@ export async function uploadFiles () {
       ])
       return Notify('Session terminated. Login required!')
     }
+
     if (!files || files.length === 0) {
       displayLabel([
         'main__wrapper',
@@ -201,10 +224,12 @@ export async function uploadFiles () {
       ])
       return Notify('Something went wrong.')
     }
-    const formData = new FormData()
+
+    // Append files to FormData
     for (let i = 0; i < files.length; i++) {
       formData.append('images', files[i])
     }
+    formData.append('description', description)
 
     const response = await API_CLIENT.post('/uploader/upload', formData, {
       headers: {
@@ -212,15 +237,19 @@ export async function uploadFiles () {
         'Content-Type': 'multipart/form-data'
       }
     })
+
     if (response.statusText == 'OK') {
+      document.querySelector('#uploadForm')?.remove()
       runSpinner(true)
-      Notify('Uploaded successful')
+      Notify('Uploaded successfully')
       displayLabel([
         'main__wrapper',
         'alert-success',
         'File uploaded successfully'
       ])
 
+      let form = document.querySelector('#uploadForm')
+      form?.remove
       let newData = await fetchData(1)
       let container = document.querySelector('#off__Container')
       let existingData = Array.from(container.children).map(
@@ -230,14 +259,17 @@ export async function uploadFiles () {
       newData.forEach(async obj => {
         try {
           if (!existingData.includes(obj._id)) {
-            await CARD(obj, true)
+            await addCardWithDelay(obj, true)
           }
         } catch (e) {
           console.log(e.message)
         }
       })
     }
+    return true
   } catch (error) {
+    let form = document.querySelector('#uploadForm')
+    form?.remove
     if (error.response && error.response.status == 429)
       return displayLabel([
         'main__wrapper',
@@ -260,7 +292,6 @@ export async function uploadFiles () {
 
     if (error.response.status === 409) {
       displayLabel(['main__wrapper', 'alert-danger', 'Duplicates detected!'])
-      setTimeout(() => location.reload(), 1500)
       return
     }
     if (error instanceof TypeError && error.message.includes('token')) {
@@ -278,17 +309,21 @@ export async function uploadFiles () {
         'alert-warning',
         'Your session has expired. Please login!'
       ])
+    if (error?.response.status == 500)
+      return displayLabel([
+        'main__wrapper',
+        'alert-warning',
+        'Oops something went wrong. Try again later.'
+      ])
 
-    console.log('Something went wrong: ' + error)
+    console.log('Something went wrong: ' + error.message)
   } finally {
+    let form = document.querySelector('#uploadForm')
+    form?.remove
     runSpinner(true)
   }
 }
-export async function hideUploadForm (isVisible) {
-  let form = document.getElementById('upload_formm')
-  if (!isVisible) return form?.classList.add('hide')
-  form?.classList.remove('hide')
-}
+
 export async function setUpBackToTop () {
   const buttonTopInnerHTML = `<a href="#" class="back-to-top" aria-label="Back to Top">&uarr;</a>`
 
@@ -298,8 +333,10 @@ export async function setUpBackToTop () {
   const backToTopButton = document.querySelector('.back-to-top')
 
   mainContainer?.addEventListener('scroll', function () {
+    let uploadConytainer = document.querySelector('#uploadForm')
     if (mainContainer.scrollTop > 0) {
       backToTopButton.classList.add('show-to-top-btn')
+      uploadConytainer?.remove()
     } else {
       backToTopButton.classList.remove('show-to-top-btn')
     }

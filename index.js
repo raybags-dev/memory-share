@@ -7,7 +7,7 @@ import routesHandler from './src/routes_handler.js'
 import bodyParser from 'body-parser'
 
 app.use(bodyParser.json())
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 app.use(express.static('public'))
 app.use(express.json())

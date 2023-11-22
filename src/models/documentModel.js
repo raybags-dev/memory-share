@@ -38,13 +38,6 @@ const DocumentModel = {
       return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     }
   },
-  /**
-     expiresAt: {
-    type: Date,
-    required: true,
-    default: moment().add(7, 'days').utc().toDate()
-  },
-   */
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -62,6 +55,13 @@ const DocumentModel = {
     maxlength: 100,
     minlength: 1,
     required: true
+  },
+  description: {
+    type: String,
+    default: 'Description not provided for this document.',
+    trim: true,
+    maxlength: 7000,
+    minlength: 1
   }
 }
 
