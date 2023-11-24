@@ -41,7 +41,7 @@ async function CARD (data, isNew = false) {
   <div class="card-footer bg-transparent card-img-overlay text-danger m-1 rounded" style="width:fit-content;height:fit-content;padding:.3rem; font-style:italic">${formatDate(
     createdAt
   )}</div>
-    <div class="card-body text-white">
+    <div class="card-body text-white" style="max-height:35%">
       <div class="container img__desc">${description || ''}</div>
       <ul class="list-group rounded d-none">
         <li class="list-group-item bg-transparent name">${formatEmail(
