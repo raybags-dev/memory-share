@@ -11,7 +11,7 @@ import {
   saveToLocalStorage,
   fetchFromLocalStorage
 } from '../lifters/works.js'
-async function CARD (data, isNew = false) {
+export async function CARD (data, isNew = false) {
   const {
     url,
     signature,

@@ -81,6 +81,10 @@ export async function MAIN_PAGE () {
   })
   const userProfileLink = document.querySelector('.user_profile_link')
   userProfileLink?.addEventListener('click', async () => {
+    let containerExist = document.querySelector('#carocel_big')
+    let couselBig = document.querySelector('.carucel___main')
+    couselBig && couselBig.remove()
+    if (containerExist) return
     await DisplayUserProfileHTML()
   })
   await setUpBackToTop()
@@ -120,6 +124,14 @@ export async function MAIN_PAGE () {
 }
 export async function generateUploadForm () {
   let formIsPresent = document.querySelector('#uploadForm')
+
+  let containerExist = document.querySelector('#carocel_big')
+  let couselBig = document.querySelector('.carucel___main')
+  if (containerExist || couselBig) {
+    containerExist?.remove()
+    couselBig?.remove()
+  }
+
   if (!formIsPresent) {
     const uploadHTML = `
         <form id="uploadForm" class="select-img-form text-danger" enctype="multipart/form-data">
@@ -159,7 +171,6 @@ export async function generateUploadForm () {
     formIsPresent?.remove()
   }
 }
-
 export async function genCardCarucel () {
   try {
     const cardContainer = document.querySelector('#off__Container')
@@ -192,7 +203,6 @@ export async function genCardCarucel () {
     console.log('Error from genCardCarucel: ' + e.message)
   }
 }
-
 export async function uploadFiles () {
   runSpinner(false, 'Uploading...')
   try {
@@ -287,7 +297,7 @@ export async function uploadFiles () {
       return displayLabel([
         'main__wrapper',
         'alert-danger',
-        'Sorry an error occured try again later.'
+        'Sorry an error occured try again later!'
       ])
 
     if (error.response.status === 409) {
@@ -323,7 +333,6 @@ export async function uploadFiles () {
     runSpinner(true)
   }
 }
-
 export async function setUpBackToTop () {
   const buttonTopInnerHTML = `<a href="#" class="back-to-top" aria-label="Back to Top">&uarr;</a>`
 

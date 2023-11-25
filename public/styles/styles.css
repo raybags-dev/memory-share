@@ -260,13 +260,17 @@ textarea:focus {
 
 .label_class {
     position: fixed !important;
-    top: 3.5% !important;
+    top: 4% !important;
     left: 50% !important;
     transform: translate(-50%, -50%);
     z-index: 1000;
     border-radius: 50%;
-    opacity: .7;
+    opacity: .3;
+    transition: opacity .3s;
+}
 
+.label_class:hover {
+    opacity: .8;
 }
 
 

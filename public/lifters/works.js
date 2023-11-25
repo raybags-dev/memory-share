@@ -1,6 +1,6 @@
 import { LOGIN_HTML } from '../pages/login.js'
 import { SIGNUP_HTML } from '../pages/signup.js'
-import { userGuideModel, addCardWithDelay } from '../components/card.js'
+import { userGuideModel, addCardWithDelay, CARD } from '../components/card.js'
 
 // api client
 export const API_CLIENT = axios.create({
@@ -269,56 +269,73 @@ export async function searchDatabase () {
   try {
     runSpinner(false, 'Searching...')
     const { token } = JSON.parse(sessionStorage.getItem('token'))
-    let url = '/uploader/user-docs'
+    let url = '/uploader/search-docs'
 
     const headers = {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     }
-    const res = await API_CLIENT.post(url, {}, { headers })
+
+    const body = {
+      searchQuery: inputValue
+    }
+
+    const res = await API_CLIENT.post(url, body, { headers })
 
     if (res.statusText === 'OK') {
       runSpinner(true)
       const { documents: response } = await res.data
-      let hasResults = false
-      let matchingDocs = [] // array to store the matching search results
-
-      response.forEach((obj, index) => {
-        const { originalname, filename, createdAt } = obj
-        const document_name = originalname.toLowerCase()
-
-        if (inputValue === '' || document_name.includes(inputValue)) {
-          if (originalname && filename && createdAt) {
-            matchingDocs.push(obj) // add the matching result to the array
-            hasResults = true
-          } else {
-            console.warn(
-              `Document with ID ${obj._id} is missing one or more required properties.`
-            )
-          }
-        } else {
-          const card = document.querySelector(`[data-id="${obj._id}"]`)
-          if (card) {
-            card.classList.add('hide') // hide cards that don't match the search query
-          }
-        }
+      response.forEach(async doc => {
+        document
+          .querySelectorAll('.col')
+          ?.forEach(card => card.classList.add('hide'))
+        await CARD(doc)
       })
-
-      if (!inputValue) {
-        // Make all the cards visible again if inputValue is empty
-        const cards = document.querySelectorAll('.card.hide')
-        cards.forEach(card => card.classList.remove('hide'))
+      if (response.length > 0) {
+        displayLabel([
+          'main__wrapper',
+          'alert-success',
+          `Search successful, (${response.length}) documents found!`
+        ])
       }
+    } else {
+      runSpinner(true)
+      displayLabel(['main__wrapper', 'alert-warning', 'No matches were found!'])
+      document
+        .querySelectorAll('.col')
+        ?.forEach(card => card.classList.remove('hide'))
     }
   } catch (error) {
-    if (error.response.data.error == 'Documents not found') {
-      displayLabel(['main__wrapper', 'alert-warning', `No matches were found!`])
-      console.log(error.message)
+    runSpinner(true)
+    if (error) {
+      const statusCode = error.response.status
+      const statusText = error.response.statusText
+      const errorData = error.response.data
+
+      if (statusCode === 404 && statusText == 'Not Found') {
+        document
+          .querySelectorAll('.col')
+          ?.forEach(card => card.classList.add('hide'))
+        displayLabel(['main__wrapper', 'alert-warning', 'Resource not found.'])
+        return
+      }
+      if (statusCode === 401) {
+        displayLabel(['main__wrapper', 'alert-danger', 'Unauthorized access.'])
+        return
+      }
+
+      displayLabel([
+        'main__wrapper',
+        'alert-danger',
+        'Error searching documents.'
+      ])
+      console.error('Error:', error.message)
     }
   } finally {
     runSpinner(true)
   }
 }
+
 // get user profiles
 export async function fetchUserProfile () {
   runSpinner(false)
@@ -369,7 +386,7 @@ export async function fetchUserProfile () {
       displayLabel([
         'main__wrapper',
         'alert-warning',
-        `Sorry. To use this application, you must signup!`
+        `Please signup to use this service!`
       ])
 
       SIGNUP_HTML()

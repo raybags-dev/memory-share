@@ -69,5 +69,8 @@ const DOCUMENT_SCHEMA = new mongoose.Schema(DocumentModel, {
   timestamps: true
 })
 
+// Add text index on 'originalname' and 'description' fields
+DOCUMENT_SCHEMA.index({ originalname: 'text', description: 'text' })
+
 const DOCUMENT = mongoose.model('document-collection', DOCUMENT_SCHEMA)
 export { DOCUMENT }
