@@ -265,6 +265,7 @@ export async function AllUserDocs (app) {
         count = await DOCUMENT.countDocuments({ user: req.user.data._id })
       }
       const response = await query
+      console.log(response)
       if (response.length === 0) return res.status(404).json('Nothing found!')
 
       const updatedDoc = await checkAndUpdateDocumentUrls(response)
@@ -272,6 +273,49 @@ export async function AllUserDocs (app) {
     })
   )
 }
+export async function SearchUserDocs (app) {
+  app.post(
+    '/raybags/v1/uploader/search-docs',
+    authMiddleware,
+    validateDocumentOwnership,
+    async (req, res) => {
+      const { searchQuery } = req.body
+      const isAdmin = req.user.isAdmin
+      let query, count
+
+      if (!searchQuery) {
+        return res.status(400).json('Search query is required.')
+      }
+
+      if (isAdmin) {
+        query = DOCUMENT.find(
+          { $text: { $search: searchQuery } },
+          { token: 0 }
+        ).sort({ createdAt: -1 })
+        count = await DOCUMENT.countDocuments({
+          $text: { $search: searchQuery }
+        })
+      } else {
+        query = DOCUMENT.find(
+          { user: req.user.data._id, $text: { $search: searchQuery } },
+          { token: 0 }
+        ).sort({ createdAt: -1 })
+        count = await DOCUMENT.countDocuments({
+          user: req.user.data._id,
+          $text: { $search: searchQuery }
+        })
+      }
+
+      const response = await query
+
+      if (response.length === 0) return res.status(404).json('Nothing found!')
+
+      const updatedDoc = await checkAndUpdateDocumentUrls(response)
+      res.status(200).json({ count, documents: updatedDoc })
+    }
+  )
+}
+
 export async function FindOneItem (app) {
   app.post(
     '/raybags/v1/wizard/uploader/:id',

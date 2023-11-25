@@ -13,7 +13,8 @@ import {
   GetAllUsers,
   GetUser,
   ForgotPassword,
-  UpdatePassword
+  UpdatePassword,
+  SearchUserDocs
 } from './routes/router.js'
 
 export default async app => {
@@ -31,5 +32,6 @@ export default async app => {
   GetUser(app)
   ForgotPassword(app)
   UpdatePassword(app)
+  SearchUserDocs(app)
   app.use(NotSupported)
 }
