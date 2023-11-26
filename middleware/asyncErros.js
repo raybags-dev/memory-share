@@ -5,6 +5,7 @@ export function asyncMiddleware (handler) {
     } catch (ex) {
       const statusCode = ex.statusCode || 500
       res.status(statusCode).json({ status: 'failed', message: ex.message })
+      console.error('Error message:', ex.message)
       if (typeof next === 'function') {
         next({ error: 'something went wrong!\n', message: ex.message })
       }

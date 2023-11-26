@@ -62,18 +62,21 @@ export async function MAIN_PAGE () {
 
   function debounceSearchDatabase (e) {
     if (e && e.preventDefault) e.preventDefault()
+
     clearTimeout(mySearchTimeout)
 
     mySearchTimeout = setTimeout(async () => {
       const inputValue = searchInput?.value.trim().toLowerCase()
 
-      if (inputValue === '') {
+      if (e.type === 'blur' || inputValue === '') {
+        console.log(e.type)
         await PaginateData()
       } else {
         await searchDatabase()
       }
     }, 1000)
   }
+
   searchInput?.addEventListener('input', debounceSearchDatabase)
   const logoutLink = document.querySelector('.logoutuser_link')
   logoutLink?.addEventListener('click', async () => {
