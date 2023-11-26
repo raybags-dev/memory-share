@@ -52,7 +52,6 @@ describe('authMiddleware', () => {
     expect(next.called).to.be.false
   })
 })
-//============ Test is admin function -----------
 describe('isAdmin', () => {
   let req, res, next
 
@@ -105,7 +104,6 @@ describe('isAdmin', () => {
     ).to.be.true
   })
 })
-// ============ Test if user exists ===========
 describe('checkUserExists', () => {
   let req, res, next
   beforeEach(() => {
@@ -150,7 +148,6 @@ describe('checkUserExists', () => {
     USER_MODEL.findById.restore()
   })
 })
-// =============== Test generateJWTToken ==============
 describe('generateJWTToken', () => {
   it('should generate a valid JWT token with the expected payload', async () => {
     // Mock the jwt.sign function using Sinon
@@ -189,7 +186,6 @@ describe('generateJWTToken', () => {
     }
   })
 })
-// ============ Log in user test case ===============
 describe('loginUser', () => {
   let req
   let res
@@ -241,7 +237,6 @@ describe('loginUser', () => {
     findOneStub.restore()
   })
 })
-// ========= Test extractTokenMiddleware ============
 describe('extractTokenMiddleware', () => {
   let req, res, next
 
@@ -265,8 +260,6 @@ describe('extractTokenMiddleware', () => {
     expect(next.called).to.be.true
   })
 })
-
-// ========= test validateDocumentOwnership ============
 describe('validateDocumentOwnership', () => {
   let req, res, next
   beforeEach(() => {

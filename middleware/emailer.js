@@ -21,15 +21,12 @@ export async function sendEmail (
   callback
 ) {
   try {
-    // Check if verificationToken is provided before modifying the email body
     const verificationLink = verificationToken
       ? `Verification Link: ${verificationToken}`
       : ''
 
-    // Include both the email body and verification link
     const emailBody = `${emailData.body}\n\n${verificationLink}`
 
-    // Create the email options
     const mailOptions = {
       from: EMAIL_FOR_NOTIFICATION,
       to: recipient,
@@ -37,7 +34,6 @@ export async function sendEmail (
       text: emailBody
     }
 
-    // Send the email
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error('Error sending email:', error.message)
@@ -53,11 +49,9 @@ export async function sendEmail (
 }
 export async function generateVerificationLink (verificationToken) {
   try {
-    // If a verificationToken is provided, use it directly
     if (verificationToken) {
       return verificationToken
     } else {
-      // Otherwise, generate a new token
       return await generatePasswordResetToken()
     }
   } catch (error) {

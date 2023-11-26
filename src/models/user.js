@@ -17,7 +17,6 @@ const userModel = {
   email: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
     minlength: 5,
     maxlength: 255,
