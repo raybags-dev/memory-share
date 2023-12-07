@@ -1,7 +1,7 @@
 import { USER_MODEL } from '../models/user.js'
 import { sendEmail } from '../../middleware/emailer.js'
 
-export async function ForgotPasswordRouter (req, res) {
+export async function ForgotPasswordController (req, res) {
   const { email } = req.body
   const the_user = await USER_MODEL.findOne({ email: req.body.email })
 
@@ -27,7 +27,7 @@ export async function ForgotPasswordRouter (req, res) {
     res.status(500).json({ error: 'Error generating verification token.' })
   }
 }
-export async function UpdatePasswordRouter (req, res) {
+export async function UpdatePasswordController (req, res) {
   try {
     const user = await USER_MODEL.findOne({ email: req.body.email })
     const token = user.generateAuthToken()

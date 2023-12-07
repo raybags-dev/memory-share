@@ -5,7 +5,7 @@ import { genVerificationToken } from '../../middleware/generateToken.js'
 import { dbFileUploader } from '../../middleware/bd_worker.js'
 import { DOCUMENT } from '../models/documentModel.js'
 
-export async function DocsUploaderRouter (req, res) {
+export async function DocsUploaderController (req, res) {
   try {
     const multerMiddleware = multer({ storage: multer.memoryStorage() }).array(
       'images'
@@ -32,10 +32,10 @@ export async function DocsUploaderRouter (req, res) {
 
       let maxLimit = 6
       let docCount = await DOCUMENT.countDocuments({
-        user: req.user.data._id
+        user: req.user._id
       })
 
-      if (!req.user.data.isAdmin) {
+      if (!req.user.isAdmin) {
         const totalDocuments = req.files.length + docCount
 
         if (totalDocuments > maxLimit) {
@@ -91,7 +91,7 @@ export async function DocsUploaderRouter (req, res) {
           originalname: file.originalname,
           filename: uuidv4() + '.' + fileType,
           data: resizedImage,
-          user: req.user.data._id,
+          user: req.user._id,
           token: await genVerificationToken(),
           contentType: file.mimetype,
           encoding: file.encoding,
@@ -102,6 +102,7 @@ export async function DocsUploaderRouter (req, res) {
       await dbFileUploader(files, req, res)
     })
   } catch (error) {
+    console.log(error)
     if (error.name === 'ValidationError') {
       if (error.errors.question) {
         return res.status(400).json({

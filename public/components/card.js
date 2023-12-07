@@ -188,6 +188,7 @@ export async function deleteDocument (documentId = '') {
       if (response.status === 200) {
         await IsProcessRunning(false, docId)
 
+        colElem.classList.add('delet-transition')
         colElem.classList.add('del_effect')
         // remove the card from the DOM
         setTimeout(() => colElem.remove(), 500)

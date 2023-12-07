@@ -6,10 +6,10 @@ import {
   createFileReadStream
 } from '../../middleware/bd_worker.js'
 
-export async function downloadRouter (req, res) {
+export async function downloadController (req, res) {
   try {
     const itemId = req.params.id
-    const userId = req.user.data._id
+    const { _id: userId } = req.user
     const document = await DOCUMENT.findOne({ _id: new ObjectId(itemId) })
     if (!document) {
       return res.status(404).json({ message: 'Document not found' })
@@ -25,7 +25,7 @@ export async function downloadRouter (req, res) {
     const fileStream = await createFileReadStream(updatedDoc[0].data)
     fileStream.pipe(res)
   } catch (error) {
-    console.error(error)
+    console.error(error.message)
     res.status(500).json({ error: 'Server error' })
   }
 }

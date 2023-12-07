@@ -305,6 +305,7 @@ export async function uploadFiles () {
 
     if (error.response.status === 409) {
       displayLabel(['main__wrapper', 'alert-danger', 'Duplicates detected!'])
+      setTimeout(() => window.location.reload(), 2000)
       return
     }
     if (error instanceof TypeError && error.message.includes('token')) {
@@ -354,7 +355,7 @@ export async function setUpBackToTop () {
     }
   })
 
-  backToTopButton.addEventListener('click', function (e) {
+  backToTopButton?.addEventListener('click', function (e) {
     e.preventDefault()
     if (mainContainer) {
       mainContainer.scrollTo({ top: 0, behavior: 'smooth' })
@@ -362,7 +363,7 @@ export async function setUpBackToTop () {
   })
 
   if (mainContainer && mainContainer.innerHTML.trim() === '') {
-    backToTopButton.classList.remove('show-to-top-btn')
+    backToTopButton?.classList.remove('show-to-top-btn')
   }
 }
 export async function animateImages () {

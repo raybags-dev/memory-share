@@ -1,3 +1,4 @@
+import { error } from 'console'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -11,16 +12,23 @@ export default async app => {
 
     for (const file of files) {
       if (file.endsWith('Router.js')) {
-        const routerModule = await import(path.join(routesPath, file))
-        const router = routerModule.default
-        app.use(router)
+        try {
+          const routerModule = await import(path.join(routesPath, file))
+          const router = routerModule.default
+          app.use(router)
+        } catch (e) {
+          console.log(`Error importing souter ${file}: `, e)
+        }
       }
     }
-    // not supported
     const { NotSupportedRouter } = await import(
       './controllers/notSupportedController.js'
     )
-    app.use(NotSupportedRouter)
+    try {
+      app.use(NotSupportedRouter)
+    } catch (e) {
+      console.log(`Error setting up NotSupportedRouter: ${e}`)
+    }
   } catch (error) {
     console.error('Error reading router files:', error)
   }

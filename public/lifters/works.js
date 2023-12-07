@@ -335,7 +335,6 @@ export async function searchDatabase () {
     runSpinner(true)
   }
 }
-
 // get user profiles
 export async function fetchUserProfile () {
   runSpinner(false)

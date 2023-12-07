@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb'
 import { DOCUMENT } from '../models/documentModel.js'
 import { checkAndUpdateDocumentUrls } from '../../middleware/bd_worker.js'
 
-export async function FindOneDocRouter (req, res) {
+export async function FindOneDocController (req, res) {
   try {
     const itemId = req.params.id
     const userId = req.user.data._id
