@@ -1,10 +1,10 @@
 // routes/userRoutes.js
 import express from 'express'
 import {
-  LoginRouter,
-  CreateUserRouter,
-  GetAllUsersRouter,
-  GetUserRouter
+  LoginController,
+  CreateUserController,
+  GetAllUsersController,
+  GetUserController
 } from '../controllers/userController.js'
 import { loginUser } from '../../middleware/auth.js'
 
@@ -13,18 +13,18 @@ import { asyncMiddleware } from '../../middleware/asyncErros.js'
 
 const router = express.Router()
 
-router.post('/raybags/v1/uploader/create-user', CreateUserRouter)
-router.post('/raybags/v1/user/login', loginUser, LoginRouter)
+router.post('/raybags/v1/uploader/create-user', CreateUserController)
+router.post('/raybags/v1/user/login', loginUser, LoginController)
 
 router.post(
   '/raybags/v1/uploader/get-users',
   authMiddleware,
   isAdmin,
-  asyncMiddleware(GetAllUsersRouter)
+  asyncMiddleware(GetAllUsersController)
 )
 router.post(
   '/raybags/v1/uploader/get-user',
   authMiddleware,
-  asyncMiddleware(GetUserRouter)
+  asyncMiddleware(GetUserController)
 )
 export default router

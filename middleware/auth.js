@@ -1,18 +1,19 @@
 import jwt from 'jsonwebtoken'
 import { config } from 'dotenv'
 config()
-const { ACCESS_TOKEN, ENCRYPTION_KEY } = process.env
+const { ACCESS_TOKEN } = process.env
 import { USER_MODEL } from '../src/models/user.js'
 import { DOCUMENT } from '../src/models/documentModel.js'
 
-export const generateJWTToken = async (data, version) => {
+export const generateJWTToken = async (data, version, superUserToken) => {
   const expiresIn = 60000
   const payload = {
-    data,
     email: data.email,
-    userId: data._id,
+    _id: data._id,
+    version: version,
     isAdmin: data.isAdmin,
-    version: version
+    isSuperUser: data.isSuperUser || false,
+    superUserToken: data.isSuperUser ? superUserToken : null
   }
 
   return new Promise((resolve, reject) => {
@@ -22,9 +23,14 @@ export const generateJWTToken = async (data, version) => {
     })
   })
 }
-// login user
 export const loginUser = async (req, res, next) => {
-  const { email = '', password = '', verification_token } = req.body
+  const {
+    email = '',
+    password = '',
+    verification_token,
+    isAdmin,
+    superUserToken
+  } = req.body
 
   try {
     const user = await USER_MODEL.findOne({ email })
@@ -42,7 +48,7 @@ export const loginUser = async (req, res, next) => {
 
         user.password = password
         await user.save()
-        // clear verifiaction Token when
+
         user.password_reset_token = undefined
         await user.save()
 
@@ -51,9 +57,11 @@ export const loginUser = async (req, res, next) => {
             email: user.email,
             _id: user._id,
             isAdmin: user.isAdmin,
-            version: user.version
+            version: user.version,
+            isSuperUser: user.isSuperUser
           },
-          user.version
+          user.version,
+          user.superUserToken
         )
 
         res.setHeader('authorization', `Bearer ${token}`)
@@ -70,23 +78,41 @@ export const loginUser = async (req, res, next) => {
     }
 
     const isMatch = await user.comparePassword(password)
+
     if (!isMatch) {
       return res.status(401).json({ error: 'Invalid email or password' })
     }
 
-    // If user exists and password is correct, generate JWT token
+    const userData = {
+      email: user.email,
+      _id: user._id,
+      version: user.version,
+      isAdmin: user.isAdmin,
+      isSuperUser: user.isSuperUser || false
+    }
+
+    if (isAdmin) {
+      userData.isAdmin = true
+      if (superUserToken) {
+        userData.isSuperUser = true
+      }
+    }
+
+    req.locals = req.locals || {}
+
     const token = await generateJWTToken(
-      {
-        email: user.email,
-        _id: user._id,
-        isAdmin: user.isAdmin,
-        version: user.version
-      },
-      user.version
+      userData,
+      user.version,
+      user.superUserToken
     )
 
     // Set token in the response header
     res.setHeader('authorization', `Bearer ${token}`)
+    if (user.superUserToken) {
+      res.setHeader('admin-token', user.superUserToken)
+      req.locals.superUserToken = user.superUserToken
+    }
+
     req.user = user.toObject()
     next()
   } catch (error) {
@@ -94,7 +120,6 @@ export const loginUser = async (req, res, next) => {
     res.status(500).json({ error: 'Server error', message: error.message })
   }
 }
-//  extract token
 export const extractTokenMiddleware = (req, res, next) => {
   const authHeader = req.headers['authorization']
   if (authHeader) {
@@ -104,47 +129,58 @@ export const extractTokenMiddleware = (req, res, next) => {
   next()
 }
 export const authMiddleware = async (req, res, next) => {
-  // Check if Authorization header is present
   const authHeader = req.headers['authorization']
+
   if (!authHeader) {
-    return res.status(401).json({ error: 'Missing Authorization header' })
+    return res
+      .status(401)
+      .json({ error: 'Authentication Failed: Missing required header(s)' })
   }
-  // Extract JWT token from Authorization header
   const [bearer, token] = authHeader.split(' ')
+
   if (bearer !== 'Bearer' || !token) {
     return res.status(401).json({ error: 'Invalid Authorization header' })
   }
-  // Verify and decode JWT token
+
   try {
     const decodedToken = jwt.verify(token, ACCESS_TOKEN)
-    // Attach decoded token to request object for use in subsequent middleware or routes
     req.user = decodedToken
-    req.token = token // Attach token to request object for use in subsequent middleware or routes
+    req.token = token
 
-    const userEmail = decodedToken.data.email
+    const userEmail = decodedToken.email
+
     if (!userEmail) {
       return res.status(401).json({ error: 'Missing email in token data' })
     }
 
-    // Check if user with email exists in database
     const user = await USER_MODEL.findOne({ email: userEmail }).maxTimeMS(10000)
 
     if (!user) {
-      return res.status(401).json({ error: 'Could not find user!' })
+      return res.status(401).json({ error: 'Unauthorized action!' })
     }
 
-    // Check if the user's identifier in the token matches the identifier in the user's record
-    if (decodedToken.data.version !== user.version) {
+    if (decodedToken.version !== user.version) {
       return res.status(401).json({ error: 'User has been deleted!' })
     }
 
-    req.locals = { user } // attach user object to req.locals
+    if (user.isAdmin) {
+      if (user.superUserToken && decodedToken.isSuperUser) {
+        req.locals = { user, isSuperUser: true }
+      } else {
+        req.locals = { user }
+      }
+    } else {
+      req.locals = { user }
+    }
+
     next()
   } catch (error) {
-    return res.status(401).json({
-      error: 'Invalid token',
-      message: error.message && 'This login session expired'
-    })
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token expired' })
+    }
+
+    console.error('Authentication error:', error.message || error)
+    return res.status(401).json({ error: 'Authentication failed' })
   }
 }
 export const checkDocumentAccess = async (req, res, next) => {
@@ -165,64 +201,11 @@ export const checkDocumentAccess = async (req, res, next) => {
     res.status(500).json({ error: 'Server error', message: 'Try again later' })
   }
 }
-//   check user is admin
 export const isAdmin = async (req, res, next) => {
   if (!req.user.isAdmin) {
     return res.status(403).json({
-      message:
-        'Access denied: admin privileges required! Contact Raymond  for assistance!'
+      message: 'FORBIDDEN: Access denied!'
     })
   }
   next()
-}
-//  check if user exist middleware
-export const checkUserExists = async (req, res, next) => {
-  try {
-    const { userId } = req.params
-    const user = await USER_MODEL.findById(userId)
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' })
-    }
-
-    req.locals = { user } // attach user object to req.locals
-    next()
-  } catch (error) {
-    console.error(error.message)
-    res.status(500).json({ error: 'Server error', message: 'Try again later' })
-  }
-}
-export const validateDocumentOwnership = async (req, res, next) => {
-  try {
-    const user_id = req.user.data._id
-    // Find all documents that were created by the user
-    const documents = await DOCUMENT.find({ user: user_id }, { data: 0 }).exec()
-
-    if (documents.length === 0) {
-      return res.status(404).json({ error: 'Documents not found' })
-    }
-    // Check if the requested document is in the list of documents created by the user
-    const userdocuments = documents.find(doc => doc.user.toString() === user_id)
-    if (!userdocuments) {
-      return res.status(401).json({ error: 'Unauthorized' })
-    }
-    // Attach document object to req.locals for use in subsequent middleware or routes
-    req.locals = { userdocuments }
-    next()
-  } catch (error) {
-    console.log(error)
-    return res.status(500).json({ error: 'Server error' })
-  }
-}
-export async function verifySecretKey (req, res, next) {
-  try {
-    const clientSecretKey = req.headers['x-secret-key']
-    if (!clientSecretKey || clientSecretKey !== ENCRYPTION_KEY) {
-      return res.status(401).json({ message: 'Unauthorized' })
-    }
-    next()
-  } catch (error) {
-    console.error('Error in verifySecretKey middleware:', error)
-    res.status(500).json({ message: 'Internal Server Error' })
-  }
 }

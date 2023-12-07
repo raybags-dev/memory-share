@@ -1,9 +1,11 @@
 import { DOCUMENT } from '../models/documentModel.js'
 import { checkAndUpdateDocumentUrls } from '../../middleware/bd_worker.js'
 
-export async function SearchUserDocsRouter (req, res) {
+export async function SearchUserDocsController (req, res) {
   const { searchQuery } = req.body
-  const isAdmin = req.user.isAdmin
+  const { _id: userId, isAdmin } = req.user
+  console.log(userId)
+
   let query, count
 
   if (!searchQuery) {
@@ -20,11 +22,11 @@ export async function SearchUserDocsRouter (req, res) {
     })
   } else {
     query = DOCUMENT.find(
-      { user: req.user.data._id, $text: { $search: searchQuery } },
+      { user: userId, $text: { $search: searchQuery } },
       { token: 0 }
     ).sort({ createdAt: -1 })
     count = await DOCUMENT.countDocuments({
-      user: req.user.data._id,
+      user: userId,
       $text: { $search: searchQuery }
     })
   }
