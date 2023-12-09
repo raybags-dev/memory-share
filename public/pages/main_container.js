@@ -11,7 +11,10 @@ import {
 import {
   DisplayUserProfileHTML,
   generateSubCards,
-  addCardWithDelay
+  addCardWithDelay,
+  addAdminLinkToNavbar,
+  checkAdminTokenAndFetchUser,
+  deleteUser
 } from '../components/card.js'
 import { DisplayeBigImage } from '../components/card.js'
 import { logOutUser, LOGIN_HTML } from '../pages/login.js'
@@ -29,7 +32,7 @@ export async function MAIN_PAGE () {
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse bg-transparent" id="navbarScroll">
-              <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll bg-transparent" style="--bs-scroll-height: 100px;">
+              <ul id="__nav" class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll bg-transparent" style="--bs-scroll-height: 100px;">
                 <li class="nav-item dropdown">
                   <a class="dropdown-item  dropdown-item-dark text-white bg-transparent user_profile_link"href="#">Account</a>
                 </li>
@@ -48,6 +51,7 @@ export async function MAIN_PAGE () {
                 <label id="showForm" class="label"><span>+</span></label>
               </div>
         <div id="off__Container" class="row row-cols-1 row-cols-md-3 g-2" style="transition:.5s !important;">
+    
         </div>
       </main>
     `
@@ -122,6 +126,47 @@ export async function MAIN_PAGE () {
           }
         )
       }
+    }
+  })
+
+  addAdminLinkToNavbar()
+  const m_gwa = document.querySelector('.mwesigwa_link')
+  const acc = document.querySelector('.user_profile_link')
+  m_gwa?.addEventListener('click', async () => {
+    let isContainerLoaded = await checkAdminTokenAndFetchUser()
+    if (isContainerLoaded) {
+      setTimeout(() => {
+        const parentElement1 = m_gwa.parentNode
+        const parentElement2 = acc.parentNode
+        if (parentElement1 && parentElement2) {
+          try {
+            parentElement1.remove()
+            parentElement2.remove()
+
+            const cardContainers = document.querySelectorAll('.dele_btn')
+            cardContainers.forEach(btn => {
+              btn.addEventListener('click', async e => {
+                const colContainer = e.target.closest('.col')
+
+                if (colContainer) {
+                  const userId = colContainer.getAttribute('data-user-id')
+                  const cadDelId = e.target.getAttribute('cad-del-id')
+
+                  if (userId === cadDelId) {
+                    const response = await deleteUser(userId)
+                    if (response?.status === true) {
+                      colContainer.classList.add('nimate-del-profile')
+                      setTimeout(() => colContainer.remove(), 500)
+                    }
+                  }
+                }
+              })
+            })
+          } catch (e) {
+            console.log(e.message)
+          }
+        }
+      }, 2000)
     }
   })
 }

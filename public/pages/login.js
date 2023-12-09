@@ -85,7 +85,12 @@ export async function LOGIN_HTML () {
       if (response.status == 200) {
         runSpinner(true)
         const token = response.headers.authorization.split(' ')[1]
-        sessionStorage.setItem('token', JSON.stringify({ token, email }))
+        const admin_token = response.headers['admin-token']
+
+        sessionStorage.setItem(
+          'token',
+          JSON.stringify({ token, email, admin_token })
+        )
         // Redirect to main page
         sessionStorage.setItem('redirected', true)
         //   show logout button
@@ -126,7 +131,12 @@ export async function loginUser (user) {
       ])
       runSpinner(true)
       const token = response.headers.authorization.split(' ')[1]
-      sessionStorage.setItem('token', JSON.stringify({ token, email }))
+      const admin_token = response.headers['admin-token']
+
+      sessionStorage.setItem(
+        'token',
+        JSON.stringify({ token, email, admin_token })
+      )
       // Redirect to main page
       sessionStorage.setItem('redirected', true)
       Notify(`Login successful`)
