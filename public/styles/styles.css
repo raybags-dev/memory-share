@@ -691,8 +691,11 @@ textarea:focus {
 
 .loader {
     position: relative;
-    width: 180px;
-    height: 180px;
+    width: 150px;
+    height: 150px;
+    padding: 1rem;
+    border-radius: 50%;
+    text-shadow: 1px 1px black;
 }
 
 .loader:before,
@@ -705,7 +708,7 @@ textarea:focus {
 }
 
 .loader:after {
-    box-shadow: 0 2px 0 #FF3D00 inset;
+    box-shadow: 0 2px 0 #00ff0d inset;
     -webkit-animation: rotate 1.5s linear infinite;
     animation: rotate 1.5s linear infinite;
 }
@@ -730,7 +733,7 @@ textarea:focus {
     }
 }
 
-.col {
+.doc-column {
     min-height: 30vh !important;
     overflow: hidden !important;
     transition: width .3s;
@@ -757,18 +760,18 @@ textarea:focus {
     }
 }
 
-.col.sm-card {
+.doc-column.sm-card {
     max-height: 50%;
     min-height: 50%;
 }
 
-.col.sm-card .card {
+.doc-column.sm-card .doc--card {
     display: grid;
     place-content: center;
     align-items: center;
 }
 
-.card {
+.doc--card {
     position: relative;
     min-width: 100%;
     min-height: 100%;
@@ -780,25 +783,8 @@ textarea:focus {
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
-    opacity: 0;
+    opacity: 1;
     transition: opacity .7s;
-}
-
-.fade-card {
-    -webkit-animation: card-anime 1 forwards ease-in .7s;
-    animation: card-anime 1 forwards ease-in .7s;
-}
-
-@-webkit-keyframes card-anime {
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes card-anime {
-    to {
-        opacity: 1;
-    }
 }
 
 .img_card {
@@ -863,11 +849,11 @@ textarea:focus {
     transition: .3s;
 }
 
-.card-body:empty+.card-footer {
+.doc-card-body:empty+.card-footer {
     display: none;
 }
 
-.card-body {
+.doc-card-body {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -881,7 +867,7 @@ textarea:focus {
     background-color: rgba(6, 6, 6, 0.5);
 }
 
-.col:hover .card-body {
+.doc-column:hover .doc-card-body {
     max-height: 25vh;
     opacity: 1;
 }
@@ -974,17 +960,12 @@ textarea:focus {
     outline: 4px solid rgb(228, 227, 227);
 }
 
-
-
 .big_spinnerr {
     background-color: transparent;
     border: transparent;
     min-width: 100%;
     overflow: hidden;
 }
-
-
-
 
 .skeleton {
     display: grid;
@@ -1143,6 +1124,71 @@ textarea:focus {
     animation: bring-in-form 1 forwards ease-in-out .4s;
 }
 
+
+#mwesi-wrapper {
+    background-color: transparent;
+    padding: .4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mwesigwa_link {
+    opacity: 0;
+    transition: all .3s;
+    -webkit-animation: nav_item_in 1 forwards ease-in .5s;
+    animation: nav_item_in 1 forwards ease-in .5s;
+}
+
+.mwesigwa__wrap {
+    -webkit-clip-path: inset(0 0 0 0);
+    clip-path: inset(0 0 0 0);
+    transition: -webkit-clip-path .2s;
+    transition: clip-path .2s;
+    transition: clip-path .2s, -webkit-clip-path .2s;
+
+}
+
+.nimate-del-profile {
+    -webkit-animation: delet-user-anime 1 forwards ease-in .1s;
+    animation: delet-user-anime 1 forwards ease-in .1s;
+}
+
+
+@-webkit-keyframes delet-user-anime {
+    to {
+        -webkit-clip-path: inset(50% 51% 50% 49%);
+        clip-path: inset(50% 51% 50% 49%);
+    }
+}
+
+
+@keyframes delet-user-anime {
+    to {
+        -webkit-clip-path: inset(50% 51% 50% 49%);
+        clip-path: inset(50% 51% 50% 49%);
+    }
+}
+
+.mwesigwa__wrap>.list-group {
+    font-size: medium;
+}
+
+@-webkit-keyframes nav_item_in {
+    to {
+        opacity: 1;
+    }
+}
+
+
+
+@keyframes nav_item_in {
+    to {
+        opacity: 1;
+    }
+}
+
+
 @-webkit-keyframes bring-in-form {
     to {
         bottom: 1%;
@@ -1224,6 +1270,10 @@ textarea:focus {
     #uploadForm {
         width: 90%;
         height: 70%;
+    }
+
+    .mwesigwa__wrap {
+        min-width: 100% !important;
     }
 }
 

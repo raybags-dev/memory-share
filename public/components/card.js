@@ -26,8 +26,8 @@ export async function CARD (data, isNew = false) {
   const { email } = JSON.parse(sessionStorage.getItem('token'))
   let fall_back = '../images/_404_.jpeg'
   let cardContent = `
-  <div class="col sm-card bg-transparent" style="padding:.2rem;" data-id="${_id}">
-  <div class="card fade-card main___card  bg-transparent rounded" style="object-fit:contain !important;" data-card="${_id}">
+  <div class="col sm-card bg-transparent doc-column" style="padding:.2rem;" data-id="${_id}">
+  <div class="card main___card  bg-transparent rounded doc--card" style="object-fit:contain !important;" data-card="${_id}">
     <div class="main-del-cont" style="cursor:pointer !important;z-index:1000 !important;">
     <i id="de__btn_1" class="fa-regular fa-trash-can"></i>
     </div>
@@ -41,7 +41,7 @@ export async function CARD (data, isNew = false) {
   <div class="card-footer bg-transparent card-img-overlay text-danger m-1 rounded" style="width:fit-content;height:fit-content;padding:.3rem; font-style:italic">${formatDate(
     createdAt
   )}</div>
-    <div class="card-body text-white">
+    <div class="card-body text-white doc-card-body">
       <div class="container img__desc">${description || ''}</div>
       <ul class="list-group rounded d-none">
         <li class="list-group-item bg-transparent name">${formatEmail(
@@ -125,21 +125,6 @@ export async function DisplayeBigImage (dataId, imgSrc, createdAt, description) 
     container__main_body?.removeChild(carouselElement)
   })
 
-  // const carouselElement = document.querySelector('.carucel___main')
-  // if (carouselElement) {
-  //   carouselElement.addEventListener('slid.bs.carousel', event => {
-  //     const activeSlide = event.relatedTarget
-  //     const descriptionCont = document.querySelector('.description_cont')
-  //     if (descriptionCont && activeSlide) {
-  //       const dataId = activeSlide.getAttribute('data-image-id')
-  //       const cardElement = document.querySelector(
-  //         `.sm-card[data-id="${dataId}"]`
-  //       )
-  //       const desc = cardElement?.querySelector('.img__desc')?.textContent
-  //       descriptionCont.textContent = desc
-  //     }
-  //   })
-  // }
   const carouselElement = document.querySelector('.carucel___main')
   if (carouselElement) {
     carouselElement.addEventListener('slid.bs.carousel', event => {
@@ -428,4 +413,281 @@ export async function generateSubCards (dataId, imgSrc, createdAt) {
 export async function addCardWithDelay (obj, isNew = false, delay = 150) {
   await new Promise(resolve => setTimeout(resolve, delay))
   await CARD(obj, isNew)
+}
+export async function userIsAdmin () {
+  const storedToken = JSON.parse(sessionStorage.getItem('token'))
+  if (!storedToken || !storedToken.admin_token) {
+    return false
+  }
+  try {
+    let url = 'uploader/get-user'
+    const response = await API_CLIENT.post(url, null, {
+      headers: {
+        authorization: `Bearer ${storedToken.token}`
+      }
+    })
+    if (response.status === 200) {
+      const superUserTokenFromServer = response.data.superUserToken
+      return superUserTokenFromServer === storedToken.admin_token
+    }
+    return false
+  } catch (error) {
+    console.error('Error fetching user details:', error)
+    return false
+  }
+}
+export function addAdminLinkToNavbar () {
+  const navUl = document.getElementById('__nav')
+  const tokenString = sessionStorage.getItem('token')
+
+  if (tokenString) {
+    const token = JSON.parse(tokenString)
+    if (token && token.admin_token) {
+      const adminLi = document.createElement('li')
+      adminLi.classList.add('nav-item', 'dropdown')
+
+      const adminLink = document.createElement('a')
+      adminLink.classList.add(
+        'dropdown-item',
+        'dropdown-item-dark',
+        'text-white',
+        'bg-transparent',
+        'mwesigwa_link'
+      )
+      adminLink.href = '#'
+      adminLink.textContent = 'Admin'
+
+      adminLi.appendChild(adminLink)
+      navUl?.insertBefore(adminLi, navUl.firstChild)
+    }
+  }
+}
+export async function mwesigwaCard (user) {
+  if (!user) {
+    displayLabel(['main__wrapper', 'alert-warning', 'No users were be found!'])
+    return
+  }
+  const cardElement = document.createElement('div')
+  cardElement.classList.add('col', 'mwesigwa__wrap')
+  cardElement.style.maxWidth = '18rem'
+  cardElement.setAttribute('data-user-id', user._id)
+
+  cardElement.innerHTML = `
+      <div class="card shadow-lg" user-data-id="${user._id}">
+      <div class="card-header" style="display:flex;justify-content:space-between;">
+      <h4>
+      <span class="badge bg-secondary text-center" style="min-width:40%;">${
+        (user.isAdmin && 'Administrator') || 'User'
+      }</span>
+      </h4>
+      <h4>
+      <span class="badge bg-secondary text-center" style="min-width:40%;">${
+        (user.totalDocumentsOwned && 'count: ', user.totalDocumentsOwned) ||
+        'count: 0'
+      }</span>
+      </h4>
+
+      </div>
+        <ul class="list-group">
+            <li class="list-group-item list-group-item-action">${
+              user.name || ''
+            }</li>
+            <li class="list-group-item list-group-item-action">${
+              user.email || ''
+            }</li>
+            <li class="list-group-item list-group-item-action user-id">${
+              user.userId || ''
+            }</li>
+            <li class="list-group-item list-group-item-action doc_id">${
+              user._id || ''
+            }</li>
+            <li class="list-group-item list-group-item-action">${
+              user.createdAt || ''
+            }</li>
+        </ul>
+        <div class="card-footer d-grid gap-2">
+          <button type="button" cad-del-id="${
+            user._id
+          }" class="btn btn-md btn-outline-danger dele_btn float-right">Delete Profile</button>
+        </div>
+      </div>
+  `
+  const parentContainer = document.getElementById('mwesi-wrapper')
+  parentContainer.appendChild(cardElement)
+}
+export async function getAllUsers (page = 1) {
+  const storedToken = JSON.parse(sessionStorage.getItem('token'))
+  if (!storedToken || !storedToken.admin_token) {
+    return false
+  }
+
+  try {
+    let url = `uploader/get-users?page=${page}`
+    const response = await API_CLIENT.post(url, null, {
+      headers: {
+        authorization: `Bearer ${storedToken.token}`
+      }
+    })
+
+    if (response.status === 200 && response.data.user_profiles.length) {
+      return response.data
+    }
+
+    return displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      'Request failed. See error logs'
+    ])
+  } catch (error) {
+    console.error('Error fetching user details:', error)
+    return false
+  }
+}
+export async function checkAdminTokenAndFetchUser () {
+  runSpinner(false, 'loading')
+  const is_admin = await userIsAdmin()
+  if (!is_admin) return
+  document.body.style.cssText = 'background: white;'
+  await createWrapperContainer()
+  runSpinner(true)
+  return true
+}
+export async function createWrapperContainer () {
+  try {
+    runSpinner(false, 'loading')
+    let isObserving = true
+    const wrapperContainerId = 'mwesi-wrapper'
+    let wrapperContainer = document.getElementById(wrapperContainerId)
+
+    if (!wrapperContainer) {
+      wrapperContainer = document.createElement('div')
+      wrapperContainer.classList.add(
+        'row',
+        'row-cols-1',
+        'row-cols-md-3',
+        'g-3'
+      )
+      wrapperContainer.id = wrapperContainerId
+
+      const parentContainer = document.getElementById('main__wrapper')
+      parentContainer.innerHTML = ''
+
+      parentContainer.appendChild(wrapperContainer)
+      displayLabel([
+        'main__wrapper',
+        'alert-success',
+        'Authorized access. Welcome!'
+      ])
+
+      let page = 1
+
+      const fetchAndAppendNextPage = async () => {
+        try {
+          runSpinner(false, 'loading')
+
+          const { profile_count, user_profiles } = await getAllUsers(page++)
+
+          if (!user_profiles) {
+            console.log('No more items to fetch. Last page reached.')
+            isObserving = false
+            return
+          }
+
+          if (user_profiles.length > 0) {
+            user_profiles.forEach((profile, index) => {
+              setTimeout(async () => {
+                await mwesigwaCard(profile)
+              }, 100 * index)
+            })
+
+            setTimeout(() => {
+              observeLastCard()
+            }, 500)
+          } else {
+            isObserving = false
+            console.log('Last page reached.')
+            let adminBTN = document.querySelector('.mwesigwa_link')
+            if (adminBTN) adminBTN.disabled = true
+
+            displayLabel(['main__wrapper', 'alert-info', 'Last page reached.'])
+          }
+        } catch (error) {
+          console.error('Error fetching and appending next page:', error)
+          displayLabel([
+            'main__wrapper',
+            'alert-danger',
+            `Error: ${error.message}`
+          ])
+        } finally {
+          runSpinner(true, 'loading')
+        }
+      }
+
+      const observeLastCard = () => {
+        const lastCard = wrapperContainer.lastElementChild
+        if (lastCard) {
+          observer.observe(lastCard)
+        }
+      }
+
+      const observerCallback = async (entries, observer) => {
+        if (entries[0].isIntersecting && isObserving) {
+          await fetchAndAppendNextPage()
+        }
+      }
+
+      const observer = new IntersectionObserver(observerCallback, {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+      })
+      await fetchAndAppendNextPage()
+    }
+  } catch (e) {
+    console.log(e.message)
+    displayLabel([
+      'main__wrapper',
+      'alert-danger',
+      'Something went wrong, access denied!'
+    ])
+  } finally {
+    runSpinner(true, 'failed')
+  }
+}
+export async function deleteUser (user_id) {
+  runSpinner(false, 'deleting')
+  if (!user_id) return
+  const storedToken = JSON.parse(sessionStorage.getItem('token'))
+  if (!storedToken || !storedToken.admin_token) {
+    return false
+  }
+
+  try {
+    let url = `delete-user-and-docs/${user_id}`
+    const response = await API_CLIENT.delete(url, {
+      headers: {
+        authorization: `Bearer ${storedToken.token}`
+      }
+    })
+
+    if (response.status === 200) {
+      displayLabel([
+        'main__wrapper',
+        'alert-success',
+        'User deleted successfully!'
+      ])
+      return response.data
+    }
+
+    displayLabel([
+      'main__wrapper',
+      'alert-warning',
+      'Request failed. See error logs'
+    ])
+  } catch (error) {
+    console.error('Error deleting user:', error)
+    return false
+  } finally {
+    runSpinner(true)
+  }
 }
