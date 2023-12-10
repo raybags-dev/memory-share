@@ -161,6 +161,8 @@ export async function loginUser (user) {
   }
 }
 export async function logOutUser (isLogout) {
+  document.body.style.cssText =
+    'background: linear-gradient(rgba(26, 26, 26, 0.8), rgb(26, 26, 26)), url("../images/bg-water.jpeg") center/cover no-repeat fixed;backdrop-filter:blur(3px)'
   if (isLogout) {
     const sessionToken = sessionStorage.getItem('token')
     if (sessionToken) {

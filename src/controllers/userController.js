@@ -133,104 +133,63 @@ export async function GetUserController (req, res) {
     console.log(e)
   }
 }
-
-// export async function GetAllUsersController (req, res) {
-//   try {
-//     const isSuperUser = await USER_MODEL.isSuperUser(
-//       req.locals.user.superUserToken
-//     )
-
-//     if (!isSuperUser) {
-//       return res.status(401).json({ error: 'Unauthorized - Not a super user' })
-//     }
-
-//     const currentUser = req.locals.user
-//     const perPage = 10
-//     let page = parseInt(req.query.page) || 1
-
-//     // Calculate the skip value based on the page and perPage
-//     const skip = (page - 1) * perPage
-
-//     const users = await USER_MODEL.find(
-//       { _id: { $ne: currentUser._id } },
-//       {},
-//       { token: 0, password: 0, __v: 0 }
-//     )
-//       .sort({ createdAt: -1 })
-//       .skip(skip)
-//       .limit(perPage)
-
-//     const updatedUsers = await Promise.all(
-//       users.map(async user => {
-//         const count = await DOCUMENT.countDocuments({ user: user._id })
-//         return { ...user.toObject(), totalDocumentsOwned: count }
-//       })
-//     )
-
-//     if (updatedUsers.length === 0) {
-//       return res.status(404).json('No profiles found!')
-//     }
-
-//     // Check if there are more users beyond the current page
-//     const hasMore = await USER_MODEL.find({ _id: { $ne: currentUser._id } })
-//       .skip(skip + perPage)
-//       .limit(1)
-
-//     let nextPage = null
-
-//     if (hasMore.length > 0) {
-//       nextPage = page + 1
-//     }
-
-//     res.set('next-page', nextPage)
-//     res.set('current-page', page)
-
-//     res.status(200).json({
-//       profile_count: updatedUsers.length,
-//       user_profiles: updatedUsers
-//     })
-//   } catch (error) {
-//     console.error('Error getting all users:', error)
-//     res.status(500).json({ error: 'Internal Server Error' })
-//   }
-// }
 export async function GetAllUsersController (req, res) {
   try {
     const isSuperUser = await USER_MODEL.isSuperUser(
       req.locals.user.superUserToken
     )
-
-    if (!isSuperUser) {
+    if (!isSuperUser)
       return res.status(401).json({ error: 'Unauthorized - Not a super user' })
-    }
 
     const currentUser = req.locals.user
     const perPage = 10
     let page = parseInt(req.query.page) || 1
 
-    // Calculate the skip value based on the page and perPage
     const skip = (page - 1) * perPage
 
-    const users = await USER_MODEL.find(
-      { _id: { $ne: currentUser._id } },
-      {},
-      { token: 0, password: 0, __v: 0 }
-    )
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(perPage)
+    const users = await USER_MODEL.aggregate([
+      {
+        $match: {
+          _id: { $ne: currentUser._id }
+        }
+      },
+      {
+        $lookup: {
+          from: 'documents',
+          localField: '_id',
+          foreignField: 'user',
+          as: 'documents'
+        }
+      },
+      {
+        $addFields: {
+          totalDocumentsOwned: { $size: '$documents' }
+        }
+      },
+      {
+        $project: {
+          documents: 0,
+          password: 0,
+          token: 0,
+          __v: 0
+        }
+      },
+      {
+        $sort: { totalDocumentsOwned: -1 } // sorting by totalDocumentsOwned in DESC order
+      },
+      {
+        $skip: skip
+      },
+      {
+        $limit: perPage
+      }
+    ])
 
     const totalUserCount = await USER_MODEL.countDocuments({
       _id: { $ne: currentUser._id }
     })
 
-    const updatedUsers = await Promise.all(
-      users.map(async user => {
-        const count = await DOCUMENT.countDocuments({ user: user._id })
-        return { ...user.toObject(), totalDocumentsOwned: count }
-      })
-    )
-    if (updatedUsers.length === 0) {
+    if (users.length === 0) {
       return res.status(404).json({
         profile_count: 0,
         current_page: page,
@@ -239,8 +198,9 @@ export async function GetAllUsersController (req, res) {
         user_profiles: []
       })
     }
+
     const pageCount = Math.ceil(totalUserCount / perPage)
-    const currentPageCount = updatedUsers.length
+    const currentPageCount = users.length
     const hasMore = totalUserCount > skip + perPage
     let nextPage = null
     if (hasMore) {
@@ -253,7 +213,7 @@ export async function GetAllUsersController (req, res) {
       next_page: nextPage,
       page_count: pageCount,
       current_page_count: currentPageCount,
-      user_profiles: updatedUsers
+      user_profiles: users
     })
   } catch (error) {
     console.error('Error getting all users:', error)
