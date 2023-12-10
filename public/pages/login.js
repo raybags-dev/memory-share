@@ -116,7 +116,9 @@ export async function LOGIN_HTML () {
   })
 }
 export async function loginUser (user) {
-  runSpinner(false, 'Processing')
+  const cookieRef = await handleCookieAcceptance()
+  if (!cookieRef) return
+  runSpinner(false, 'On it')
   const email = user.email
   const password = user.password
 
@@ -161,8 +163,9 @@ export async function loginUser (user) {
   }
 }
 export async function logOutUser (isLogout) {
-  document.body.style.cssText =
-    'background: linear-gradient(rgba(26, 26, 26, 0.8), rgb(26, 26, 26)), url("../images/bg-water.jpeg") center/cover no-repeat fixed;backdrop-filter:blur(3px)'
+  const cookieRef = await handleCookieAcceptance()
+  if (!cookieRef) return
+
   if (isLogout) {
     const sessionToken = sessionStorage.getItem('token')
     if (sessionToken) {
@@ -175,5 +178,70 @@ export async function logOutUser (isLogout) {
       }, 500)
     }
     await LOGIN_HTML()
+  }
+}
+export async function handleCookieAcceptance () {
+  try {
+    const isCookiesAccepted = localStorage.getItem('isCookiesAccepted')
+
+    if (isCookiesAccepted === 'false' || isCookiesAccepted === null) {
+      const modalHTML = `
+          <div class="modal fade text-dark" id="cookieModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="cookieModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5 text-light" id="cookieModalLabel">Cookie Policy</h1>
+                <button type="button" class="btn-close text-light c--iie-c-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p class="text-light">This website uses cookies to enhance the user experience. By accepting cookies, you agree to our <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a>.</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-lg btn-outline-secondary" id="rejectCookies" data-bs-dismiss="modal">Reject</button>
+                <button type="button" class="btn btn-lg btn-outline-primary" id="acceptCookies">Accept</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+
+      document.body.insertAdjacentHTML('beforeend', modalHTML)
+      const cookieModal = new bootstrap.Modal(
+        document.getElementById('cookieModal')
+      )
+      cookieModal.show()
+
+      document.getElementById('acceptCookies').addEventListener('click', () => {
+        localStorage.setItem('isCookiesAccepted', 'true')
+        localStorage.setItem('userGuideShown', 'false')
+        cookieModal.hide()
+        window.location.reload()
+      })
+
+      document.getElementById('rejectCookies').addEventListener('click', () => {
+        localStorage.setItem('isCookiesAccepted', 'false')
+        displayLabel([
+          'body',
+          'alert-danger',
+          "Unfortunately, you can't use this application without consenting to the Terms of Service."
+        ])
+        cookieModal.hide()
+        setTimeout(() => window.location.reload(), 5000)
+      })
+
+      document.querySelector('.c--iie-c-btn').addEventListener('click', () => {
+        localStorage.setItem('isCookiesAccepted', 'false')
+        displayLabel([
+          'body',
+          'alert-danger',
+          "Unfortunately, you can't use this application without consenting to the Terms of Service."
+        ])
+        cookieModal.hide()
+        setTimeout(() => window.location.reload(), 5000)
+      })
+    }
+    return localStorage.getItem('isCookiesAccepted') === 'true'
+  } catch (e) {
+    console.log(e.message)
   }
 }

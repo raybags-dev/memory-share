@@ -475,41 +475,41 @@ export async function mwesigwaCard (user) {
 
   cardElement.innerHTML = `
       <div class="card shadow-lg bg-transparent" user-data-id="${user._id}">
-      <div class="card-header" style="display:flex;justify-content:space-between;">
-      <h4>
-      <span class="badge bg-transparent text-muted text-center text-light adm_badge" style="min-width:40%;">${
-        (user.isAdmin && 'Administrator') || 'User'
-      }</span>
-      </h4>
-      <h4>
-      <span class="badge bg-transparent text-muted text-center text-light count_badge" style="min-width:40%;">${
-        (user.totalDocumentsOwned && 'count: ', user.totalDocumentsOwned) || '0'
-      }</span>
-      </h4>
+          <div class="card-header" style="display:flex;justify-content:space-between;">
+              <button type="button" class="btn btn-outline-secondary position-relative prof-notif-btn" disabled>
+              ${(user.isAdmin && 'Administrator') || 'Standard'}
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              ${
+                (user.totalDocumentsOwned && 'count: ',
+                user.totalDocumentsOwned) || '0'
+              }
+                <span class="visually-hidden">user documents</span>
+              </span>
+            </button>
 
-      </div>
-        <ul class="list-group bg-transparent">
-            <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
-              user.name || ''
-            }</li>
-            <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
-              user.email || ''
-            }</li>
-            <li class="list-group-item list-group-item-action text-muted text-light bg-transparent user-id">${
-              user.userId || ''
-            }</li>
-            <li class="list-group-item list-group-item-action text-muted text-light bg-transparent doc_id">${
-              user._id || ''
-            }</li>
-            <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
-              user.createdAt || ''
-            }</li>
-        </ul>
-        <div class="card-footer d-grid gap-2">
-          <button type="button" cad-del-id="${
-            user._id
-          }" class="btn btn-md btn-outline-danger dele_btn float-right">Delete Profile</button>
-        </div>
+          </div>
+            <ul class="list-group bg-transparent">
+                <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
+                  user.name || ''
+                }</li>
+                <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
+                  user.email || ''
+                }</li>
+                <li class="list-group-item list-group-item-action text-muted text-light bg-transparent user-id">${
+                  user.userId || ''
+                }</li>
+                <li class="list-group-item list-group-item-action text-muted text-light bg-transparent doc_id">${
+                  user._id || ''
+                }</li>
+                <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
+                  user.createdAt || ''
+                }</li>
+            </ul>
+            <div class="card-footer d-grid gap-2">
+              <button type="button" cad-del-id="${
+                user._id
+              }" class="btn btn-md btn-outline-danger dele_btn float-right">Delete Profile</button>
+            </div>
       </div>
   `
   const parentContainer = document.getElementById('mwesi-wrapper')
@@ -557,8 +557,7 @@ export async function checkAdminTokenAndFetchUser () {
 
   const is_admin = await userIsAdmin()
   if (!is_admin) return
-  document.body.style.cssText =
-    'background: linear-gradient(rgba(26, 26, 26, 0.8), rgb(26, 26, 26)), url("https://raw.githubusercontent.com/raybags-web-dev/image_base/master/images/about2.jpg") center/cover no-repeat fixed;backdrop-filter:blur(3px)'
+  document.body.style.cssText = 'background: rgb(26, 26, 26);'
 
   await createWrapperContainer()
   await setUpBackToTop('main__wrapper')
