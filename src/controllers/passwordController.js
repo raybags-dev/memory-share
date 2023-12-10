@@ -16,7 +16,7 @@ export async function ForgotPasswordController (req, res) {
   // send email to user for token.
   const emailData = {
     title: 'Important: Request to update password',
-    body: `A request to update the password for this account was received successfully. This is your token to update your password.\n\nVerification Token: ${resetToken}\n\nThe Token will be active for 24hrs.`
+    body: `A request to update the password for this account was received successfully. This is your token to update your password.\nVerification Token: ${resetToken}\n\nUsage: Copy the token string and paste it in the appropriate field. \nThe Token will remain active for only 24hrs.`
   }
 
   try {

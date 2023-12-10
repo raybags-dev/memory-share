@@ -22,7 +22,7 @@ export async function sendEmail (
 ) {
   try {
     const verificationLink = verificationToken
-      ? `Verification Link: ${verificationToken}`
+      ? `Verification Token: ${verificationToken}`
       : ''
 
     const emailBody = `${emailData.body}\n\n${verificationLink}`

@@ -39,7 +39,7 @@ body {
     -ms-user-select: none;
     user-select: none;
     scroll-behavior: smooth;
-    background: linear-gradient(rgba(26, 26, 26, 0.7),
+    background: linear-gradient(rgba(26, 26, 26, 0.8),
             rgb(26, 26, 26)),
         url("../images/bg-water.jpeg") center/cover no-repeat fixed;
 }
@@ -708,7 +708,7 @@ textarea:focus {
 }
 
 .loader:after {
-    box-shadow: 0 2px 0 #00ff0d inset;
+    box-shadow: 0 2px 0 #cdcccc inset;
     -webkit-animation: rotate 1.5s linear infinite;
     animation: rotate 1.5s linear infinite;
 }
@@ -1131,6 +1131,7 @@ textarea:focus {
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: .6rem;
 }
 
 .mwesigwa_link {
@@ -1141,12 +1142,35 @@ textarea:focus {
 }
 
 .mwesigwa__wrap {
+    border-radius: .4rem;
     -webkit-clip-path: inset(0 0 0 0);
     clip-path: inset(0 0 0 0);
-    transition: -webkit-clip-path .2s;
-    transition: clip-path .2s;
-    transition: clip-path .2s, -webkit-clip-path .2s;
+    transition: all .2s;
+    gap: .6rem !important;
+    border: 2px solid #363636b3 !important;
+    min-height: 355px;
+}
 
+.mwesigwa__wrap:hover {
+    border: 2px solid #545454b3 !important;
+    transition: all .3s;
+}
+
+.dele_btn {
+    border: 1px solid #3a3a3ab3 !important;
+    opacity: .7;
+}
+
+.adm_badge {
+    border: 1px solid #3a3a3ab3;
+}
+
+.count_badge {
+    border: 1px solid #3a3a3ab3;
+    border-radius: 50%;
+    size: 10px;
+    text-align: center;
+    overflow: hidden;
 }
 
 .nimate-del-profile {

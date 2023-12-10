@@ -11,6 +11,7 @@ import {
   saveToLocalStorage,
   fetchFromLocalStorage
 } from '../lifters/works.js'
+import { setUpBackToTop } from '../pages/main_container.js'
 export async function CARD (data, isNew = false) {
   const {
     url,
@@ -468,40 +469,39 @@ export async function mwesigwaCard (user) {
     return
   }
   const cardElement = document.createElement('div')
-  cardElement.classList.add('col', 'mwesigwa__wrap')
+  cardElement.classList.add('col', 'mwesigwa__wrap', 'bg-transparent')
   cardElement.style.maxWidth = '18rem'
   cardElement.setAttribute('data-user-id', user._id)
 
   cardElement.innerHTML = `
-      <div class="card shadow-lg" user-data-id="${user._id}">
+      <div class="card shadow-lg bg-transparent" user-data-id="${user._id}">
       <div class="card-header" style="display:flex;justify-content:space-between;">
       <h4>
-      <span class="badge bg-secondary text-center" style="min-width:40%;">${
+      <span class="badge bg-transparent text-muted text-center text-light adm_badge" style="min-width:40%;">${
         (user.isAdmin && 'Administrator') || 'User'
       }</span>
       </h4>
       <h4>
-      <span class="badge bg-secondary text-center" style="min-width:40%;">${
-        (user.totalDocumentsOwned && 'count: ', user.totalDocumentsOwned) ||
-        'count: 0'
+      <span class="badge bg-transparent text-muted text-center text-light count_badge" style="min-width:40%;">${
+        (user.totalDocumentsOwned && 'count: ', user.totalDocumentsOwned) || '0'
       }</span>
       </h4>
 
       </div>
-        <ul class="list-group">
-            <li class="list-group-item list-group-item-action">${
+        <ul class="list-group bg-transparent">
+            <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
               user.name || ''
             }</li>
-            <li class="list-group-item list-group-item-action">${
+            <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
               user.email || ''
             }</li>
-            <li class="list-group-item list-group-item-action user-id">${
+            <li class="list-group-item list-group-item-action text-muted text-light bg-transparent user-id">${
               user.userId || ''
             }</li>
-            <li class="list-group-item list-group-item-action doc_id">${
+            <li class="list-group-item list-group-item-action text-muted text-light bg-transparent doc_id">${
               user._id || ''
             }</li>
-            <li class="list-group-item list-group-item-action">${
+            <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
               user.createdAt || ''
             }</li>
         </ul>
@@ -545,10 +545,23 @@ export async function getAllUsers (page = 1) {
 }
 export async function checkAdminTokenAndFetchUser () {
   runSpinner(false, 'loading')
+  const topImageCont = document.querySelector('.img__conta')
+  const searchFormmm = document.querySelector('.doc_s_form')
+  const m_gwa = document.querySelector('.mwesigwa_link')
+  const acc = document.querySelector('.user_profile_link')
+
+  topImageCont?.remove()
+  searchFormmm?.remove()
+  m_gwa.parentNode?.remove()
+  acc.parentNode?.remove()
+
   const is_admin = await userIsAdmin()
   if (!is_admin) return
-  document.body.style.cssText = 'background: white;'
+  document.body.style.cssText =
+    'background: linear-gradient(rgba(26, 26, 26, 0.8), rgb(26, 26, 26)), url("https://raw.githubusercontent.com/raybags-web-dev/image_base/master/images/about2.jpg") center/cover no-repeat fixed;backdrop-filter:blur(3px)'
+
   await createWrapperContainer()
+  await setUpBackToTop('main__wrapper')
   runSpinner(true)
   return true
 }
@@ -561,12 +574,7 @@ export async function createWrapperContainer () {
 
     if (!wrapperContainer) {
       wrapperContainer = document.createElement('div')
-      wrapperContainer.classList.add(
-        'row',
-        'row-cols-1',
-        'row-cols-md-3',
-        'g-3'
-      )
+      wrapperContainer.classList.add('row', 'row-cols-1', 'row-cols-md-3')
       wrapperContainer.id = wrapperContainerId
 
       const parentContainer = document.getElementById('main__wrapper')
@@ -585,7 +593,7 @@ export async function createWrapperContainer () {
         try {
           runSpinner(false, 'loading')
 
-          const { profile_count, user_profiles } = await getAllUsers(page++)
+          const { user_profiles } = await getAllUsers(page++)
 
           if (!user_profiles) {
             console.log('No more items to fetch. Last page reached.')

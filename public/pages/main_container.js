@@ -40,7 +40,7 @@ export async function MAIN_PAGE () {
                   <a class="dropdown-item  dropdown-item-dark text-white bg-transparent logoutuser_link" href="#">Logout</a>
                 </li>
               </ul>
-            <form class="d-flex" style="max-height:inherit !important">
+            <form class="d-flex doc_s_form" style="max-height:inherit !important">
               <input id="search____input" class="form-control me-2" autocomplete="off" type="search" placeholder="Search" aria-label="Search">
             </form>
           </div>
@@ -50,7 +50,7 @@ export async function MAIN_PAGE () {
               <div class="label_class">
                 <label id="showForm" class="label"><span>+</span></label>
               </div>
-        <div id="off__Container" class="row row-cols-1 row-cols-md-3 g-2" style="transition:.5s !important;">
+        <div id="off__Container" class="row row-cols-1 row-cols-md-3" style="transition:.5s !important;">
     
         </div>
       </main>
@@ -94,7 +94,7 @@ export async function MAIN_PAGE () {
     if (containerExist) return
     await DisplayUserProfileHTML()
   })
-  await setUpBackToTop()
+  await setUpBackToTop('off__Container')
   await animateImages()
   let cardContainerr = document.querySelector('#off__Container')
   cardContainerr?.addEventListener('click', async function (event) {
@@ -130,46 +130,61 @@ export async function MAIN_PAGE () {
   })
 
   addAdminLinkToNavbar()
+
   const m_gwa = document.querySelector('.mwesigwa_link')
-  const acc = document.querySelector('.user_profile_link')
   m_gwa?.addEventListener('click', async () => {
     let isContainerLoaded = await checkAdminTokenAndFetchUser()
-    if (isContainerLoaded) {
-      setTimeout(() => {
-        const parentElement1 = m_gwa.parentNode
-        const parentElement2 = acc.parentNode
-        if (parentElement1 && parentElement2) {
-          try {
-            parentElement1.remove()
-            parentElement2.remove()
-
-            const cardContainers = document.querySelectorAll('.dele_btn')
-            cardContainers.forEach(btn => {
-              btn.addEventListener('click', async e => {
-                const colContainer = e.target.closest('.col')
-
-                if (colContainer) {
-                  const userId = colContainer.getAttribute('data-user-id')
-                  const cadDelId = e.target.getAttribute('cad-del-id')
-
-                  if (userId === cadDelId) {
-                    const response = await deleteUser(userId)
-                    if (response?.status === true) {
-                      colContainer.classList.add('nimate-del-profile')
-                      setTimeout(() => colContainer.remove(), 500)
-                    }
-                  }
-                }
-              })
-            })
-          } catch (e) {
-            console.log(e.message)
-          }
-        }
-      }, 2000)
-    }
+    setupDeleteButtonListeners(isContainerLoaded)
+    observeContainerChanges()
   })
 }
+// ====== Handle card deletion, mutations with mutation-observer ======
+function handleDeleteButtonClick (e) {
+  const colContainer = e.target.closest('.col')
+
+  if (colContainer) {
+    const userId = colContainer.getAttribute('data-user-id')
+    const cadDelId = e.target.getAttribute('cad-del-id')
+
+    if (userId === cadDelId) {
+      deleteUser(userId).then(response => {
+        if (response?.status === true) {
+          colContainer.classList.add('nimate-del-profile')
+          setTimeout(() => colContainer.remove(), 500)
+        }
+      })
+    }
+  }
+}
+function setupDeleteButtonListeners (isContainerLoaded) {
+  if (!isContainerLoaded) return
+
+  const cardContainers = document.querySelectorAll('.dele_btn')
+  cardContainers.forEach(btn => {
+    btn.addEventListener('click', handleDeleteButtonClick)
+  })
+}
+function handleMutations (mutationsList, observer) {
+  const hasCards = document.querySelector('.col')
+
+  if (hasCards) {
+    setupDeleteButtonListeners(true)
+  } else {
+    observer.disconnect()
+    setupDeleteButtonListeners(false)
+  }
+}
+function observeContainerChanges () {
+  const container = document.getElementById('mwesi-wrapper')
+  const observer = new MutationObserver(mutationsList =>
+    handleMutations(mutationsList, observer)
+  )
+  observer.observe(container, {
+    childList: true,
+    subtree: true
+  })
+}
+// ====== Handle card deletion, mutations with mutation-observer ======
 export async function generateUploadForm () {
   let formIsPresent = document.querySelector('#uploadForm')
 
@@ -382,19 +397,19 @@ export async function uploadFiles () {
     runSpinner(true)
   }
 }
-export async function setUpBackToTop () {
+export async function setUpBackToTop (mainContainerId) {
   const buttonTopInnerHTML = `<a href="#" class="back-to-top" aria-label="Back to Top">&uarr;</a>`
 
-  const mainContainer = document.getElementById('off__Container')
+  const mainContainer = document.getElementById(mainContainerId)
   mainContainer?.insertAdjacentHTML('beforeend', buttonTopInnerHTML)
 
   const backToTopButton = document.querySelector('.back-to-top')
 
   mainContainer?.addEventListener('scroll', function () {
-    let uploadConytainer = document.querySelector('#uploadForm')
+    let uploadContainer = document.querySelector('#uploadForm')
     if (mainContainer.scrollTop > 0) {
       backToTopButton.classList.add('show-to-top-btn')
-      uploadConytainer?.remove()
+      uploadContainer?.remove()
     } else {
       backToTopButton.classList.remove('show-to-top-btn')
     }
