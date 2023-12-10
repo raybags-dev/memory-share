@@ -39,9 +39,9 @@ body {
     -ms-user-select: none;
     user-select: none;
     scroll-behavior: smooth;
-    background: linear-gradient(rgba(26, 26, 26, 0.8),
-            rgb(26, 26, 26)),
-        url("../images/bg-water.jpeg") center/cover no-repeat fixed;
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+    background: rgb(26, 26, 26);
 }
 
 body::after {
@@ -853,6 +853,14 @@ textarea:focus {
     display: none;
 }
 
+.prof-notif-btn {
+    height: -webkit-fit-content !important;
+    height: -moz-fit-content !important;
+    height: fit-content !important;
+    padding: .3rem;
+    min-width: 100px;
+}
+
 .doc-card-body {
     position: absolute;
     bottom: 0;
@@ -1149,11 +1157,14 @@ textarea:focus {
     gap: .6rem !important;
     border: 2px solid #363636b3 !important;
     min-height: 355px;
+    transition: transform .1s;
+    overflow: hidden;
 }
 
 .mwesigwa__wrap:hover {
     border: 2px solid #545454b3 !important;
-    transition: all .3s;
+    transition: all .1s;
+    transform: scale(1.02);
 }
 
 .dele_btn {
@@ -1166,8 +1177,7 @@ textarea:focus {
 }
 
 .count_badge {
-    border: 1px solid #3a3a3ab3;
-    border-radius: 50%;
+    border: 1px solid transparent;
     size: 10px;
     text-align: center;
     overflow: hidden;

@@ -58,7 +58,7 @@ export async function showSearchBar (isData) {
   searchBar?.classList.remove('hide')
 }
 // Main page loader
-export async function runSpinner (isDone, message = '') {
+export async function runSpinner (isDone, message = 'loading') {
   const loader = document.querySelector('#main-page-loader')
   if (!isDone) {
     if (!loader) {
