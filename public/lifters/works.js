@@ -399,7 +399,7 @@ export async function fetchUserProfile () {
 // delete user documents
 export async function deleteUserDocuments () {
   try {
-    const sysMessage = await confirmAction()
+    const sysMessage = await confirmAction('#off__Container')
     if (sysMessage !== 'confirmed!') return
 
     const { token } = JSON.parse(sessionStorage.getItem('token'))
@@ -464,7 +464,7 @@ function handleDocDeleteError (error) {
 }
 export async function deleteUserProf () {
   try {
-    const sysMessage = await confirmAction()
+    const sysMessage = await confirmAction('#off__Container')
 
     if (sysMessage !== 'confirmed!') {
       return
@@ -569,7 +569,9 @@ export async function downloadImageById (imageId) {
     console.error('Error downloading image:', error)
   }
 }
-export function confirmAction () {
+export async function confirmAction (containerId, message) {
+  if (message === undefined || null)
+    message = `This action cannot be reversed. Are you sure you want to proceed ? `
   return new Promise(resolve => {
     const modalHTML = `
       <div class="modal fade" style="backdrop-filter: blur(7px) !important;" id="exampleModalToggle" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
@@ -579,10 +581,7 @@ export function confirmAction () {
               <h1 class="modal-title fs-5 text-danger" id="exampleModalToggleLabel">Danger zone</h1>
               <button type="button" class="btn-close btn-primary" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body text-muted">
-            By clicking 'Proceed', you will permanently delete your data. This action cannot be reversed.
-            Are you sure you want to proceed and delete your account ? 
-            </div>
+            <div class="modal-body text-muted">${message}</div>
             <div class="modal-footer">
               <button type="button" class="btn-lg bg-transparent btn-outline-danger proceed_delete" data-bs-dismiss="modal">Proceed</button>
               <button type="button" class="btn-lg bg-transparent btn-outline-success cancel_delete" data-bs-dismiss="modal">Cancel</button>
@@ -591,35 +590,33 @@ export function confirmAction () {
         </div>
       </div>
       <a class="btn btn-transparent" id="modalToggleButton" data-bs-toggle="modal" href="#exampleModalToggle" role="button" style="display:none;"></a>`
-    const offContainer = document.getElementById('off__Container')
-    offContainer?.insertAdjacentHTML('beforeend', modalHTML)
 
-    const big_caro_img = document.getElementById('carocel_big')
-    // Click the button to show the modal after it's appended
-    const modalButton = document?.getElementById('modalToggleButton')
-    modalButton.click()
+    const container = document.querySelector(containerId)
+    container?.insertAdjacentHTML('beforeend', modalHTML)
 
-    document
-      .querySelector('.proceed_delete')
-      .addEventListener('click', async () => {
-        if (big_caro_img) big_caro_img.remove()
-        resolve('confirmed!')
-      })
+    const modal = new bootstrap.Modal(
+      document.getElementById('exampleModalToggle')
+    )
+    modal.show()
 
-    document
-      .querySelector('.cancel_delete')
-      .addEventListener('click', async () => {
-        if (big_caro_img) big_caro_img.remove()
-        Notify('Process aborted.')
-        displayLabel([
-          'main__wrapper',
-          'alert-secondary',
-          `This process has been aborted.`
-        ])
-        resolve('Aborted.')
-      })
+    const confirmBtn = document.querySelector('.proceed_delete')
+    confirmBtn?.addEventListener('click', async () => {
+      resolve('confirmed!')
+    })
+
+    const abortBtn = document.querySelector('.cancel_delete')
+    abortBtn?.addEventListener('click', async () => {
+      Notify('Process aborted.')
+      displayLabel([
+        'main__wrapper',
+        'alert-secondary',
+        `This process has been aborted.`
+      ])
+      resolve('Aborted.')
+    })
   })
 }
+
 export async function displayLabel ([anchorId, labelClass, labelText]) {
   const existingAlert = document.querySelector('.main___alert')
   if (existingAlert) {

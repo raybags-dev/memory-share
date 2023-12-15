@@ -9,7 +9,8 @@ import {
   deleteUserProf,
   displayLabel,
   saveToLocalStorage,
-  fetchFromLocalStorage
+  fetchFromLocalStorage,
+  confirmAction
 } from '../lifters/works.js'
 import { setUpBackToTop } from '../pages/main_container.js'
 export async function CARD (data, isNew = false) {
@@ -474,7 +475,7 @@ export async function mwesigwaCard (user) {
   cardElement.setAttribute('data-user-id', user._id)
 
   cardElement.innerHTML = `
-      <div class="card shadow-lg bg-transparent" user-data-id="${user._id}">
+      <div class="card shadow-lg  bg-dark" user-data-id="${user._id}">
           <div class="card-header" style="display:flex;justify-content:space-between;">
               <button type="button" class="btn btn-outline-secondary position-relative prof-notif-btn" disabled>
               ${(user.isAdmin && 'Administrator') || 'Standard'}
@@ -488,27 +489,48 @@ export async function mwesigwaCard (user) {
             </button>
 
           </div>
-            <ul class="list-group bg-transparent">
-                <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
+            <ul class="list-group bg-dark">
+                <li class="list-group-item list-group-item-action text-muted text-light bg-dark">
+                <p><em class="small-font-size">user-name: ${
                   user.name || ''
-                }</li>
-                <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
-                  user.email || ''
-                }</li>
-                <li class="list-group-item list-group-item-action text-muted text-light bg-transparent user-id">${
-                  user.userId || ''
-                }</li>
-                <li class="list-group-item list-group-item-action text-muted text-light bg-transparent doc_id">${
-                  user._id || ''
-                }</li>
-                <li class="list-group-item list-group-item-action text-muted text-light bg-transparent">${
+                }</em></p>
+                </li>
+                <li class="list-group-item list-group-item-action text-muted text-light bg-dark">
+                 <p><em class="small-font-size">email: ${
+                   user.email || ''
+                 }</em></p>
+                </li>
+                <li class="list-group-item list-group-item-action text-muted text-light  doc_id bg-dark">
+                 <p><em class="small-font-size">userId: ${
+                   user._id || ''
+                 }</em></p>
+                </li>
+                <li class="list-group-item list-group-item-action text-muted text-light bg-dark">
+                <p><em class="small-font-size">created: ${
                   user.createdAt || ''
-                }</li>
-            </ul>
-            <div class="card-footer d-grid gap-2">
-              <button type="button" cad-del-id="${
-                user._id
-              }" class="btn btn-md btn-outline-danger dele_btn float-right">Delete Profile</button>
+                }</em></p>
+                </li>
+                <li class="list-group-item list-group-item-action text-muted text-light bg-dark">
+                <p><em class="small-font-size">status: ${
+                  (user.isSubscribed && 'subscribed') || 'not subscribed'
+                }</em></p>
+                </li>
+                </ul>
+                
+                <div class="card-footer d-grid gap-2">
+                  <div id="sub_switch" class="form-check form-switch">
+                    <label class="form-check-label" for="${
+                      user._id
+                    }">Subscription</label>
+                    <input class="form-check-input subsc-input" user-sub-id="${
+                      user._id
+                    }" type="checkbox" id="${user._id}" ${
+    user.isSubscribed ? 'checked' : ''
+  }>
+                  </div>
+                <button type="button" cad-del-id="${
+                  user._id
+                }" class="btn btn-md btn-outline-danger dele_btn">Delete Profile</button>
             </div>
       </div>
   `
@@ -595,7 +617,7 @@ export async function createWrapperContainer () {
           const { user_profiles } = await getAllUsers(page++)
 
           if (!user_profiles) {
-            console.log('No more items to fetch. Last page reached.')
+            console.log('No more items to fetch. ')
             isObserving = false
             return
           }
@@ -662,14 +684,19 @@ export async function createWrapperContainer () {
   }
 }
 export async function deleteUser (user_id) {
-  runSpinner(false, 'deleting')
-  if (!user_id) return
-  const storedToken = JSON.parse(sessionStorage.getItem('token'))
-  if (!storedToken || !storedToken.admin_token) {
-    return false
-  }
-
   try {
+    const confirmation = await confirmAction('#mwesi-wrapper')
+    if (confirmation !== 'confirmed!') {
+      return
+    }
+
+    runSpinner(false, 'deleting')
+    if (!user_id) return
+    const storedToken = JSON.parse(sessionStorage.getItem('token'))
+    if (!storedToken || !storedToken.admin_token) {
+      return false
+    }
+
     let url = `delete-user-and-docs/${user_id}`
     const response = await API_CLIENT.delete(url, {
       headers: {

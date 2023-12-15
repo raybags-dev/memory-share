@@ -138,7 +138,6 @@ export async function MAIN_PAGE () {
     observeContainerChanges()
   })
 }
-// ====== Handle card deletion, mutations with mutation-observer ======
 function handleDeleteButtonClick (e) {
   const colContainer = e.target.closest('.col')
 
@@ -184,7 +183,6 @@ function observeContainerChanges () {
     subtree: true
   })
 }
-// ====== Handle card deletion, mutations with mutation-observer ======
 export async function generateUploadForm () {
   let formIsPresent = document.querySelector('#uploadForm')
 
@@ -353,7 +351,7 @@ export async function uploadFiles () {
       return displayLabel([
         'main__wrapper',
         'alert-danger',
-        'Limit reached for a demo account!.'
+        'Too many files selected for a demo account. Max is 6 '
       ])
 
     if (error instanceof TypeError)

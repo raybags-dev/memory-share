@@ -31,7 +31,6 @@ html {
 
 body {
     zoom: reset;
-    font-family: 'Roboto', sans-serif;
     overflow: hidden;
     color: var(--secondary);
     -webkit-user-select: none;
@@ -55,6 +54,14 @@ body::after {
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
 }
+
+/* .btn:focus,
+.btn:hover,
+.btn:active {
+    outline: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+} */
 
 #main__wrapper {
     position: relative;
@@ -140,6 +147,7 @@ a {
     background-image: unset;
     background-image: linear-gradient(to top, hwb(0 10% 70% / 0.1) 0%, hwb(216 45% 45% / 0.1) 100%);
 }
+
 
 .img__conta {
     position: absolute;
@@ -520,7 +528,6 @@ a {
     bottom: 10%;
     left: 50%;
     min-width: 50%;
-    /* max-height: 640px; */
     transform: translate(-50%, -50%);
     -webkit-backdrop-filter: blur(5px);
     backdrop-filter: blur(5px);
@@ -601,9 +608,9 @@ textarea:focus {
 
 .label_class .label span {
     position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    /* display: flex;
+        justify-content: center;
+        align-items: center; */
     color: var(--green);
     font-weight: 700;
     text-align: center;
@@ -1154,22 +1161,29 @@ textarea:focus {
     -webkit-clip-path: inset(0 0 0 0);
     clip-path: inset(0 0 0 0);
     transition: all .2s;
+    padding: 0;
     gap: .6rem !important;
     border: 2px solid #363636b3 !important;
-    min-height: 355px;
+    min-height: 482px !important;
     transition: transform .1s;
     overflow: hidden;
 }
 
 .mwesigwa__wrap:hover {
-    border: 2px solid #545454b3 !important;
     transition: all .1s;
-    transform: scale(1.02);
+    border-color: #484747cd
 }
 
-.dele_btn {
+#sub_switch {
+    min-width: 100% !important;
+}
+
+.dele_btn,
+.subscribe_btn,
+.btn-group>button {
     border: 1px solid #3a3a3ab3 !important;
     opacity: .7;
+    outline-color: transparent !important;
 }
 
 .adm_badge {
