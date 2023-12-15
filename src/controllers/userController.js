@@ -1,6 +1,7 @@
 import { USER_MODEL, USER_ID_MODEL } from '../models/user.js'
 import { sendEmail } from '../../middleware/emailer.js'
 import { DOCUMENT } from '../models/documentModel.js'
+import { checkAndUpdateDocumentUrls } from '../../middleware/bd_worker.js'
 import { config } from 'dotenv'
 config()
 
@@ -35,6 +36,7 @@ export async function CreateUserController (req, res) {
     const userId = newUserId._id
 
     let user
+    const isSubscribed = false
 
     if (isSuperUser) {
       user = new USER_MODEL({
@@ -44,7 +46,8 @@ export async function CreateUserController (req, res) {
         userId,
         isAdmin: userIsAdmin,
         superUserToken,
-        isSuperUser: true
+        isSuperUser: true,
+        isSubscribed: true
       })
       await user.save()
     } else {
@@ -53,7 +56,8 @@ export async function CreateUserController (req, res) {
         email,
         password,
         userId,
-        isAdmin: userIsAdmin
+        isAdmin: userIsAdmin,
+        isSubscribed: isSubscribed
       })
       await user.save()
     }
@@ -61,7 +65,7 @@ export async function CreateUserController (req, res) {
     const token = user.generateAuthToken()
 
     const createUserEmailData = {
-      title: 'User successfully created in your s3 bucket',
+      title: 'User account created successfully',
       body: `A user:\n${user}\n has successfully been created in your S3 bucket: "${AWS_BUCKET_NAME}" in: ${AWS_REGION}.`
     }
     await sendEmail(createUserEmailData, RECIPIENT_EMAIL)
@@ -217,6 +221,105 @@ export async function GetAllUsersController (req, res) {
     })
   } catch (error) {
     console.error('Error getting all users:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+export async function AllUserDocsController (req, res) {
+  try {
+    const { isAdmin, _id: userId } = req.user
+
+    await DOCUMENT.validateDocumentOwnership(req, res, async () => {
+      let query, count
+
+      if (isAdmin) {
+        query = DOCUMENT.find({}, { token: 0 }).sort({ createdAt: -1 })
+        count = await DOCUMENT.countDocuments({})
+      } else {
+        // filter documents only owned by the user
+        query = DOCUMENT.find({ $or: [{ user: userId }] }, { token: 0 }).sort({
+          createdAt: -1
+        })
+
+        count = await DOCUMENT.countDocuments({ user: userId })
+      }
+      const response = await query
+
+      if (response.length === 0) return res.status(404).json('Nothing found!')
+
+      // Filter documents based on ownership using the isOwner method
+      const ownedDocuments = response.filter(async doc => {
+        return await USER_MODEL.isOwner(userId, doc.user.toString())
+      })
+
+      // Use the checkAndUpdateDocumentUrls function to update document URLs
+      const updatedDoc = await checkAndUpdateDocumentUrls(ownedDocuments)
+      res.status(200).json({ count: count, documents: updatedDoc })
+    })
+  } catch (error) {
+    console.error('Error in AllUserDocsRouter:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+//***************==========
+export async function UpdateSubscriptionController (req, res) {
+  try {
+    const isSuperUser = await USER_MODEL.isSuperUser(
+      req.locals.user.superUserToken
+    )
+
+    if (!isSuperUser) {
+      return res.status(401).json({ error: 'Unauthorized - Action forbidden!' })
+    }
+
+    const userIdToUpdate = req.params.userId
+    const user = await USER_MODEL.findById(userIdToUpdate)
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+    user.isSubscribed = !user.isSubscribed
+    await user.save()
+
+    res.status(200).json({
+      state: 'Success',
+      message: 'Subscription status updated!',
+      isSubscribed: user.isSubscribed
+    })
+  } catch (error) {
+    console.error('Error updating subscription status:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
+//***************==========
+export async function GetSubscriptionController (req, res) {
+  try {
+    const isSuperUser = await USER_MODEL.isSuperUser(
+      req.locals.user.superUserToken
+    )
+    if (!isSuperUser) {
+      return res.status(401).json({ error: 'Unauthorized - action forbidden!' })
+    }
+
+    const userIdToUpdate = req.params.userId
+    const user = await USER_MODEL.findById(userIdToUpdate)
+    const subStatus = await USER_MODEL.getSubscriptionStatus(userIdToUpdate)
+
+    if (subStatus === null) {
+      return res.status(404).json({ error: 'Status could not be retrieved' })
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    res.status(200).json({
+      _id: userIdToUpdate,
+      message: 'Success, subscription status retrieved!',
+      isSubscribed: subStatus
+    })
+  } catch (error) {
+    console.error('Error toggling subscription status:', error)
     res.status(500).json({ error: 'Internal Server Error' })
   }
 }

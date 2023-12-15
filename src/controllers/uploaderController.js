@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { genVerificationToken } from '../../middleware/generateToken.js'
 import { dbFileUploader } from '../../middleware/bd_worker.js'
 import { DOCUMENT } from '../models/documentModel.js'
+import { USER_MODEL } from '../models/user.js'
 
 export async function DocsUploaderController (req, res) {
   try {
@@ -23,6 +24,9 @@ export async function DocsUploaderController (req, res) {
         })
       }
 
+      // ********
+      const isSubscribed = await USER_MODEL.getSubscriptionStatus(req.user._id)
+
       if (!req.files || req.files.length === 0) {
         return res.status(400).json({
           status: 'Bad Request',
@@ -30,28 +34,31 @@ export async function DocsUploaderController (req, res) {
         })
       }
 
-      let maxLimit = 6
-      let docCount = await DOCUMENT.countDocuments({
-        user: req.user._id
-      })
+      if (!isSubscribed) {
+        let maxLimit = 6
+        let docCount = await DOCUMENT.countDocuments({
+          user: req.user._id
+        })
 
-      if (!req.user.isAdmin) {
-        const totalDocuments = req.files.length + docCount
+        if (!req.user.isAdmin) {
+          const totalDocuments = req.files.length + docCount
 
-        if (totalDocuments > maxLimit) {
-          return res.status(428).json({
-            message:
-              'With a demo account, this number of document uploads is not allowed!'
-          })
-        }
+          if (totalDocuments > maxLimit) {
+            return res.status(428).json({
+              message:
+                'With a demo account, this number of document uploads is not allowed!'
+            })
+          }
 
-        if (docCount >= maxLimit) {
-          return res.status(429).json({
-            count: docCount,
-            message: 'Demo upload limit reached.'
-          })
+          if (docCount >= maxLimit) {
+            return res.status(429).json({
+              count: docCount,
+              message: 'Demo upload limit reached.'
+            })
+          }
         }
       }
+
       const { description } = req.body
 
       const files = []

@@ -43,6 +43,12 @@ const userModel = {
     type: String,
     default: null
   },
+  isSubscribed: {
+    type: Boolean,
+    default: false,
+    required: true
+  },
+
   version: {
     type: Number,
     default: 0
@@ -113,6 +119,11 @@ userSchema.statics.isSuperUser = async function (superUserToken) {
 userSchema.statics.isAdminUser = function (isAdmin, isSuperUser) {
   return isAdmin || isSuperUser
 }
+userSchema.statics.getSubscriptionStatus = async function (userId) {
+  const user = await this.findById(userId)
+  return user ? user.isSubscribed : null
+}
+
 userSchema.statics.isOwner = async function (userId, targetId) {
   const user = await this.findById(userId)
   return user && user._id.toString() === targetId.toString()
