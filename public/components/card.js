@@ -442,7 +442,7 @@ export function addAdminLinkToNavbar () {
   const navUl = document.getElementById('__nav')
   const tokenString = sessionStorage.getItem('token')
 
-  if (tokenString) {
+  if (tokenString && !tokenString) {
     const token = JSON.parse(tokenString)
     if (token && token.admin_token) {
       const adminLi = document.createElement('li')

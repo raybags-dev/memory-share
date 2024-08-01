@@ -198,7 +198,7 @@ export async function generateUploadForm () {
         <form id="uploadForm" class="select-img-form text-danger" enctype="multipart/form-data">
         <div class="input-group mb3 input-group-lg my_inputs">
           <input type="file" name="images" class="form-control" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" multiple required>
-          <button class="btn btn-lg  btn-outline-secondary sub__this_form" type="button" id="inputGroupFileAddon04">Button</button>
+          <button class="btn btn-lg  btn-outline-secondary sub__this_form" type="button" id="inputGroupFileAddon04">Submit</button>
         </div>
   
         <div class="input-group mb3 my_inputs">
