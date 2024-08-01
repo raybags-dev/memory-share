@@ -37,7 +37,6 @@ async function starterLogger (port) {
   }
 }
 
-// Function to start the server
 const startServer = async (app, port, attempt = 1) => {
   try {
     await new Promise((resolve, reject) => {

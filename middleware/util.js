@@ -8,7 +8,7 @@ import { exec } from 'child_process'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const TEMP_FILE_PATH = path.join(__dirname, '../browser.tmp')
+const TEMP_FILE_PATH = path.join(__dirname, '../.tmp/browser.tmp')
 const execPromise = util.promisify(exec)
 
 export function isBrowserOpened () {
